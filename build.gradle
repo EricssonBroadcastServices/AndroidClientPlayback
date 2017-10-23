@@ -38,6 +38,12 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -46,11 +52,13 @@ dependencies {
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     compile "com.android.support:design:${rootProject.ext.supportLibVersion}"
     compile "com.google.android.exoplayer:exoplayer:${project.ext.exoPlayerVersion}"
-    compile 'com.android.support:support-core-utils:25.4.0'
+//    compile 'com.android.support:support-core-utils:26.1.0'
     compile 'joda-time:joda-time:2.9.4'
     compile project(':libraries:download')
-    compile project(':libraries:utilities')
-    compile project(':libraries:exposure')
+//    compile project(':libraries:utilities')
+//    compile project(':libraries:exposure')
+    compile 'com.github.EricssonBroadcastServices:AndroidClientUtilities:master-SNAPSHOT'
+    compile 'com.github.EricssonBroadcastServices:AndroidClientExposure:master-SNAPSHOT'
     compile project(':libraries:analytics')
     testCompile 'junit:junit:4.12'
 }
