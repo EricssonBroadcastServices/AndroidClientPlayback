@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="net.ericsson.emovs.playback.test" >
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="26" />
+
+    <instrumentation
+        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:functionalTest="false"
+        android:handleProfiling="false"
+        android:label="Tests for net.ericsson.emovs.playback.test"
+        android:targetPackage="net.ericsson.emovs.playback.test" />
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+
+        <activity
+            android:name="net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="EMP Player" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="net.ericsson.emovs.download.EMPDownloadService"
+            android:exported="true" >
+        </service>
+
+        <meta-data
+            android:name="android.support.VERSION"
+            android:value="25.4.0" />
+    </application>
+
+</manifest>

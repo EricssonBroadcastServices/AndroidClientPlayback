@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="C:\Wk\Ericsson\AndroidClient2\libraries\playback\src\main\assets"/><source path="C:\Wk\Ericsson\AndroidClient2\libraries\playback\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="C:\Wk\Ericsson\AndroidClient2\libraries\playback\src\debug\assets"/></dataSet></merger>

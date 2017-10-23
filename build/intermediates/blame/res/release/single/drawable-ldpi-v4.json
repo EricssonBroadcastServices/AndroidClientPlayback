@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_repeat_one.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_repeat_one.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_edit_mode_logo.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_edit_mode_logo.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_next.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_next.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_previous.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_previous.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_play.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_play.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_rewind.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_rewind.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_pause.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_pause.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_fastforward.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_fastforward.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_repeat_all.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_repeat_all.png"
+    },
+    {
+        "merged": "C:\\Wk\\Ericsson\\AndroidClient2\\libraries\\playback\\build\\intermediates\\res\\merged\\release\\drawable-ldpi-v4\\exo_controls_repeat_off.png",
+        "source": "C:\\Users\\Benjamin\\.android\\build-cache\\1658152bce2f578b1ea796caf789b942e05b29ff\\output\\res\\drawable-ldpi-v4\\exo_controls_repeat_off.png"
+    }
+]

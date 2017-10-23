@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <string name="emplayer_name" translatable="false">EMPPlayer</string>
+    <string name="emplayer_version" translatable="false">v2.69.0</string>
+    <string name="exoplayer_version" translatable="false">r2.5.0</string>
+</resources>

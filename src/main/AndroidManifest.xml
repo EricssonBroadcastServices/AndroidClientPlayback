@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="net.ericsson.emovs.playback">
+    <application>
+        <activity
+            android:name=".ui.activities.SimplePlaybackActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="EMP Player">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
