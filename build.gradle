@@ -55,14 +55,18 @@ dependencies {
     compile "com.google.android.exoplayer:exoplayer:${project.ext.exoPlayerVersion}"
     compile 'com.android.support:support-core-utils:26.0.1'
     compile 'joda-time:joda-time:2.9.4'
-//    compile project(':libraries:download')
-//    compile project(':libraries:utilities')
-//    compile project(':libraries:exposure')
-//    compile project(':libraries:analytics')
-    compile 'com.github.EricssonBroadcastServices:AndroidClientDownload:master-SNAPSHOT'
-    compile 'com.github.EricssonBroadcastServices:AndroidClientUtilities:master-SNAPSHOT'
-    compile 'com.github.EricssonBroadcastServices:AndroidClientExposure:master-SNAPSHOT'
-    compile 'com.github.EricssonBroadcastServices:AndroidClientAnalytics:master-SNAPSHOT'
+    if (project.hasProperty('hasParentProject')) {
+        compile project(':libraries:utilities')
+        compile project(':libraries:download')
+        compile project(':libraries:exposure')
+        compile project(':libraries:analytics')
+    }
+    else {
+        compile 'com.github.EricssonBroadcastServices:AndroidClientUtilities:master-SNAPSHOT'
+        compile 'com.github.EricssonBroadcastServices:AndroidClientExposure:master-SNAPSHOT'
+        compile 'com.github.EricssonBroadcastServices:AndroidClientAnalytics:master-SNAPSHOT'
+        compile 'com.github.EricssonBroadcastServices:AndroidClientDownload:master-SNAPSHOT'
+    }
     testCompile 'junit:junit:4.12'
 }
 

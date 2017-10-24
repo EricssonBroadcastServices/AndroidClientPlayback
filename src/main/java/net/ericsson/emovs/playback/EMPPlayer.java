@@ -47,7 +47,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
 
     public EMPPlayer(Activity context, ViewGroup host) {
         this.context = context;
-        this.credentialsStorage = SharedPropertiesICredentialsStorage.getInstance(context);
+        this.credentialsStorage = SharedPropertiesICredentialsStorage.getInstance();
         this.analyticsConnector = new EMPAnalyticsConnector(this);
         //this.view = view;
         this.host = host;
@@ -64,11 +64,11 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
     }
 
     public void setAnalyticsCustomAttribute(String k, String v) {
-        EMPAnalyticsProvider.getInstance(context).setCustomAttribute(k, v);
+        EMPAnalyticsProvider.getInstance().setCustomAttribute(k, v);
     }
 
     public void clearAnalyticsCustomAttributes() {
-        EMPAnalyticsProvider.getInstance(context).clearCustomAttributes();
+        EMPAnalyticsProvider.getInstance().clearCustomAttributes();
     }
 
     private void createExoView(ViewGroup host) {

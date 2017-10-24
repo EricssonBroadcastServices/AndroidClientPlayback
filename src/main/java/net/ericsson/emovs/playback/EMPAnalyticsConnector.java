@@ -51,7 +51,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
             parameters.put(EventParameters.HandshakeStarted.PROGRAM_ID, entitlement.programId);
         }
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).handshakeStarted(sessionId, parameters);
+        EMPAnalyticsProvider.getInstance().handshakeStarted(sessionId, parameters);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         parameters.put(EventParameters.Created.VERSION, player.getVersion());
         parameters.put(EventParameters.Created.PLAYER, player.getIdentifier());
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).created(sessionId, parameters);
+        EMPAnalyticsProvider.getInstance().created(sessionId, parameters);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         parameters.put(EventParameters.PlayerReady.TECHNOLOGY, player.getTechIdentifier());
         parameters.put(EventParameters.PlayerReady.TECH_VERSION, player.getTechVersion());
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).ready(sessionId, parameters);
+        EMPAnalyticsProvider.getInstance().ready(sessionId, parameters);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         // TODO: set custom attributes
-        EMPAnalyticsProvider.getInstance(player.getContext()).started(sessionId, currenTime, parameters);
+        EMPAnalyticsProvider.getInstance().started(sessionId, currenTime, parameters);
 
         clearTimeUpdater();
         timeUpdater = new RunnableThread(new Runnable() {
@@ -144,7 +144,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).paused(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().paused(sessionId, currenTime, null);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).seeked(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().seeked(sessionId, currenTime, null);
     }
 
     @Override
@@ -172,7 +172,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).resumed(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().resumed(sessionId, currenTime, null);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         HashMap<String, String> parameters = new HashMap<>();
         parameters.put(EventParameters.BitrateChanged.BITRATE, Integer.toString(newBitrate));
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).bitrateChanged(sessionId, currenTime, parameters);
+        EMPAnalyticsProvider.getInstance().bitrateChanged(sessionId, currenTime, parameters);
     }
 
 
@@ -205,7 +205,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).waitingStarted(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().waitingStarted(sessionId, currenTime, null);
     }
 
     @Override
@@ -219,7 +219,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).waitingEnded(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().waitingEnded(sessionId, currenTime, null);
     }
 
     @Override
@@ -232,7 +232,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
             return;
         }
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).completed(sessionId, null);
+        EMPAnalyticsProvider.getInstance().completed(sessionId, null);
         clearTimeUpdater();
     }
 
@@ -247,7 +247,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         long currenTime = player.getCurrentTime();
-        EMPAnalyticsProvider.getInstance(player.getContext()).aborted(sessionId, currenTime, null);
+        EMPAnalyticsProvider.getInstance().aborted(sessionId, currenTime, null);
         clearTimeUpdater();
     }
 
@@ -269,7 +269,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
             parameters.put(EventParameters.Error.MESSAGE, errorMessage);
         }
 
-        EMPAnalyticsProvider.getInstance(player.getContext()).error(sessionId, currenTime, parameters);
+        EMPAnalyticsProvider.getInstance().error(sessionId, currenTime, parameters);
     }
 
     @Override
@@ -292,7 +292,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
                     return;
                 }
                 String sessionId = player.getSessionId();
-                EMPAnalyticsProvider.getInstance(player.getContext()).setCurrentTime(sessionId, this.currentTime);
+                EMPAnalyticsProvider.getInstance().setCurrentTime(sessionId, this.currentTime);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
