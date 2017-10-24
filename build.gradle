@@ -9,13 +9,12 @@ ext {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion rootProject.ext.compileSdkVersion
-        versionCode buildVersionCode()
+        targetSdkVersion 26
         versionName version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -38,9 +37,11 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url "https://jitpack.io"
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+        maven { url "https://maven.google.com" }
     }
 }
 
@@ -49,17 +50,19 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:design:${rootProject.ext.supportLibVersion}"
+    compile "com.android.support:appcompat-v7:26.0.1"
+    compile "com.android.support:design:26.0.1"
     compile "com.google.android.exoplayer:exoplayer:${project.ext.exoPlayerVersion}"
-//    compile 'com.android.support:support-core-utils:26.1.0'
+    compile 'com.android.support:support-core-utils:26.0.1'
     compile 'joda-time:joda-time:2.9.4'
-    compile project(':libraries:download')
+//    compile project(':libraries:download')
 //    compile project(':libraries:utilities')
 //    compile project(':libraries:exposure')
+//    compile project(':libraries:analytics')
+    compile 'com.github.EricssonBroadcastServices:AndroidClientDownload:master-SNAPSHOT'
     compile 'com.github.EricssonBroadcastServices:AndroidClientUtilities:master-SNAPSHOT'
     compile 'com.github.EricssonBroadcastServices:AndroidClientExposure:master-SNAPSHOT'
-    compile project(':libraries:analytics')
+    compile 'com.github.EricssonBroadcastServices:AndroidClientAnalytics:master-SNAPSHOT'
     testCompile 'junit:junit:4.12'
 }
 
