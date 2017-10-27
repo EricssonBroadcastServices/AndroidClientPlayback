@@ -117,7 +117,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
             this.release();
         }
 
-        this.tech = new ExoPlayerTech(this, this.context, false, this.view);
+        this.tech = new ExoPlayerTech(this, this.context, false, this.view, properties);
         super.onInit();
         return true;
     }
@@ -241,7 +241,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 self.entitlement = entitlement;
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken);
+                tech.init(view, entitlement.playToken, self.properties);
                 tech.load(entitlement.channelId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -270,7 +270,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 self.entitlement = entitlement;
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken);
+                tech.init(view, entitlement.playToken, self.properties);
                 tech.load(entitlement.programId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -299,7 +299,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 self.entitlement = entitlement;
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken);
+                tech.init(view, entitlement.playToken, self.properties);
                 tech.load(entitlement.assetId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -334,7 +334,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 self.entitlement = entitlement;
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
-                tech.init(view, entitlement.playToken);
+                tech.init(view, entitlement.playToken, self.properties);
                 tech.load(entitlement.assetId, manifestPath, true);
                 context.runOnUiThread(new Runnable() {
                     public void run() {

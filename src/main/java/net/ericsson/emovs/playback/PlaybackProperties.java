@@ -11,15 +11,15 @@ public class PlaybackProperties {
     boolean autoplay;
 
     public PlaybackProperties() {
-        this.nativeControls = true;
+        this.nativeControls = false;
         this.autoplay = true;
     }
 
-    public boolean isNativeControls() {
+    public boolean hasNativeControls() {
         return nativeControls;
     }
 
-    public PlaybackProperties withUseNativeControls(boolean useNativeControls) {
+    public PlaybackProperties withNativeControls(boolean useNativeControls) {
         this.nativeControls = useNativeControls;
         return this;
     }

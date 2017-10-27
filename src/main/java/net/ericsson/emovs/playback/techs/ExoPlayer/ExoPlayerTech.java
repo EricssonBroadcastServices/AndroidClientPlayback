@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Pair;
+import android.view.View;
 
 import net.ericsson.emovs.download.DownloadItem;
 import net.ericsson.emovs.download.GenericDrmCallback;
@@ -11,6 +12,7 @@ import net.ericsson.emovs.download.WidevineOfflineLicenseManager;
 import net.ericsson.emovs.playback.EMPPlayer;
 import com.ebs.android.utilities.ErrorCodes;
 
+import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.IPlayer;
 import net.ericsson.emovs.playback.interfaces.ITech;
@@ -68,17 +70,19 @@ public class ExoPlayerTech implements IPlayer, ITech {
     boolean loadStarted;
     boolean seekStart;
     int currentBitrate;
+    PlaybackProperties properties;
 
     public ExoPlayerTech(EMPPlayer parent,  Context ctx) {
         this.ctx = ctx;
         this.parent = parent;
     }
 
-    public ExoPlayerTech(EMPPlayer parent, Context ctx, boolean init, SimpleExoPlayerView view) {
+    public ExoPlayerTech(EMPPlayer parent, Context ctx, boolean init, SimpleExoPlayerView view, PlaybackProperties properties) {
         this.parent = parent;
         this.ctx = ctx;
+        this.properties = properties;
         if (init) {
-            this.init(view, "");
+            this.init(view, "", properties);
         }
     }
 
@@ -94,13 +98,14 @@ public class ExoPlayerTech implements IPlayer, ITech {
         this.seekStart = seekStart;
     }
 
-    public void init(SimpleExoPlayerView view, String playToken){
+    public void init(SimpleExoPlayerView view, String playToken, PlaybackProperties properties){
         this.view = view;
         this.playToken = playToken;
         this.isPlaying = false;
         this.isReady = false;
         this.loadStarted = false;
         this.seekStart = false;
+        this.properties = properties;
     }
 
     public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
@@ -141,7 +146,7 @@ public class ExoPlayerTech implements IPlayer, ITech {
 
                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
                 this.player = HookedSimpleExoPlayer.newSimpleInstance(this, renderersFactory, trackSelector);
-                this.player.setPlayWhenReady(true);
+                this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
                 this.player.addListener(new Player.EventListener(){
                     @Override
                     public void onTimelineChanged(Timeline timeline, Object manifest) {
@@ -231,7 +236,7 @@ public class ExoPlayerTech implements IPlayer, ITech {
         }
         else {
             this.player = HookedSimpleExoPlayer.newSimpleInstance(this, new DefaultRenderersFactory(ctx), trackSelector);
-            this.player.setPlayWhenReady(true);
+            this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
         }
 
         return true;
@@ -239,8 +244,8 @@ public class ExoPlayerTech implements IPlayer, ITech {
 
     public void play(String dashManifestUrl) {
         this.view.setPlayer(this.player);
+        this.view.setUseController(this.properties == null ? PlaybackProperties.DEFAULT.hasNativeControls() : this.properties.hasNativeControls());
         this.view.requestFocus();
-
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         MediaSource mediaSource = new DashMediaSource(Uri.parse(dashManifestUrl), dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
