@@ -11,7 +11,7 @@ public class PlaybackProperties {
     boolean autoplay;
 
     public PlaybackProperties() {
-        this.nativeControls = false;
+        this.nativeControls = true;
         this.autoplay = true;
     }
 
