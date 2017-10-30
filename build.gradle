@@ -6,6 +6,7 @@ ext {
     releaseArtifact = 'fluxplayer-playback'
     releaseVersion = 'v2.69.0'
     releaseDescription = 'The EMP Player library playback module.'
+    libraryTag = 'master-SNAPSHOT'
 }
 
 android {
@@ -62,10 +63,10 @@ dependencies {
         compile project(':libraries:analytics')
     }
     else {
-        compile 'com.github.EricssonBroadcastServices:AndroidClientUtilities:master-SNAPSHOT'
-        compile 'com.github.EricssonBroadcastServices:AndroidClientExposure:master-SNAPSHOT'
-        compile 'com.github.EricssonBroadcastServices:AndroidClientAnalytics:master-SNAPSHOT'
-        compile 'com.github.EricssonBroadcastServices:AndroidClientDownload:master-SNAPSHOT'
+        compile "com.github.EricssonBroadcastServices:AndroidClientUtilities:${project.ext.libraryTag}"
+        compile "com.github.EricssonBroadcastServices:AndroidClientExposure:${project.ext.libraryTag}"
+        compile "com.github.EricssonBroadcastServices:AndroidClientAnalytics:${project.ext.libraryTag}"
+        compile "com.github.EricssonBroadcastServices:AndroidClientDownload:${project.ext.libraryTag}"
     }
     testCompile 'junit:junit:4.12'
 }
