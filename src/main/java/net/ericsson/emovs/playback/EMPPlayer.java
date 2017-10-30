@@ -16,6 +16,7 @@ import com.ebs.android.exposure.models.EmpOfflineAsset;
 import com.ebs.android.exposure.models.EmpProgram;
 import com.ebs.android.utilities.ErrorCodes;
 import com.ebs.android.utilities.ErrorRunnable;
+import com.ebs.android.utilities.FileSerializer;
 import com.ebs.android.utilities.RunnableThread;
 import com.ebs.android.exposure.entitlements.EntitlementCallback;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -26,6 +27,8 @@ import com.ebs.android.exposure.interfaces.IPlayable;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
+
+import java.io.File;
 
 
 /**
@@ -141,7 +144,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
         }
         else if (playable instanceof EmpOfflineAsset) {
             EmpOfflineAsset offlineAsset = (EmpOfflineAsset) playable;
-            playOffline(offlineAsset.entitlement, offlineAsset.localMediaPath);
+            playOffline(offlineAsset.localMediaPath);
         }
         else if (playable instanceof EmpChannel) {
             EmpChannel channel = (EmpChannel) playable;
@@ -325,17 +328,21 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
         EMPEntitlementProvider.getInstance().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, onErrorRunnable));
     }
 
-    private boolean playOffline(final Entitlement entitlement, final String manifestPath) {
+    private boolean playOffline(final String manifestPath) {
         // TODO: missing eventListeners.onEntitlementLoadStart();
         final EMPPlayer self = this;
         new RunnableThread(new Runnable() {
             @Override
             public void run() {
-                self.entitlement = entitlement;
+                File manifestUrl = new File(manifestPath);
+                File manifestFolder = manifestUrl.getParentFile();
+                File entitlementFile = new File(manifestFolder, "entitlement.ser");
+                self.entitlement = FileSerializer.read(entitlementFile.getAbsolutePath());
+
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
-                tech.init(view, entitlement.playToken, self.properties);
-                tech.load(entitlement.assetId, manifestPath, true);
+                tech.init(view, self.entitlement.playToken, self.properties);
+                tech.load(self.entitlement.assetId, manifestPath, true);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
                         tech.play(manifestPath);
