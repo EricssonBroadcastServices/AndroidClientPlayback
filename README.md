@@ -1,4 +1,4 @@
-# AndroidClientPlayback
+# AndroidClientPlayback   [![Release](https://jitpack.io/v/EricssonBroadcastServices/AndroidClientPlayback.svg)](https://jitpack.io/#EricssonBroadcastServices/AndroidClientPlayback)
 Library for android 2.0 video playback
 
 ## Requirements
