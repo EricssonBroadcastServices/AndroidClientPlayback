@@ -1,5 +1,5 @@
 # AndroidClientPlayback   [![Release](https://jitpack.io/v/EricssonBroadcastServices/AndroidClientPlayback.svg)](https://jitpack.io/#EricssonBroadcastServices/AndroidClientPlayback)
-Library for android 2.0 video playback
+Library for android 2.x video playback
 
 ## Requirements
 
@@ -30,7 +30,7 @@ dependencies {
 Note: do not add the jitpack.io repository under *buildscript {}*
 
 ## Release Notes
-Release specific changes can be found in the [CHANGELOG](https://github.com/EricssonBroadcastServices/AndroidClientPlayback/blob/master/CHANGELOG.md).
+Release specific changes can be found in the [CHANGELOG](CHANGELOG.md).
 
 ## Upgrade Guides
 Major changes between releases will be documented with special [Upgrade Guides](https://github.com/EricssonBroadcastServices/AndroidClientPlayback/blob/master/UPGRADE_GUIDE.md).
