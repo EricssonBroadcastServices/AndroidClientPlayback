@@ -1,4 +1,24 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://maven.google.com" }
+        maven { url "https://jitpack.io" }
+    }
+}
+
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.EricssonBroadcastServices'
 
 ext {
     exoPlayerVersion = 'r2.5.0'
@@ -35,14 +55,6 @@ android {
     }
     lintOptions {
         abortOnError false
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
-        maven { url "https://maven.google.com" }
     }
 }
 
