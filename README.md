@@ -1,5 +1,5 @@
 # AndroidClientPlayback   [![Release](https://jitpack.io/v/EricssonBroadcastServices/AndroidClientPlayback.svg)](https://jitpack.io/#EricssonBroadcastServices/AndroidClientPlayback)
-
+ 
 * [Features](#features)
 * [License](https://github.com/EricssonBroadcastServices/AndroidClientPlayback/blob/master/LICENSE)
 * [Requirements](#requirements)
