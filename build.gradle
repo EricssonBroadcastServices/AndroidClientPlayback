@@ -70,7 +70,7 @@ dependencies {
     compile 'joda-time:joda-time:2.9.4'
     if (project.hasProperty('hasParentProject')) {
         compile project(':libraries:utilities')
-        compile project(':libraries:download')
+        compile project(':libraries:download-media')
         compile project(':libraries:exposure')
         compile project(':libraries:analytics')
     }
