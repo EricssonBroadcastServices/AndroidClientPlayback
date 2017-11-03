@@ -3,6 +3,11 @@ package net.ericsson.emovs.playback;
 import android.content.Context;
 
 import com.ebs.android.exposure.entitlements.Entitlement;
+import com.ebs.android.exposure.interfaces.IPlayable;
+import com.ebs.android.exposure.models.EmpAsset;
+import com.ebs.android.exposure.models.EmpChannel;
+import com.ebs.android.exposure.models.EmpOfflineAsset;
+import com.ebs.android.exposure.models.EmpProgram;
 import com.ebs.android.utilities.RunnableThread;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
@@ -12,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by Joao Coelho on 2017-09-27.
@@ -37,6 +43,12 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
         }
 
         Entitlement entitlement = player.getEntitlement();
+        IPlayable playable = player.getPlayable();
+        boolean isOffline = false;
+
+        if (playable instanceof EmpOfflineAsset) {
+            isOffline = true;
+        }
 
         HashMap<String, String> parameters = new HashMap<>();
 
@@ -51,7 +63,7 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
             parameters.put(EventParameters.HandshakeStarted.PROGRAM_ID, entitlement.programId);
         }
 
-        EMPAnalyticsProvider.getInstance().handshakeStarted(sessionId, parameters);
+        EMPAnalyticsProvider.getInstance().handshakeStarted(sessionId, isOffline, parameters);
     }
 
     @Override
@@ -66,8 +78,24 @@ public class EMPAnalyticsConnector extends EmptyPlaybackEventListener {
 
         HashMap<String, String> parameters = new HashMap<>();
 
-        // TODO: missing play mode
-        //parameters.put(EventParameters.Created.PLAY_MODE, "");
+        IPlayable playable = player.getPlayable();
+        String mode = null;
+
+        if (playable instanceof EmpOfflineAsset) {
+            mode = "offline";
+        }
+        else if (playable instanceof EmpAsset) {
+            mode = "vod";
+        }
+        else if (playable instanceof EmpChannel) {
+            mode = "live";
+        }
+        else if (playable instanceof EmpProgram) {
+            // TODO: check if program is live
+            mode = "vod";
+        }
+
+        parameters.put(EventParameters.Created.PLAY_MODE, mode);
         parameters.put(EventParameters.Created.AUTOPLAY, Boolean.toString(player.getPlaybackProperties().isAutoplay()));
         parameters.put(EventParameters.Created.VERSION, player.getVersion());
         parameters.put(EventParameters.Created.PLAYER, player.getIdentifier());

@@ -382,8 +382,4 @@ public class ExoPlayerTech implements IPlayer, ITech {
         }
     }
 
-    private SharedPreferences getSharedPreferences() {
-        return ctx.getSharedPreferences(FLUX_EXOPLAYER_WIDEVINE_KEYSTORE, Context.MODE_PRIVATE);
-    }
-
 }

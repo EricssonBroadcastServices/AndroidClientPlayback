@@ -29,6 +29,7 @@ import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
 
 import java.io.File;
+import java.util.UUID;
 
 
 /**
@@ -46,7 +47,9 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
     EMPAnalyticsConnector analyticsConnector;
     PlaybackProperties properties;
 
+    IPlayable playable;
     Entitlement entitlement;
+    UUID playbackUUID;
 
     public EMPPlayer(Activity context, ViewGroup host) {
         this.context = context;
@@ -115,6 +118,8 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
 //        clearListeners();
         this.properties = properties;
         this.entitlement = null;
+        this.playable = null;
+        this.playbackUUID = null;
 
         if (this.tech != null) {
             this.release();
@@ -133,6 +138,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
             return;
         }
         if (playable instanceof EmpProgram) {
+            this.playable = playable;
             EmpProgram playableProgram = (EmpProgram) playable;
             if (playableProgram.liveNow()) {
                 playLive(playableProgram.channelId);
@@ -140,17 +146,19 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
             else {
                 playCatchup(playableProgram.assetId, playableProgram.programId);
             }
-
         }
         else if (playable instanceof EmpOfflineAsset) {
+            this.playable = playable;
             EmpOfflineAsset offlineAsset = (EmpOfflineAsset) playable;
             playOffline(offlineAsset.localMediaPath);
         }
         else if (playable instanceof EmpChannel) {
+            this.playable = playable;
             EmpChannel channel = (EmpChannel) playable;
             playLive(channel.channelId);
         }
         else if (playable instanceof EmpAsset) {
+            this.playable = playable;
             EmpAsset asset = (EmpAsset) playable;
             playVod(asset.assetId);
         }
@@ -213,9 +221,16 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
         return entitlement;
     }
 
+    public IPlayable getPlayable() {
+        return this.playable;
+    }
+
     public String getSessionId() {
         if (entitlement == null) {
             return null;
+        }
+        if (playable != null && playable instanceof EmpOfflineAsset) {
+            return "offline-" + playbackUUID.toString();
         }
         return entitlement.playSessionId;
     }
@@ -338,7 +353,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 File manifestFolder = manifestUrl.getParentFile();
                 File entitlementFile = new File(manifestFolder, "entitlement.ser");
                 self.entitlement = FileSerializer.read(entitlementFile.getAbsolutePath());
-
+                self.playbackUUID = UUID.randomUUID();
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
                 tech.init(view, self.entitlement.playToken, self.properties);
