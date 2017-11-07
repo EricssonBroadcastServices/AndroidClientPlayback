@@ -7,23 +7,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ebs.android.exposure.auth.SharedPropertiesICredentialsStorage;
-import com.ebs.android.exposure.entitlements.EMPEntitlementProvider;
-import com.ebs.android.exposure.entitlements.EntitledRunnable;
-import com.ebs.android.exposure.models.EmpAsset;
-import com.ebs.android.exposure.models.EmpChannel;
-import com.ebs.android.exposure.models.EmpOfflineAsset;
-import com.ebs.android.exposure.models.EmpProgram;
-import com.ebs.android.utilities.ErrorCodes;
-import com.ebs.android.utilities.ErrorRunnable;
-import com.ebs.android.utilities.FileSerializer;
-import com.ebs.android.utilities.RunnableThread;
-import com.ebs.android.exposure.entitlements.EntitlementCallback;
-import com.google.android.exoplayer2.PlaybackParameters;
+import net.ericsson.emovs.exposure.auth.SharedPropertiesICredentialsStorage;
+import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
+import net.ericsson.emovs.exposure.entitlements.EntitledRunnable;
+import net.ericsson.emovs.exposure.models.EmpAsset;
+import net.ericsson.emovs.exposure.models.EmpChannel;
+import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
+import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.ErrorCodes;
+import net.ericsson.emovs.utilities.ErrorRunnable;
+import net.ericsson.emovs.utilities.FileSerializer;
+import net.ericsson.emovs.utilities.RunnableThread;
+import net.ericsson.emovs.exposure.entitlements.EntitlementCallback;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 
-import com.ebs.android.exposure.entitlements.Entitlement;
-import com.ebs.android.exposure.interfaces.IPlayable;
+import net.ericsson.emovs.exposure.entitlements.Entitlement;
+import net.ericsson.emovs.exposure.interfaces.IPlayable;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;

@@ -5,8 +5,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.ebs.android.exposure.interfaces.IPlayable;
-import com.ebs.android.utilities.ViewHelper;
+import net.ericsson.emovs.exposure.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.ViewHelper;
 
 import net.ericsson.emovs.playback.EmptyPlaybackEventListener;
 import net.ericsson.emovs.playback.PlaybackProperties;

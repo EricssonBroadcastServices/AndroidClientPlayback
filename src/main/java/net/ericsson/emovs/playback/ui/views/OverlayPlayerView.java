@@ -1,7 +1,6 @@
 package net.ericsson.emovs.playback.ui.views;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -10,9 +9,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.ebs.android.exposure.interfaces.IPlayable;
+import net.ericsson.emovs.exposure.interfaces.IPlayable;
 
-import net.ericsson.emovs.playback.EMPPlayer;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 

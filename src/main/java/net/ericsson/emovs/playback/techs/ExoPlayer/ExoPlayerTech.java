@@ -1,16 +1,14 @@
 package net.ericsson.emovs.playback.techs.ExoPlayer;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Pair;
-import android.view.View;
 
 import net.ericsson.emovs.download.DownloadItem;
 import net.ericsson.emovs.download.GenericDrmCallback;
 import net.ericsson.emovs.download.WidevineOfflineLicenseManager;
 import net.ericsson.emovs.playback.EMPPlayer;
-import com.ebs.android.utilities.ErrorCodes;
+import net.ericsson.emovs.utilities.ErrorCodes;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;

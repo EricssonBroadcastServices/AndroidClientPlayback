@@ -1,14 +1,12 @@
 package net.ericsson.emovs.playback;
 
-import android.content.Context;
-
-import com.ebs.android.exposure.entitlements.Entitlement;
-import com.ebs.android.exposure.interfaces.IPlayable;
-import com.ebs.android.exposure.models.EmpAsset;
-import com.ebs.android.exposure.models.EmpChannel;
-import com.ebs.android.exposure.models.EmpOfflineAsset;
-import com.ebs.android.exposure.models.EmpProgram;
-import com.ebs.android.utilities.RunnableThread;
+import net.ericsson.emovs.exposure.entitlements.Entitlement;
+import net.ericsson.emovs.exposure.interfaces.IPlayable;
+import net.ericsson.emovs.exposure.models.EmpAsset;
+import net.ericsson.emovs.exposure.models.EmpChannel;
+import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
+import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.RunnableThread;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.analytics.EventParameters;
@@ -16,8 +14,6 @@ import net.ericsson.emovs.analytics.EventParameters;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by Joao Coelho on 2017-09-27.
