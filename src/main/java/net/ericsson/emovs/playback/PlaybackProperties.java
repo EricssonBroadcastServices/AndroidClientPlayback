@@ -9,10 +9,13 @@ public class PlaybackProperties {
 
     boolean nativeControls;
     boolean autoplay;
+    Long startTime;
+    boolean useLastViewedOffset;
 
     public PlaybackProperties() {
         this.nativeControls = true;
         this.autoplay = true;
+        this.useLastViewedOffset = false;
     }
 
     public boolean hasNativeControls() {
@@ -28,8 +31,27 @@ public class PlaybackProperties {
         return autoplay;
     }
 
+    public boolean useLastViewedOffset() {
+        return useLastViewedOffset;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
     public PlaybackProperties withAutoplay(boolean autoplay) {
         this.autoplay = autoplay;
         return this;
     }
+
+    public PlaybackProperties withUseLastViewedOffset(boolean useLastViewedOffset) {
+        this.useLastViewedOffset = useLastViewedOffset;
+        return this;
+    }
+
+    public PlaybackProperties withStartTime(Long startTime) {
+        this.startTime = startTime;
+        return this;
+    }
+
 }

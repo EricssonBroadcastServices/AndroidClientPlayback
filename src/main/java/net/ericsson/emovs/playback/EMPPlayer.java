@@ -315,6 +315,9 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
             public void run() {
                 self.entitlement = entitlement;
                 self.onEntitlementChange();
+                if(self.properties != null && self.properties.useLastViewedOffset()) {
+                    self.properties.withStartTime(entitlement.lastViewedOffset);
+                }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
                 tech.init(view, entitlement.playToken, self.properties);
                 tech.load(entitlement.assetId, entitlement.mediaLocator, false);

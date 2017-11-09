@@ -144,6 +144,9 @@ public class ExoPlayerTech implements IPlayer, ITech {
 
                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
                 this.player = HookedSimpleExoPlayer.newSimpleInstance(this, renderersFactory, trackSelector);
+                if (this.properties != null && this.properties.getStartTime() != null) {
+                    this.player.seekTo(this.properties.getStartTime());
+                }
                 this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
                 this.player.addListener(new Player.EventListener(){
                     @Override
