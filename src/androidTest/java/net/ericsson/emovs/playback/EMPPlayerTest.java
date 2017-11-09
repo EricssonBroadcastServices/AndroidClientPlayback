@@ -2,6 +2,8 @@ package net.ericsson.emovs.playback;
 
 import android.support.test.runner.AndroidJUnit4;
 
+import junit.framework.Assert;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +32,12 @@ public class EMPPlayerTest {
     }
 
     @Test
-    public void dummyTest() throws Exception {
-    }
+    public void playbackPropertiesTest() throws Exception {
+        PlaybackProperties props = new PlaybackProperties();
+        props.withAutoplay(true).withNativeControls(false);
 
+        Assert.assertFalse(props.hasNativeControls());
+        Assert.assertTrue(props.isAutoplay());
+    }
 
 }
