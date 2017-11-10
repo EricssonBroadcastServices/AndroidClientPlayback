@@ -19,7 +19,7 @@ public class MyVideoPlayer extends SimplePlaybackActivity {
 
 Once the derived activity is created and registered in **AndroidManifest.xml**, the player can be started by sending the playable in the Intent:
 
-### **Asset**
+**Asset**
 
 ```java
 EmpAsset asset = new EmpAsset();
@@ -30,7 +30,7 @@ intent.putExtra("playable", asset);
 context.startActivity(intent);
 ```
 
-### **Catchup**
+**Catchup**
 
 ```java
 EmpProgram program = new EmpProgram();
@@ -42,7 +42,7 @@ intent.putExtra("playable", program);
 context.startActivity(intent);
 ```
 
-### **Channel**
+**Channel**
 
 ```java
 EmpChannel asset = new EmpChannel();
