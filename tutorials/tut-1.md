@@ -3,7 +3,7 @@
 The most basic integration of EMPPlayer is by extending the **SimplePlaybackActivity** class provided by the library.
 In order to specify playback properties like autoplay or startTime, use class PlaybackProperties.
  
-``
+``java
 public class MyVideoPlayer extends SimplePlaybackActivity {
 
     public MyVideoPlayer() {
@@ -21,7 +21,7 @@ Once the derived activity is created and registered in **AndroidManifest.xml**, 
 
 ** Asset **
 
-``
+``java
 EmpAsset asset = new EmpAsset();
 asset.assetId = "MY_ASSET_ID";
 
@@ -32,7 +32,7 @@ context.startActivity(intent);
 
 ** Catchup **
 
-``
+``java
 EmpProgram program = new EmpProgram();
 asset.channelId = "MY_CHANNEL_ID";
 asset.programId = "MY_PROGRAM_ID";
@@ -44,7 +44,7 @@ context.startActivity(intent);
 
 ** Channel **
 
-``
+``java
 EmpChannel asset = new EmpChannel();
 asset.channelId = "MY_CHANNEL_ID";
 
