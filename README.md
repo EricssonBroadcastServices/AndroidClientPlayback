@@ -25,7 +25,7 @@
 - [Integrating simple Activity for playback](tutorials/tutorial-simple-player.md)
 - [Customizing player UI](tutorials/tutorial-player-customization.md)
 
-Contact the EMP team for tips on other types of quick player integrations :)
+Contact the EMP team for tips on other types of player integrations :)
 
 ## Requirements
 
