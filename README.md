@@ -10,7 +10,14 @@
 
 ## Features
 
-
+- [x] EMP Integration & Analytics
+- [x] Base Playback Activity
+- [x] Base EMPPlayer Layout
+- [x] DASH VOD playback
+- [x] DASH Live playback
+- [x] DASH Catchup playback
+- [x] DASH Offline playback
+- [x] Support for Widevine DRM
 
 ## Requirements
 
