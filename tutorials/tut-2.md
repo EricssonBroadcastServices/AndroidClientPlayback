@@ -12,7 +12,7 @@ public class MyVideoPlayer extends SimplePlaybackActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-		this.properties = PlaybackProperties.DEFAULT.withNativeControls(false);
+		this.properties = new PlaybackProperties().withNativeControls(false);
         this.bindContentView(R.layout.mycustomlayout);
         super.onCreate(savedInstanceState);
     }
