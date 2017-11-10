@@ -22,9 +22,9 @@
 
 ## Tutorials
 
-- Integrating simple playback Activity [V](tutorials/tut-1.md)
-- Customizing player UI controls [V](tutorials/tut-2.md)
-- Playing Offline content [2](tutorials/tut-3.md)
+- [Integrating simple playback Activity](tutorials/tut-1.md)
+- [Customizing player UI controls](tutorials/tut-2.md)
+- [Playing Offline content] (tutorials/tut-3.md)
 
 ## Requirements
 
