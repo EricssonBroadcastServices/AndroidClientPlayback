@@ -24,7 +24,7 @@
 
 - [Integrating simple Activity for playback](tutorials/tut-1.md)
 - [Customizing player UI controls](tutorials/tut-2.md)
-- [Playing Offline content](tutorials/tut-3.md)
+- [Playing offline content](tutorials/tut-3.md)
 
 ## Requirements
 
