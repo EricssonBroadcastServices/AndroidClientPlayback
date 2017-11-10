@@ -44,6 +44,9 @@ public class SimplePlaybackActivity extends Activity {
         if (properties == null) {
             this.properties = PlaybackProperties.DEFAULT;
         }
+        else {
+            this.properties = properties;
+        }
     }
 
     @Override

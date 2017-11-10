@@ -58,7 +58,7 @@ context.startActivity(intent);
 ```
 
 **NOTE:** in order for the entitlement to be loaded from the backend, the **ApiUrl**, **CustomerId** and **BusinessId** need to be set when the Application is created. 
-Also, the user has to be logged in. For authentication flows, please read Exposure library tutorials [here](https://github.com/EricssonBroadcastServices/AndroidClientExposure/tree/master/tutorials) or check our reference app [here](). 
+Also, the user has to be logged in. For authentication flows, please read Exposure library tutorials [here](https://github.com/EricssonBroadcastServices/AndroidClientExposure/tree/master/tutorials) or check our reference app [here](https://github.com/EricssonBroadcastServices/AndroidClientReferenceApp). 
 
 ```java
 
