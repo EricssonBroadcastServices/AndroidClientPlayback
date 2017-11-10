@@ -25,7 +25,7 @@ Once the derived activity is created and registered in **AndroidManifest.xml**, 
 EmpAsset asset = new EmpAsset();
 asset.assetId = "MY_ASSET_ID";
 
-Intent intent = new Intent(ctx, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+Intent intent = new Intent(context, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 intent.putExtra("playable", asset);
 context.startActivity(intent);
 ```
@@ -37,7 +37,7 @@ EmpProgram program = new EmpProgram();
 program.channelId = "MY_CHANNEL_ID";
 program.programId = "MY_PROGRAM_ID";
 
-Intent intent = new Intent(ctx, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+Intent intent = new Intent(context, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 intent.putExtra("playable", program);
 context.startActivity(intent);
 ```
@@ -48,7 +48,7 @@ context.startActivity(intent);
 EmpChannel channel = new EmpChannel();
 channel.channelId = "MY_CHANNEL_ID";
 
-Intent intent = new Intent(ctx, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+Intent intent = new Intent(context, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 intent.putExtra("playable", channel);
 context.startActivity(intent);
 ```
