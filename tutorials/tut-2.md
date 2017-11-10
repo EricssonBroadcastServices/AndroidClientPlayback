@@ -1,4 +1,4 @@
-# Customizing Player UI controls
+# Customizing Player UI
 
 
 One way of customizing the activity UI and it is not possible to append UI elements to the content view, then the method **bindContentView** shall be used to create a custom layout.
