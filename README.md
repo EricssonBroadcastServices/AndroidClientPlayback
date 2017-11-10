@@ -23,7 +23,7 @@
 ## Tutorials
 
 - [Integrating simple Activity for playback](tutorials/tut-1.md)
-- [Customizing player UI controls](tutorials/tut-2.md)
+- [Customizing player UI](tutorials/tut-2.md)
 
 Contact the EMP team for tips on other types of quick player integrations :)
 
