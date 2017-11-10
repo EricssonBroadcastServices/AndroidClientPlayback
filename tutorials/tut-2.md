@@ -20,6 +20,8 @@ public class MyVideoPlayer extends SimplePlaybackActivity {
 ```
 
 A custom XML layout should look like this:
+Any type of Layout is allowed, what is important is to include **net.ericsson.emovs.playback.ui.views.EMPPlayerView** instance(s).
+Note that it is possible to have several **EMPPlayerView** in one layout in order to achieve a multiview experience.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -31,7 +33,7 @@ A custom XML layout should look like this:
 	android:orientation="vertical">
 	<net.ericsson.emovs.playback.ui.views.EMPPlayerView 
 		xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/empplayer_layout_1"
+		android:id="@+id/myempplayer"
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
 		android:layout_weight="1">
@@ -39,4 +41,21 @@ A custom XML layout should look like this:
 </LinearLayout>
 ```
 
-Note that it is possible to have several **EMPPlayerView** in one layout in order to achieve a multiview experience.
+
+If one wants to implement custom controls, then all it has to be done is fetch the **EMPPlayerView** object in the activity and register a listener in the associated **EMPPlayer** instance.
+This listener must implement interface **IPlaybackEventListener** or extend class **EmptyPlaybackEventListener**.
+
+```java
+EMPPlayerView view = (EMPPlayerView) findViewById(R.id.myempplayer);
+view.getPlayer().addListener(new EmptyPlaybackEventListener(view.getPlayer()) {
+	@Override
+	public void onError(int errorCode, String errorMessage) {
+		// Your logic here ...
+	}
+	
+	// ...
+});
+```
+
+The **EMPPlayer** class also exposes more methods to fully enable control of the playback: pause, resume, stop, play, seekTo, etc..
+For more information, check the documentation.
