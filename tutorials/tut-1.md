@@ -34,6 +34,16 @@ intent.putExtra("playable", asset);
 context.startActivity(intent);
 ```
 
+**Offline Asset**
+
+```java
+EmpOfflineAsset asset = new EmpOfflineAsset();
+asset.localMediaPath = "PATH_TO_MEDIA_PARENT_FOLDER";
+
+Intent intent = new Intent(context, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+intent.putExtra("playable", asset);
+context.startActivity(intent);
+
 **Catchup**
 
 ```java

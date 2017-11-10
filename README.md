@@ -24,7 +24,8 @@
 
 - [Integrating simple Activity for playback](tutorials/tut-1.md)
 - [Customizing player UI controls](tutorials/tut-2.md)
-- [Playing offline content](tutorials/tut-3.md)
+
+Contact the EMP team for tips on other types of quick player integrations :)
 
 ## Requirements
 
