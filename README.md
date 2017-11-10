@@ -1,6 +1,7 @@
 # AndroidClientPlayback   [![Release](https://jitpack.io/v/EricssonBroadcastServices/AndroidClientPlayback.svg)](https://jitpack.io/#EricssonBroadcastServices/AndroidClientPlayback)
  
 * [Features](#features)
+* [Tutorials](#tutorials)
 * [License](https://github.com/EricssonBroadcastServices/AndroidClientPlayback/blob/master/LICENSE)
 * [Requirements](#requirements)
 * [Installation](#installation)
@@ -18,6 +19,12 @@
 - [x] DASH Catchup playback
 - [x] DASH Offline playback
 - [x] Support for Widevine DRM
+
+## Tutorials
+
+- Integrating simple playback Activity [V](tutorials/tut-1.md)
+- Customizing player UI controls [V](tutorials/tut-2.md)
+- Playing Offline content [2](tutorials/tut-3.md)
 
 ## Requirements
 
