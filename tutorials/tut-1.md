@@ -4,6 +4,10 @@ The most basic integration of EMPPlayer is by extending the **SimplePlaybackActi
 In order to specify playback properties like autoplay or startTime, use class PlaybackProperties.
  
 ```java
+import android.os.Bundle;
+import net.ericsson.emovs.playback.PlaybackProperties;
+import net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity;
+
 public class MyVideoPlayer extends SimplePlaybackActivity {
 
     public MyVideoPlayer() {
