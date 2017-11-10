@@ -34,8 +34,8 @@ context.startActivity(intent);
 
 ```java
 EmpProgram program = new EmpProgram();
-asset.channelId = "MY_CHANNEL_ID";
-asset.programId = "MY_PROGRAM_ID";
+program.channelId = "MY_CHANNEL_ID";
+program.programId = "MY_PROGRAM_ID";
 
 Intent intent = new Intent(ctx, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 intent.putExtra("playable", program);
@@ -45,10 +45,10 @@ context.startActivity(intent);
 **Channel**
 
 ```java
-EmpChannel asset = new EmpChannel();
-asset.channelId = "MY_CHANNEL_ID";
+EmpChannel channel = new EmpChannel();
+channel.channelId = "MY_CHANNEL_ID";
 
 Intent intent = new Intent(ctx, MyVideoPlayer.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-intent.putExtra("playable", playable);
+intent.putExtra("playable", channel);
 context.startActivity(intent);
 ```
