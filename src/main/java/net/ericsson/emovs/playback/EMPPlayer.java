@@ -360,7 +360,8 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 File manifestUrl = new File(manifestPath);
                 File manifestFolder = manifestUrl.getParentFile();
                 File entitlementFile = new File(manifestFolder, "entitlement.ser");
-                self.entitlement = FileSerializer.read(entitlementFile.getAbsolutePath());
+                Entitlement entitlement = new Entitlement();
+                self.entitlement = FileSerializer.readJson(entitlement, entitlementFile.getAbsolutePath());
                 self.playbackUUID = UUID.randomUUID();
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
