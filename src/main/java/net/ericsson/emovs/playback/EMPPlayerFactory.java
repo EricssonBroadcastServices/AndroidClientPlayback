@@ -8,6 +8,7 @@ import android.view.ViewGroup;
  */
 
 public class EMPPlayerFactory {
+
     public static EMPPlayer build(Activity context, ViewGroup host) {
         return new EMPPlayer(new EMPAnalyticsConnector(), context, host);
     }
