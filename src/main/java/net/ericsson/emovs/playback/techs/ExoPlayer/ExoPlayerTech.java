@@ -1,13 +1,18 @@
 package net.ericsson.emovs.playback.techs.ExoPlayer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import net.ericsson.emovs.download.DownloadItem;
 import net.ericsson.emovs.download.GenericDrmCallback;
 import net.ericsson.emovs.download.WidevineOfflineLicenseManager;
 import net.ericsson.emovs.playback.EMPPlayer;
+import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.utilities.ErrorCodes;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
@@ -19,7 +24,6 @@ import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
@@ -57,11 +61,12 @@ public class ExoPlayerTech implements IPlayer, ITech {
     private final String FLUX_EXOPLAYER_WIDEVINE_KEYSTORE = "FLUX_EXOPLAYER_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID = "key_offline_asset_id_";
 
-    Context ctx;
+    ViewGroup host;
+    Activity ctx;
     SimpleExoPlayer player;
     SimpleExoPlayerView view;
     String playToken;
-    EMPPlayer parent;
+    Player parent;
 
     boolean isPlaying;
     boolean isReady;
@@ -70,21 +75,22 @@ public class ExoPlayerTech implements IPlayer, ITech {
     int currentBitrate;
     PlaybackProperties properties;
 
-    public ExoPlayerTech(EMPPlayer parent,  Context ctx) {
+    public ExoPlayerTech(EMPPlayer parent,  Activity ctx) {
         this.ctx = ctx;
         this.parent = parent;
+
     }
 
-    public ExoPlayerTech(EMPPlayer parent, Context ctx, boolean init, SimpleExoPlayerView view, PlaybackProperties properties) {
+    public ExoPlayerTech(Player parent, Activity ctx, boolean init, PlaybackProperties properties) {
         this.parent = parent;
         this.ctx = ctx;
         this.properties = properties;
         if (init) {
-            this.init(view, "", properties);
+            this.init("", properties);
         }
     }
 
-    EMPPlayer getParent() {
+    Player getParent() {
         return parent;
     }
 
@@ -96,8 +102,8 @@ public class ExoPlayerTech implements IPlayer, ITech {
         this.seekStart = seekStart;
     }
 
-    public void init(SimpleExoPlayerView view, String playToken, PlaybackProperties properties){
-        this.view = view;
+    public void init(String playToken, PlaybackProperties properties){
+        createExoView(parent.getViewGroup());
         this.playToken = playToken;
         this.isPlaying = false;
         this.isReady = false;
@@ -148,7 +154,7 @@ public class ExoPlayerTech implements IPlayer, ITech {
                     this.player.seekTo(this.properties.getStartTime());
                 }
                 this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
-                this.player.addListener(new Player.EventListener(){
+                this.player.addListener(new com.google.android.exoplayer2.Player.EventListener(){
                     @Override
                     public void onTimelineChanged(Timeline timeline, Object manifest) {
 
@@ -177,7 +183,7 @@ public class ExoPlayerTech implements IPlayer, ITech {
 
                     @Override
                     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                        if (playbackState == Player.STATE_READY) {
+                        if (playbackState == com.google.android.exoplayer2.Player.STATE_READY) {
                             if (isReady == false) {
                                 parent.onLoad();
                                 isReady = true;
@@ -191,17 +197,17 @@ public class ExoPlayerTech implements IPlayer, ITech {
                                 parent.onSeek(player.getCurrentPosition());
                             }
                         }
-                        else if (playbackState == Player.STATE_ENDED && isPlaying) {
+                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED && isPlaying) {
                             isPlaying = false;
                             isReady = false;
                             seekStart = false;
                             parent.onPlaybackEnd();
                         }
-                        else if (playbackState == Player.STATE_BUFFERING && !isReady && !isPlaying && !loadStarted) {
+                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_BUFFERING && !isReady && !isPlaying && !loadStarted) {
                             loadStarted = true;
                             parent.onLoadStart();
                         }
-                        else if (playbackState == Player.STATE_IDLE) {
+                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_IDLE) {
                             isPlaying = false;
                             isReady = false;
                             seekStart = false;
@@ -381,6 +387,49 @@ public class ExoPlayerTech implements IPlayer, ITech {
                     throw new ParserException("Unsupported drm type: " + typeString);
                 }
         }
+    }
+
+    private void createExoView(final ViewGroup host) {
+        if (this.view != null) {
+            return;
+        }
+
+        if (host == null) {
+            // TODO: raise proper error
+            return;
+        }
+
+        this.ctx.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View initialExoView = host.findViewById(R.id.exoview);
+
+                if(initialExoView != null && initialExoView instanceof SimpleExoPlayerView) {
+                    view = (SimpleExoPlayerView) initialExoView;
+                    return;
+                }
+
+                LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View exoLayout = inflater.inflate(R.layout.exoview, null);
+
+                host.removeAllViews();
+                host.addView(exoLayout);
+
+                View exoView = host.findViewById(R.id.exoview);
+
+                if (exoView == null) {
+                    //TODO: raise error - exo view not found
+                    return;
+                }
+                if (exoView instanceof SimpleExoPlayerView == false) {
+                    //TODO: raise error - view not of SimpleExoPlayerView type
+                    return;
+                }
+
+                view = (SimpleExoPlayerView) exoView;
+            }
+        });
+
     }
 
 }

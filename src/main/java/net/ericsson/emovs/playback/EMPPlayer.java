@@ -1,15 +1,15 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.exposure.auth.SharedPropertiesICredentialsStorage;
+import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.entitlements.EntitledRunnable;
+import net.ericsson.emovs.exposure.entitlements.Entitlement;
+import net.ericsson.emovs.exposure.entitlements.EntitlementCallback;
+import net.ericsson.emovs.exposure.interfaces.IPlayable;
 import net.ericsson.emovs.exposure.models.EmpAsset;
 import net.ericsson.emovs.exposure.models.EmpChannel;
 import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
@@ -18,114 +18,29 @@ import net.ericsson.emovs.utilities.ErrorCodes;
 import net.ericsson.emovs.utilities.ErrorRunnable;
 import net.ericsson.emovs.utilities.FileSerializer;
 import net.ericsson.emovs.utilities.RunnableThread;
-import net.ericsson.emovs.exposure.entitlements.EntitlementCallback;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-
-import net.ericsson.emovs.exposure.entitlements.Entitlement;
-import net.ericsson.emovs.exposure.interfaces.IPlayable;
-
-import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
-import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
 
 import java.io.File;
 import java.util.UUID;
 
-
 /**
- * Created by Joao Coelho on 2017-08-30.
+ * Created by Joao Coelho on 2017-11-17.
  */
 
-public class EMPPlayer extends PlaybackEventListenerAggregator {
-    ExoPlayerTech tech;
+public class EMPPlayer extends Player {
+    private IPlayable playable;
+    private Entitlement entitlement;
 
-    ViewGroup host;
-    SimpleExoPlayerView view;
-
-    Activity context;
-    SharedPropertiesICredentialsStorage credentialsStorage;
-    EMPAnalyticsConnector analyticsConnector;
-    PlaybackProperties properties;
-
-    IPlayable playable;
-    Entitlement entitlement;
-    UUID playbackUUID;
-
-    public EMPPlayer(Activity context, ViewGroup host) {
-        this.context = context;
-        this.credentialsStorage = SharedPropertiesICredentialsStorage.getInstance();
-        this.analyticsConnector = new EMPAnalyticsConnector(this);
-        //this.view = view;
-        this.host = host;
-        addListener(this.analyticsConnector);
-        createExoView(this.host);
+    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, Activity context, ViewGroup host) {
+        super(analyticsConnector, context, host);
     }
 
     @Override
-    public void clearListeners() {
-        super.clearListeners();
-        if(this.analyticsConnector != null) {
-            addListener(this.analyticsConnector);
-        }
-    }
+    protected boolean init(PlaybackProperties properties) {
+        super.init(properties);
 
-    public void setAnalyticsCustomAttribute(String k, String v) {
-        EMPAnalyticsProvider.getInstance().setCustomAttribute(k, v);
-    }
-
-    public void clearAnalyticsCustomAttributes() {
-        EMPAnalyticsProvider.getInstance().clearCustomAttributes();
-    }
-
-    private void createExoView(ViewGroup host) {
-        if (this.view != null) {
-            return;
-        }
-
-        if (host == null) {
-            // TODO: raise proper error
-            return;
-        }
-
-        View initialExoView = host.findViewById(R.id.exoview);
-
-        if(initialExoView != null && initialExoView instanceof SimpleExoPlayerView) {
-            this.view = (SimpleExoPlayerView) initialExoView;
-            return;
-        }
-
-        LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View exoLayout = inflater.inflate(R.layout.exoview, null);
-
-        host.removeAllViews();
-        host.addView(exoLayout);
-
-        View exoView = host.findViewById(R.id.exoview);
-
-        if (exoView == null) {
-            //TODO: raise error - exo view not found
-            return;
-        }
-        if (exoView instanceof SimpleExoPlayerView == false) {
-            //TODO: raise error - view not of SimpleExoPlayerView type
-            return;
-        }
-
-        this.view = (SimpleExoPlayerView) exoView;
-    }
-
-    private boolean init(PlaybackProperties properties) {
-//        clearListeners();
-        this.properties = properties;
         this.entitlement = null;
         this.playable = null;
-        this.playbackUUID = null;
 
-        if (this.tech != null) {
-            this.release();
-        }
-
-        this.tech = new ExoPlayerTech(this, this.context, false, this.view, properties);
-        super.onInit();
         return true;
     }
 
@@ -169,87 +84,6 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
         return;
     }
 
-    public void release() {
-        if (this.tech != null) {
-            this.tech.release();
-            this.tech = null;
-        }
-        super.clearListeners();
-    }
-
-    public void pause() {
-        if (this.tech != null) {
-            this.tech.pause();
-        }
-    }
-
-    public void resume() {
-        if (this.tech != null) {
-            this.tech.resume();
-        }
-    }
-
-    public void stop() {
-        if (this.tech != null) {
-            this.tech.stop();
-        }
-    }
-
-
-    public void seekTo(long positionMs) {
-        if (this.tech != null) {
-            this.tech.seekTo(positionMs);
-        }
-    }
-
-    public long getCurrentTime() {
-        if (this.tech != null) {
-            return this.tech.getCurrentTime();
-        }
-        return -1;
-    }
-
-    public long getDuration() {
-        if (this.tech != null) {
-            return this.tech.getDuration();
-        }
-        return -1;
-    }
-
-    public Entitlement getEntitlement() {
-        return entitlement;
-    }
-
-    public IPlayable getPlayable() {
-        return this.playable;
-    }
-
-    public String getSessionId() {
-        if (entitlement == null) {
-            return null;
-        }
-        if (playable != null && playable instanceof EmpOfflineAsset) {
-            return "offline-" + playbackUUID.toString();
-        }
-        return entitlement.playSessionId;
-    }
-
-    public boolean isPlaying() {
-        return this.tech != null && this.tech.isPlaying();
-    }
-
-    public PlaybackProperties getPlaybackProperties() {
-        return properties;
-    }
-
-    public int getCurrentBitrate() {
-        return this.tech == null ? -1 : tech.getCurrentBitrate();
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
     private void playLive(final String channelId) {
         final EMPPlayer self = this;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
@@ -261,7 +95,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken, self.properties);
+                tech.init(entitlement.playToken, self.properties);
                 tech.load(entitlement.channelId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -293,7 +127,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken, self.properties);
+                tech.init(entitlement.playToken, self.properties);
                 tech.load(entitlement.programId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -325,7 +159,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(view, entitlement.playToken, self.properties);
+                tech.init(entitlement.playToken, self.properties);
                 tech.load(entitlement.assetId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -365,7 +199,7 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
                 self.playbackUUID = UUID.randomUUID();
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
-                tech.init(view, self.entitlement.playToken, self.properties);
+                tech.init(self.entitlement.playToken, self.properties);
                 tech.load(self.entitlement.assetId, manifestPath, true);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -377,26 +211,31 @@ public class EMPPlayer extends PlaybackEventListenerAggregator {
         return true;
     }
 
+    public Entitlement getEntitlement() {
+        return entitlement;
+    }
 
-    public String getTechVersion() {
-        if (this.tech == null) {
+    public IPlayable getPlayable() {
+        return this.playable;
+    }
+
+    public String getSessionId() {
+        if (entitlement == null) {
             return null;
         }
-        return this.tech.getVersion();
-    }
-
-    public String getTechIdentifier() {
-        if (this.tech == null) {
-            return null;
+        if (playable != null && playable instanceof EmpOfflineAsset) {
+            return "offline-" + playbackUUID.toString();
         }
-        return this.tech.getIdentifier();
+        return entitlement.playSessionId;
     }
 
-    public String getIdentifier() {
-        return context.getString(R.string.emplayer_name);
+    public void setAnalyticsCustomAttribute(String k, String v) {
+        EMPAnalyticsProvider.getInstance().setCustomAttribute(k, v);
     }
 
-    public String getVersion() {
-        return context.getString(R.string.emplayer_version);
+    public void clearAnalyticsCustomAttributes() {
+        EMPAnalyticsProvider.getInstance().clearCustomAttributes();
     }
+
+
 }

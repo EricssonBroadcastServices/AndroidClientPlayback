@@ -56,6 +56,18 @@ android {
     lintOptions {
         abortOnError false
     }
+    // Note: consider this approach to build a lighweight library
+    //if (!project.hasProperty('hasParentProject')) {
+    //    sourceSets {
+    //        main {
+    //            java {
+    //                //srcDir 'src'
+    //                exclude '**/techs/**'
+    //                exclude '**/ui/**'
+    //            }
+    //        }
+    //    }
+    //}
 }
 
 dependencies {

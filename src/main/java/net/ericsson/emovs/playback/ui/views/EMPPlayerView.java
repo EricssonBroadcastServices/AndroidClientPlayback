@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
 import net.ericsson.emovs.playback.EMPPlayer;
+import net.ericsson.emovs.playback.EMPPlayerFactory;
 
 /**
  * Created by Joao Coelho on 2017-09-29.
@@ -18,17 +19,17 @@ public class EMPPlayerView extends RelativeLayout {
 
     public EMPPlayerView(Context context) {
         super(context);
-        this.player = new EMPPlayer((Activity) getContext(), this);
+        this.player = EMPPlayerFactory.build((Activity) getContext(), this);
     }
 
     public EMPPlayerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.player = new EMPPlayer((Activity) getContext(), this);
+        this.player = EMPPlayerFactory.build((Activity) getContext(), this);
     }
 
     public EMPPlayerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.player = new EMPPlayer((Activity) getContext(), this);
+        this.player = EMPPlayerFactory.build((Activity) getContext(), this);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class EMPPlayerView extends RelativeLayout {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public EMPPlayerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        this.player = new EMPPlayer((Activity) getContext(), this);
+        this.player = EMPPlayerFactory.build((Activity) getContext(), this);
     }
 
     public EMPPlayer getPlayer() {
