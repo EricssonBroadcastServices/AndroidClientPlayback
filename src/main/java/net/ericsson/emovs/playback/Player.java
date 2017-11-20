@@ -32,7 +32,7 @@ public class Player extends PlaybackEventListenerAggregator {
         }
     }
 
-    protected boolean init(PlaybackProperties properties) {
+    protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;
         this.playbackUUID = null;
 
@@ -53,7 +53,7 @@ public class Player extends PlaybackEventListenerAggregator {
         }
     }
 
-    public void play(String streamUrl, PlaybackProperties properties) {
+    public void play(String streamUrl, PlaybackProperties properties) throws Exception {
         init(properties);
         tech.init("", properties);
         tech.load(UUID.randomUUID().toString(), streamUrl, false);

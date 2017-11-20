@@ -5,18 +5,18 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
-import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.entitlements.EntitledRunnable;
-import net.ericsson.emovs.exposure.entitlements.Entitlement;
 import net.ericsson.emovs.exposure.entitlements.EntitlementCallback;
 import net.ericsson.emovs.exposure.interfaces.IPlayable;
 import net.ericsson.emovs.exposure.models.EmpAsset;
 import net.ericsson.emovs.exposure.models.EmpChannel;
 import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
 import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.Entitlement;
 import net.ericsson.emovs.utilities.ErrorCodes;
 import net.ericsson.emovs.utilities.ErrorRunnable;
 import net.ericsson.emovs.utilities.FileSerializer;
+import net.ericsson.emovs.utilities.IEntitlementProvider;
 import net.ericsson.emovs.utilities.RunnableThread;
 
 import java.io.File;
@@ -29,15 +29,19 @@ import java.util.UUID;
 public class EMPPlayer extends Player {
     private IPlayable playable;
     private Entitlement entitlement;
+    private IEntitlementProvider entitlementProvider;
 
-    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, Activity context, ViewGroup host) {
+    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, Activity context, ViewGroup host) {
         super(analyticsConnector, context, host);
+        this.entitlementProvider = entitlementProvider;
     }
 
     @Override
-    protected boolean init(PlaybackProperties properties) {
+    protected boolean init(PlaybackProperties properties) throws Exception {
         super.init(properties);
-
+        if (getEntitlementProvider() == null) {
+            throw new Exception("Do not use default constructor on EMPPlayer.");
+        }
         this.entitlement = null;
         this.playable = null;
 
@@ -45,43 +49,49 @@ public class EMPPlayer extends Player {
     }
 
     public void play(IPlayable playable, PlaybackProperties properties) {
-        init(properties);
-        super.onPlay();
-        if (playable == null) {
-            this.onError(ErrorCodes.PLAYBACK_INVALID_EMP_PLAYABLE, "");
-            return;
-        }
-        if (playable instanceof EmpProgram) {
-            this.playable = playable;
-            EmpProgram playableProgram = (EmpProgram) playable;
-            if (playableProgram.liveNow()) {
-                playLive(playableProgram.channelId);
+        try {
+            init(properties);
+
+            super.onPlay();
+            if (playable == null) {
+                this.onError(ErrorCodes.PLAYBACK_INVALID_EMP_PLAYABLE, "");
+                return;
+            }
+            if (playable instanceof EmpProgram) {
+                this.playable = playable;
+                EmpProgram playableProgram = (EmpProgram) playable;
+                if (playableProgram.liveNow()) {
+                    playLive(playableProgram.channelId);
+                }
+                else {
+                    playCatchup(playableProgram.assetId, playableProgram.programId);
+                }
+            }
+            else if (playable instanceof EmpOfflineAsset) {
+                this.playable = playable;
+                EmpOfflineAsset offlineAsset = (EmpOfflineAsset) playable;
+                playOffline(offlineAsset.localMediaPath);
+            }
+            else if (playable instanceof EmpChannel) {
+                this.playable = playable;
+                EmpChannel channel = (EmpChannel) playable;
+                playLive(channel.channelId);
+            }
+            else if (playable instanceof EmpAsset) {
+                this.playable = playable;
+                EmpAsset asset = (EmpAsset) playable;
+                playVod(asset.assetId);
             }
             else {
-                playCatchup(playableProgram.assetId, playableProgram.programId);
+                this.onError(ErrorCodes.PLAYBACK_INVALID_EMP_PLAYABLE, "");
+                return;
             }
-        }
-        else if (playable instanceof EmpOfflineAsset) {
-            this.playable = playable;
-            EmpOfflineAsset offlineAsset = (EmpOfflineAsset) playable;
-            playOffline(offlineAsset.localMediaPath);
-        }
-        else if (playable instanceof EmpChannel) {
-            this.playable = playable;
-            EmpChannel channel = (EmpChannel) playable;
-            playLive(channel.channelId);
-        }
-        else if (playable instanceof EmpAsset) {
-            this.playable = playable;
-            EmpAsset asset = (EmpAsset) playable;
-            playVod(asset.assetId);
-        }
-        else {
-            this.onError(ErrorCodes.PLAYBACK_INVALID_EMP_PLAYABLE, "");
-            return;
-        }
 
-        return;
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.onError(ErrorCodes.GENERIC_PLAYBACK_FAILED, e.getMessage());
+        }
     }
 
     private void playLive(final String channelId) {
@@ -113,7 +123,7 @@ public class EMPPlayer extends Player {
             }
         };
         super.onEntitlementLoadStart();
-        EMPEntitlementProvider.getInstance().playLive(channelId, new EntitlementCallback(null, channelId, null, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playLive(channelId, new EntitlementCallback(null, channelId, null, onEntitlementRunnable, onErrorRunnable));
     }
 
     private void playCatchup(final String channelId, final String programId) {
@@ -145,7 +155,7 @@ public class EMPPlayer extends Player {
             }
         };
         super.onEntitlementLoadStart();
-        EMPEntitlementProvider.getInstance().playCatchup(channelId, programId, new EntitlementCallback(null, channelId, programId, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playCatchup(channelId, programId, new EntitlementCallback(null, channelId, programId, onEntitlementRunnable, onErrorRunnable));
     }
 
     private void playVod(final String assetId) {
@@ -182,7 +192,7 @@ public class EMPPlayer extends Player {
             }
         };
         super.onEntitlementLoadStart();
-        EMPEntitlementProvider.getInstance().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, onErrorRunnable));
     }
 
     private boolean playOffline(final String manifestPath) {
@@ -209,6 +219,10 @@ public class EMPPlayer extends Player {
             }
         }).start();
         return true;
+    }
+
+    private IEntitlementProvider getEntitlementProvider() {
+        return entitlementProvider;
     }
 
     public Entitlement getEntitlement() {

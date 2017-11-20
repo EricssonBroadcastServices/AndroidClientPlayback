@@ -3,7 +3,7 @@ package net.ericsson.emovs.playback;
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 
 /**
- * Created by Benjamin on 2017-11-17.
+ * Created by Joao Coelho on 2017-11-17.
  */
 
 public class AnalyticsPlaybackConnector implements IPlaybackEventListener {

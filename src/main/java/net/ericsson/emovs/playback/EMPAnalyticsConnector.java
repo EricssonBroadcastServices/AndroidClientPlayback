@@ -1,11 +1,12 @@
 package net.ericsson.emovs.playback;
 
-import net.ericsson.emovs.exposure.entitlements.Entitlement;
+
 import net.ericsson.emovs.exposure.interfaces.IPlayable;
 import net.ericsson.emovs.exposure.models.EmpAsset;
 import net.ericsson.emovs.exposure.models.EmpChannel;
 import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
 import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.Entitlement;
 import net.ericsson.emovs.utilities.RunnableThread;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;

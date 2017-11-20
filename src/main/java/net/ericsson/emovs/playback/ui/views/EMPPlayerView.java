@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
 import net.ericsson.emovs.playback.EMPPlayer;
-import net.ericsson.emovs.playback.EMPPlayerFactory;
+import net.ericsson.emovs.playback.factories.EMPPlayerFactory;
 
 /**
  * Created by Joao Coelho on 2017-09-29.
