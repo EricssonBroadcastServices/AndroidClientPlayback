@@ -3,7 +3,7 @@ package net.ericsson.emovs.playback.factories;
 import android.app.Activity;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.playback.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.playback.Player;
 
 /**

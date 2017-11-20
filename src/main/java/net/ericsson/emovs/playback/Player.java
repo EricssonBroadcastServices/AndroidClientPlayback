@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.exposure.interfaces.IPlayable;
 import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
+import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
+
 import java.util.UUID;
 
 
@@ -28,7 +29,7 @@ public class Player extends PlaybackEventListenerAggregator {
 
         if (analyticsConnector != null) {
             this.analyticsConnector.bindPlayer(this);
-            addListener(this.analyticsConnector);
+            addListener(new AnalyticsHolder(this.analyticsConnector));
         }
     }
 
@@ -49,7 +50,7 @@ public class Player extends PlaybackEventListenerAggregator {
     public void clearListeners() {
         super.clearListeners();
         if (this.analyticsConnector != null) {
-            addListener(this.analyticsConnector);
+            addListener(new AnalyticsHolder(this.analyticsConnector));
         }
     }
 

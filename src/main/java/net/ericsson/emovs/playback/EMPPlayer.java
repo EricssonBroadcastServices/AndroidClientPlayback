@@ -12,6 +12,7 @@ import net.ericsson.emovs.exposure.models.EmpAsset;
 import net.ericsson.emovs.exposure.models.EmpChannel;
 import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
 import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.Entitlement;
 import net.ericsson.emovs.utilities.ErrorCodes;
 import net.ericsson.emovs.utilities.ErrorRunnable;

@@ -6,6 +6,7 @@ import net.ericsson.emovs.exposure.models.EmpAsset;
 import net.ericsson.emovs.exposure.models.EmpChannel;
 import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
 import net.ericsson.emovs.exposure.models.EmpProgram;
+import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.Entitlement;
 import net.ericsson.emovs.utilities.RunnableThread;
 
@@ -93,8 +94,8 @@ public class EMPAnalyticsConnector extends AnalyticsPlaybackConnector {
 
         parameters.put(EventParameters.Created.PLAY_MODE, mode);
         parameters.put(EventParameters.Created.AUTOPLAY, Boolean.toString(player().getPlaybackProperties().isAutoplay()));
-        parameters.put(EventParameters.Created.VERSION, player.getVersion());
-        parameters.put(EventParameters.Created.PLAYER, player.getIdentifier());
+        parameters.put(EventParameters.Created.VERSION, player().getVersion());
+        parameters.put(EventParameters.Created.PLAYER, player().getIdentifier());
 
         EMPAnalyticsProvider.getInstance().created(sessionId, parameters);
     }
@@ -111,8 +112,8 @@ public class EMPAnalyticsConnector extends AnalyticsPlaybackConnector {
 
         HashMap<String, String> parameters = new HashMap<>();
 
-        parameters.put(EventParameters.PlayerReady.TECHNOLOGY, player.getTechIdentifier());
-        parameters.put(EventParameters.PlayerReady.TECH_VERSION, player.getTechVersion());
+        parameters.put(EventParameters.PlayerReady.TECHNOLOGY, player().getTechIdentifier());
+        parameters.put(EventParameters.PlayerReady.TECH_VERSION, player().getTechVersion());
 
         EMPAnalyticsProvider.getInstance().ready(sessionId, parameters);
     }
@@ -142,7 +143,7 @@ public class EMPAnalyticsConnector extends AnalyticsPlaybackConnector {
             }
             parameters.put(EventParameters.Started.MEDIA_LOCATOR, cleanMediaLocator);
             parameters.put(EventParameters.Started.VIDEO_LENGTH, Long.toString(duration));
-            parameters.put(EventParameters.Started.BITRATE, Integer.toString(player.getCurrentBitrate()));
+            parameters.put(EventParameters.Started.BITRATE, Integer.toString(player().getCurrentBitrate()));
         }
 
         // TODO: set custom attributes
@@ -234,7 +235,7 @@ public class EMPAnalyticsConnector extends AnalyticsPlaybackConnector {
 
     @Override
     public void onWaitingEnd() {
-        if (player == null) {
+        if (player() == null) {
             player();
         }
         String sessionId = player().getSessionId();
@@ -312,7 +313,7 @@ public class EMPAnalyticsConnector extends AnalyticsPlaybackConnector {
         for(;;) {
             try {
                 Thread.sleep(CURRENT_TIME_PERIOD);
-                if (player.isPlaying() == false) {
+                if (player().isPlaying() == false) {
                     return;
                 }
                 String sessionId = player().getSessionId();
