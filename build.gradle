@@ -65,6 +65,7 @@ android {
             main {
                 java {
                     exclude '**/factories/EMPPlayerFactory.java'
+                    exclude '**/ui/**'
                 }
             }
         }
