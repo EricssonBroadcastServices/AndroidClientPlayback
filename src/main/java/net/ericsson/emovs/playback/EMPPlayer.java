@@ -4,21 +4,21 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
-import net.ericsson.emovs.exposure.entitlements.EntitledRunnable;
-import net.ericsson.emovs.exposure.entitlements.EntitlementCallback;
-import net.ericsson.emovs.exposure.interfaces.IPlayable;
-import net.ericsson.emovs.exposure.models.EmpAsset;
-import net.ericsson.emovs.exposure.models.EmpChannel;
-import net.ericsson.emovs.exposure.models.EmpOfflineAsset;
-import net.ericsson.emovs.exposure.models.EmpProgram;
-import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
-import net.ericsson.emovs.utilities.Entitlement;
-import net.ericsson.emovs.utilities.ErrorCodes;
-import net.ericsson.emovs.utilities.ErrorRunnable;
-import net.ericsson.emovs.utilities.FileSerializer;
-import net.ericsson.emovs.utilities.IEntitlementProvider;
-import net.ericsson.emovs.utilities.RunnableThread;
+import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
+import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
+import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.models.EmpAsset;
+import net.ericsson.emovs.utilities.models.EmpChannel;
+import net.ericsson.emovs.utilities.models.EmpOfflineAsset;
+import net.ericsson.emovs.utilities.models.EmpProgram;
+import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.entitlements.Entitlement;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.ErrorRunnable;
+import net.ericsson.emovs.utilities.system.FileSerializer;
+import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
+import net.ericsson.emovs.utilities.system.RunnableThread;
 
 import java.io.File;
 import java.util.UUID;
@@ -27,7 +27,7 @@ import java.util.UUID;
  * Created by Joao Coelho on 2017-11-17.
  */
 
-public class EMPPlayer extends Player {
+public class EMPPlayer extends Player implements IEntitledPlayer {
     private IPlayable playable;
     private Entitlement entitlement;
     private IEntitlementProvider entitlementProvider;
@@ -243,14 +243,5 @@ public class EMPPlayer extends Player {
         }
         return entitlement.playSessionId;
     }
-
-    public void setAnalyticsCustomAttribute(String k, String v) {
-        EMPAnalyticsProvider.getInstance().setCustomAttribute(k, v);
-    }
-
-    public void clearAnalyticsCustomAttributes() {
-        EMPAnalyticsProvider.getInstance().clearCustomAttributes();
-    }
-
 
 }

@@ -13,11 +13,10 @@ import net.ericsson.emovs.download.GenericDrmCallback;
 import net.ericsson.emovs.download.WidevineOfflineLicenseManager;
 import net.ericsson.emovs.playback.EMPPlayer;
 import net.ericsson.emovs.playback.Player;
-import net.ericsson.emovs.utilities.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
-import net.ericsson.emovs.playback.interfaces.IPlayer;
 import net.ericsson.emovs.playback.interfaces.ITech;
 
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -57,7 +56,7 @@ import java.util.UUID;
  * Created by Joao Coelho on 2017-08-29.
  */
 
-public class ExoPlayerTech implements IPlayer, ITech {
+public class ExoPlayerTech implements ITech {
     private final String FLUX_EXOPLAYER_WIDEVINE_KEYSTORE = "FLUX_EXOPLAYER_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID = "key_offline_asset_id_";
 

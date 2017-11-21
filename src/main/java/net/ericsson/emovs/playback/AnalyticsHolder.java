@@ -1,10 +1,10 @@
 package net.ericsson.emovs.playback;
 
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
-import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 
 /**
- * Created by Benjamin on 2017-11-20.
+ * Created by Joao Coelho on 2017-11-20.
  */
 
 public class AnalyticsHolder implements IPlaybackEventListener {

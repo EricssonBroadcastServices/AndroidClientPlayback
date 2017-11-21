@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
-import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
-import net.ericsson.emovs.playback.EMPAnalyticsConnector;
+import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.analytics.EMPAnalyticsConnector;
 import net.ericsson.emovs.playback.EMPPlayer;
-import net.ericsson.emovs.utilities.IEntitlementProvider;
+import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 
 /**
  * Created by Joao Coelho on 2017-11-17.

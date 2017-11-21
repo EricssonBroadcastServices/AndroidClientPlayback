@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import net.ericsson.emovs.exposure.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.interfaces.IPlayable;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;

@@ -5,7 +5,8 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
-import net.ericsson.emovs.utilities.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.interfaces.IPlayer;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * Created by Joao Coelho on 2017-08-30.
  */
 
-public class Player extends PlaybackEventListenerAggregator {
+public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     protected AnalyticsPlaybackConnector analyticsConnector;
     protected Activity context;
     protected ViewGroup host;
@@ -146,5 +147,9 @@ public class Player extends PlaybackEventListenerAggregator {
 
     public String getVersion() {
         return context.getString(R.string.emplayer_version);
+    }
+
+    public boolean isAutoPlay() {
+        return getPlaybackProperties().isAutoplay();
     }
 }
