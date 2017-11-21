@@ -8,11 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.download.DownloadItem;
-import net.ericsson.emovs.download.GenericDrmCallback;
-import net.ericsson.emovs.download.WidevineOfflineLicenseManager;
+import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.EMPPlayer;
 import net.ericsson.emovs.playback.Player;
+import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
+import net.ericsson.emovs.utilities.drm.DashLicenseDetails;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
@@ -120,7 +120,7 @@ public class ExoPlayerTech implements ITech {
         //DefaultTrackSelector.Parameters newParameters = currentParameters.withMaxVideoBitrate(500000);
         //trackSelector.setParameters(newParameters);
 
-        Pair<String, String> licenseDetails = DownloadItem.getLicenseDetails(manifestUrl, isOffline);
+        Pair<String, String> licenseDetails = DashLicenseDetails.getLicenseDetails(manifestUrl, isOffline);
 
         if (licenseDetails != null) {
             String[] keyRequestPropertiesArray = {};
@@ -329,7 +329,7 @@ public class ExoPlayerTech implements ITech {
 
     private DrmSessionManager<FrameworkMediaCrypto> buildOfflineDrmSessionManager(String mediaId, UUID uuid, String licenseUrl, String initDataB64/*, Map<String, String> keyRequestProperties*/) {
         try {
-            WidevineOfflineLicenseManager licenseDownloadManager = new WidevineOfflineLicenseManager(ctx);
+            WidevinePlaybackLicenseManager licenseDownloadManager = new WidevinePlaybackLicenseManager(ctx);
             byte[] offlineAssetKeyId = licenseDownloadManager.get(licenseUrl, mediaId);
 
             if (offlineAssetKeyId == null) {

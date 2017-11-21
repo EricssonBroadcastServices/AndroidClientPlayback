@@ -27,6 +27,7 @@ ext {
     releaseVersion = 'v0.71.0'
     releaseDescription = 'The EMP Player library playback module.'
     libraryTag = 'master-SNAPSHOT'
+    lightweight = { -> return false }
 }
 
 android {
@@ -39,6 +40,7 @@ android {
         versionName version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         debug {
             resValue "string", "exoplayer_version", project.ext.exoPlayerVersion
@@ -53,21 +55,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     lintOptions {
         abortOnError false
     }
-    // Note: consider this approach to build a lighweight library
-    //if (!project.hasProperty('hasParentProject')) {
-    //    sourceSets {
-    //        main {
-    //            java {
-    //                //srcDir 'src'
-    //                exclude '**/techs/**'
-    //                exclude '**/ui/**'
-    //            }
-    //        }
-    //    }
-    //}
+    // Lightweight build removes EMP factory
+    if (lightweight()) {
+        sourceSets {
+            main {
+                java {
+                    exclude '**/factories/EMPPlayerFactory.java'
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -82,15 +83,15 @@ dependencies {
     compile 'joda-time:joda-time:2.9.4'
     if (project.hasProperty('hasParentProject')) {
         compile project(':libraries:utilities')
-        compile project(':libraries:download-media')
-        compile project(':libraries:exposure')
-        compile project(':libraries:analytics')
+        if (lightweight() == false) {
+            compile project(':libraries:analytics')
+        }
     }
     else {
         compile "com.github.EricssonBroadcastServices:AndroidClientUtilities:${project.ext.libraryTag}"
-        compile "com.github.EricssonBroadcastServices:AndroidClientExposure:${project.ext.libraryTag}"
-        compile "com.github.EricssonBroadcastServices:AndroidClientAnalytics:${project.ext.libraryTag}"
-        compile "com.github.EricssonBroadcastServices:AndroidClientDownload:${project.ext.libraryTag}"
+        if (lightweight() == false) {
+            compile "com.github.EricssonBroadcastServices:AndroidClientAnalytics:${project.ext.libraryTag}"
+        }
     }
     testCompile 'junit:junit:4.12'
 }
