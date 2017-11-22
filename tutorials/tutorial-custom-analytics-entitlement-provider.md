@@ -27,10 +27,10 @@ The EMPPlayer instance is instanciated throught a **EntitlementPlayerFactory**:
 EMPPlayer player = EntitlementPlayerFactory.build(entitlementProvider, analyticsConnector, myActivity, myView);
 ```  
 
-``analyticsConnector`` is an instance of a class that extends **AnalyticsPlaybackConnector**;
-``entitlementProvider`` is an instance of a class that implements **IEntitlementProvider** interface
-``myActivity`` is the activity using the player
-``myView`` is the reference to the player's wrapper View (must extend ViewGroup)
+- ``analyticsConnector`` is an instance of a class that extends **AnalyticsPlaybackConnector**;
+- ``entitlementProvider`` is an instance of a class that implements **IEntitlementProvider** interface
+- ``myActivity`` is the activity using the player
+- ``myView`` is the reference to the player's wrapper View (must extend ViewGroup)
 
 **IEntitlementProvider** methods receive a **IEntitlementCallback** which is called back when the entitlement is ready, passing it as an argument of the **onEntitlement** method or an error.
 
