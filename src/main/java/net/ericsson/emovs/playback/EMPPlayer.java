@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
@@ -32,8 +33,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     private Entitlement entitlement;
     private IEntitlementProvider entitlementProvider;
 
-    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, Activity context, ViewGroup host) {
-        super(analyticsConnector, context, host);
+    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host) {
+        super(analyticsConnector, techFactory, context, host);
         this.entitlementProvider = entitlementProvider;
     }
 
@@ -106,7 +107,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(entitlement.playToken, self.properties);
+                tech.init(self, context, entitlement.playToken, self.properties);
                 tech.load(entitlement.channelId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -138,7 +139,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(entitlement.playToken, self.properties);
+                tech.init(self, context, entitlement.playToken, self.properties);
                 tech.load(entitlement.programId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -170,7 +171,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(entitlement.playToken, self.properties);
+                tech.init(self, context, entitlement.playToken, self.properties);
                 tech.load(entitlement.assetId, entitlement.mediaLocator, false);
                 context.runOnUiThread(new Runnable() {
                     public void run() {
@@ -210,7 +211,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 self.playbackUUID = UUID.randomUUID();
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
-                tech.init(self.entitlement.playToken, self.properties);
+                tech.init(self, context, self.entitlement.playToken, self.properties);
                 tech.load(self.entitlement.assetId, manifestPath, true);
                 context.runOnUiThread(new Runnable() {
                     public void run() {

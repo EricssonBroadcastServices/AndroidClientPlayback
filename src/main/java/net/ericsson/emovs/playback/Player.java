@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.playback.techs.ExoPlayer.ExoPlayerTech;
+import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
 
@@ -20,13 +20,15 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     protected Activity context;
     protected ViewGroup host;
     protected PlaybackProperties properties;
-    protected ExoPlayerTech tech;
+    protected TechFactory techFactory;
+    protected ITech tech;
     protected UUID playbackUUID;
 
-    public Player(AnalyticsPlaybackConnector analyticsConnector, Activity context, ViewGroup host) {
+    public Player(AnalyticsPlaybackConnector analyticsConnector, TechFactory techFactory, Activity context, ViewGroup host) {
         this.host = host;
         this.context = context;
         this.analyticsConnector = analyticsConnector;
+        this.techFactory = techFactory;
 
         if (analyticsConnector != null) {
             this.analyticsConnector.bindPlayer(this);
@@ -42,7 +44,8 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
             this.release();
         }
 
-        this.tech = new ExoPlayerTech(this, this.context, false, properties);
+        this.tech = techFactory.build();
+
         super.onInit();
         return true;
     }
@@ -57,7 +60,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     public void play(String streamUrl, PlaybackProperties properties) throws Exception {
         init(properties);
-        tech.init("", properties);
+        this.tech.init(this, this.context, "", properties);
         tech.load(UUID.randomUUID().toString(), streamUrl, false);
     }
 

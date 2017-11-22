@@ -74,21 +74,6 @@ public class ExoPlayerTech implements ITech {
     int currentBitrate;
     PlaybackProperties properties;
 
-    public ExoPlayerTech(EMPPlayer parent,  Activity ctx) {
-        this.ctx = ctx;
-        this.parent = parent;
-
-    }
-
-    public ExoPlayerTech(Player parent, Activity ctx, boolean init, PlaybackProperties properties) {
-        this.parent = parent;
-        this.ctx = ctx;
-        this.properties = properties;
-        if (init) {
-            this.init("", properties);
-        }
-    }
-
     Player getParent() {
         return parent;
     }
@@ -101,8 +86,12 @@ public class ExoPlayerTech implements ITech {
         this.seekStart = seekStart;
     }
 
-    public void init(String playToken, PlaybackProperties properties){
+    public void init(Player parent, Activity ctx, String playToken, PlaybackProperties properties){
+        this.parent = parent;
+        this.ctx = ctx;
+
         createExoView(parent.getViewGroup());
+
         this.playToken = playToken;
         this.isPlaying = false;
         this.isReady = false;
