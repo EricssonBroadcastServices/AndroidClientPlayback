@@ -32,5 +32,6 @@ EMPPlayer player = EntitlementPlayerFactory.build(entitlementProvider, analytics
 - ``myActivity`` is the activity using the player
 - ``myView`` is the reference to the player's wrapper View (must extend ViewGroup)
 
-**IEntitlementProvider** methods receive a **IEntitlementCallback** which is called back when the entitlement is ready, passing it as an argument of the **onEntitlement** method or an error.
+**IEntitlementProvider** methods receive a **IEntitlementCallback** which is called back when the entitlement is ready, passing it as an argument of the **onEntitlement** method.
+If an error occurs, onError is called instead.
 
