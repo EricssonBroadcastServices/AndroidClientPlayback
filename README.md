@@ -24,7 +24,7 @@
 
 - [Integrating simple Activity for playback](tutorials/tutorial-simple-player.md)
 - [Customizing player UI](tutorials/tutorial-player-customization.md)
-- [Custom Analytics and Entitlemt Provider](tutorials/tutorial-custom-analytics-entitlement-provider.md)
+- [Custom Analytics and Entitlement Provider](tutorials/tutorial-custom-analytics-entitlement-provider.md)
 - [Custom Playback Tech](tutorials/tutorial-custom-tech.md)
 
 Contact the EMP team for tips on other types of player integrations :)
