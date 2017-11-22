@@ -41,6 +41,25 @@ Note that it is possible to have several **EMPPlayerView** in one layout in orde
 </LinearLayout>
 ```
 
+To play an asset, the reference code is as follows:
+
+```java
+	final Context myContext = getApplicationContext();
+	EMPPlayerView view = (EMPPlayerView) findViewById(R.id.myempplayer);	// the id will probably change in your implementation
+	EMPPlayer player = view.getPlayer();
+	player.clearListeners();
+	player.addListener(new EmptyPlaybackEventListener(player) {
+		@Override
+		public void onError(int errorCode, String errorMessage) {
+			Toast.makeText(myContext, errorMessage, Toast.LENGTH_SHORT).show();
+		}
+
+	});
+	
+	EmpAsset asset = new EmpAsset();
+	asset.assetId = 'your_asset_id';
+	player.play(asset, PlaybackProperties.DEFAULT);
+```
 
 If one wants to implement custom controls, then all it has to be done is fetch the **EMPPlayerView** object in the activity and register a listener in the associated **EMPPlayer** instance.
 This listener must implement interface **IPlaybackEventListener** or extend class **EmptyPlaybackEventListener**.
