@@ -66,6 +66,8 @@ android {
                 java {
                     exclude '**/factories/EMPPlayerFactory.java'
                     exclude '**/ui/**'
+//                    exclude '**/techs/**'     // uncomment for build with no techs
+//                    exclude '**/drm/**'       // uncomment for build with no techs
                 }
             }
         }

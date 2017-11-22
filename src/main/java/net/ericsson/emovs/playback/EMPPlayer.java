@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;

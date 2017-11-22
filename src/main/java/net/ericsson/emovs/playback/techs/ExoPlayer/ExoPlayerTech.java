@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
-import net.ericsson.emovs.playback.EMPPlayer;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
 import net.ericsson.emovs.utilities.drm.DashLicenseDetails;
