@@ -15,6 +15,9 @@ import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 
 /**
+ * This view is not finished yet.
+ * It will be used for players that are overlayed on top of other views
+ *
  * Created by Joao Coelho on 2017-09-29.
  */
 

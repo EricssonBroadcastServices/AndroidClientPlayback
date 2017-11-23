@@ -20,9 +20,17 @@ import static android.view.Window.FEATURE_NO_TITLE;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
 /**
+ * <p>
+ *     This class is a base Activity that can be easily extended in order to achieve a quick and functional playback activity.
+ *     To play an asset just pass the playable in the Intent when starting the activity.
+ * </p>
+ * <p>
+ *     The default layout includes a EMPPlayerView that matches the parent layout dimensions.
+ *     However it is possible to have custom layouts with as many players as you want
+ * </p>
+ *
  * Created by Joao Coelho on 2017-09-21.
  */
-
 public class SimplePlaybackActivity extends Activity {
     protected final String PLAYABLE_ARGUMENT_NAME = "playable";
 
@@ -32,12 +40,20 @@ public class SimplePlaybackActivity extends Activity {
     protected Integer contentViewLayoutId;
     protected PlaybackProperties properties;
 
+    /**
+     * Default constructor
+     */
     public SimplePlaybackActivity() {
         this.empPlaylist = new LinkedList<>();
         this.properties = PlaybackProperties.DEFAULT;
         this.contentViewLayoutId = null;
     }
 
+    /**
+     * Constructor with specific playback properties
+     *
+     * @param properties
+     */
     public SimplePlaybackActivity(PlaybackProperties properties) {
         this.contentViewLayoutId = null;
         this.empPlaylist = new LinkedList<>();
@@ -92,22 +108,41 @@ public class SimplePlaybackActivity extends Activity {
         releaseAllEmpClients();
     }
 
+    /**
+     * This method adds a playable to the playback queue
+     *
+     * @param playable
+     */
     protected void addPlayable(IPlayable playable) {
         empPlaylist.add(playable);
     }
 
+    /**
+     * This method clears the playback queue
+     */
     protected void clearPlaylist() {
         empPlaylist.clear();
     }
 
+    /**
+     * Use this method to bind a custom layout (note that the xml must have at least one reference to a EMPPlayerView)
+     *
+     * @param contentViewLayoutId
+     */
     protected void bindContentView(int contentViewLayoutId) {
         this.contentViewLayoutId = contentViewLayoutId;
     }
 
+    /**
+     * Use this method to get and cache a list of EMPPlayerView instances present in the current layout
+     */
     protected void refresh() {
         this.playerViews = ViewHelper.getViewsFromViewGroup(getWindow().getDecorView(), EMPPlayerView.class);
     }
 
+    /**
+     * This method gets the playables sent to the activity as extras of the Intent and queues them for playback
+     */
     protected void extractExtras() {
         Bundle extras = getIntent().getExtras();
         if (extras.containsKey(PLAYABLE_ARGUMENT_NAME)) {
@@ -126,6 +161,9 @@ public class SimplePlaybackActivity extends Activity {
         }
     }
 
+    /**
+     * This method assigns a playable (if available) for each EMPPlayerView available in the current layout and starts playback
+     */
     protected void startPlayback() {
         if (this.playerViews == null || empPlaylist.size() == 0) {
             return;
