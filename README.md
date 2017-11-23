@@ -6,7 +6,7 @@
 * [Requirements](#requirements)
 * [Dependencies](#dependencies)
 * [Installation](#installation)
-* [Documentation](https://jitpack.io/com/github/EricssonBroadcastServices/AndroidClientDownload/master-SNAPSHOT/javadoc/)
+* [Documentation](https://jitpack.io/com/github/EricssonBroadcastServices/AndroidClientPlayback/master-SNAPSHOT/javadoc/)
 * [Release Notes](#release-notes)
 * [Upgrade Guides](#upgrade-guides)
 
