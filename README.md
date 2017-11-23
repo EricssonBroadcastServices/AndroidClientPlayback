@@ -4,6 +4,7 @@
 * [Tutorials](#tutorials)
 * [License](https://github.com/EricssonBroadcastServices/AndroidClientPlayback/blob/master/LICENSE)
 * [Requirements](#requirements)
+* [Dependencies](#dependencies)
 * [Installation](#installation)
 * [Documentation](https://jitpack.io/com/github/EricssonBroadcastServices/AndroidClientDownload/master-SNAPSHOT/javadoc/)
 * [Release Notes](#release-notes)
@@ -32,6 +33,18 @@ Contact the EMP team for tips on other types of player integrations :)
 ## Requirements
 
 * `Android` 4.4+
+
+## Dependencies
+
+**Full**
+
+- [AndroidClientAnalytics](https://github.com/EricssonBroadcastServices/AndroidClientAnalytics)
+- [AndroidClientExposure](https://github.com/EricssonBroadcastServices/AndroidClientExposure)
+- [AndroidClientUtilities](https://github.com/EricssonBroadcastServices/AndroidClientUtilities)
+
+**Lightweight**
+
+- [AndroidClientUtilities](https://github.com/EricssonBroadcastServices/AndroidClientUtilities)
 
 ## Installation
 
