@@ -5,9 +5,10 @@ import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 import java.util.HashMap;
 
 /**
+ * This class is an event listener aggregator which receives one event from the player and passes it on to all the listeners it aggregates
+ *
  * Created by Joao Coelho on 2017-09-27.
  */
-
 class PlaybackEventListenerAggregator implements IPlaybackEventListener {
     HashMap<IPlaybackEventListener, IPlaybackEventListener> eventListeners;
 

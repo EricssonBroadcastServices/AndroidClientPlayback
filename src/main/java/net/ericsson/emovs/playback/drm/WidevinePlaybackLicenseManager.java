@@ -18,9 +18,10 @@ import com.google.android.exoplayer2.util.Util;
 import static com.google.android.exoplayer2.ExoPlayerLibraryInfo.TAG;
 
 /**
+ * This class manages downloaded Widevine licenses and fetches them from android's SharedStorage
+ *
  * Created by Joao Coelho on 2017-09-21.
  */
-
 public class WidevinePlaybackLicenseManager {
     private final String EMP_WIDEVINE_KEYSTORE = "EMP_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID  = "OFFLINE_KEY_";
@@ -31,6 +32,13 @@ public class WidevinePlaybackLicenseManager {
         this.ctx = ctx;
     }
 
+    /**
+     * Given a licenseUrl and a media ID, the method return the byte-encoded license
+     *
+     * @param licenseUrl
+     * @param mediaId
+     * @return
+     */
     public byte[] get(String licenseUrl, String mediaId) {
 
         String offlineAssetKeyIdStr = getSharedPreferences().getString(KEY_OFFLINE_MEDIA_ID + mediaId, null);

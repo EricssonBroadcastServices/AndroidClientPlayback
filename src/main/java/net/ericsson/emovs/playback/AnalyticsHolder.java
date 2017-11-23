@@ -4,9 +4,10 @@ import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 
 /**
+ * This class is a bridde between the AnalyticsPlayBackConnector base class and the IPlaybackEventListener interface that is used by the player
+ *
  * Created by Joao Coelho on 2017-11-20.
  */
-
 public class AnalyticsHolder implements IPlaybackEventListener {
     AnalyticsPlaybackConnector connector;
 

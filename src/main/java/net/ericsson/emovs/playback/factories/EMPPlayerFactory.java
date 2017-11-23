@@ -14,9 +14,16 @@ import net.ericsson.emovs.playback.EMPPlayer;
 import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 
 /**
+ * <p>
+ *     Use this factory to instantiate a player with all functionalities offered by EMP.
+ * </p>
+ *
+ * <p>
+ *     You can also tune the analytics connector, entitlement provider or tech factory
+ * </p>
+ *
  * Created by Joao Coelho on 2017-11-17.
  */
-
 public class EMPPlayerFactory {
 
     public static EMPPlayer build(Activity context, ViewGroup host) {

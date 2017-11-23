@@ -4,9 +4,10 @@ package net.ericsson.emovs.playback;
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 
 /**
+ * This is an empty declaration of a IPlayBackListener - you can override this class if you want to handle just a small subset of all events that the player can trigger
+ *
  * Created by Joao Coelho on 2017-09-27.
  */
-
 public class EmptyPlaybackEventListener implements IPlaybackEventListener {
     protected EMPPlayer player;
 

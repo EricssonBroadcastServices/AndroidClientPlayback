@@ -32,23 +32,26 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     private Entitlement entitlement;
     private IEntitlementProvider entitlementProvider;
 
+    /**
+     * Constructor of a EMPPlayer instance - must be instanciated from a PlayerFactory
+     *
+     * @param analyticsConnector reference to an analytics connector instance
+     * @param entitlementProvider reference to the entitlement provider
+     * @param techFactory reference to a factory of specific techs that will play the media
+     * @param context activity that holds the player
+     * @param host reference to the ViewGroup that wraps the player (can have several players per activity)
+     */
     public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host) {
         super(analyticsConnector, techFactory, context, host);
         this.entitlementProvider = entitlementProvider;
     }
 
-    @Override
-    protected boolean init(PlaybackProperties properties) throws Exception {
-        super.init(properties);
-        if (getEntitlementProvider() == null) {
-            throw new Exception("Do not use default constructor on EMPPlayer.");
-        }
-        this.entitlement = null;
-        this.playable = null;
-
-        return true;
-    }
-
+    /**
+     * Plays some media available in EMP backend
+     *
+     * @param playable the playable you want to play: asset, program or channel
+     * @param properties playback properties, like autoplay, startTime, etc.. use PlaybackProperties.DEFAULT for default props
+     */
     public void play(IPlayable playable, PlaybackProperties properties) {
         try {
             init(properties);
@@ -93,6 +96,51 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             e.printStackTrace();
             this.onError(ErrorCodes.GENERIC_PLAYBACK_FAILED, e.getMessage());
         }
+    }
+
+    /**
+     * Returns the entitlement of a given playback session
+     *
+     * @return
+     */
+    public Entitlement getEntitlement() {
+        return entitlement;
+    }
+
+    /**
+     * Returns the playable from current playback session
+     *
+     * @return
+     */
+    public IPlayable getPlayable() {
+        return this.playable;
+    }
+
+    /**
+     * Returns current playback session ID
+     *
+     * @return
+     */
+    public String getSessionId() {
+        if (entitlement == null) {
+            return null;
+        }
+        if (playable != null && playable instanceof EmpOfflineAsset) {
+            return "offline-" + playbackUUID.toString();
+        }
+        return entitlement.playSessionId;
+    }
+
+    @Override
+    protected boolean init(PlaybackProperties properties) throws Exception {
+        super.init(properties);
+        if (getEntitlementProvider() == null) {
+            throw new Exception("Do not use default constructor on EMPPlayer.");
+        }
+        this.entitlement = null;
+        this.playable = null;
+
+        return true;
     }
 
     private void playLive(final String channelId) {
@@ -224,24 +272,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     private IEntitlementProvider getEntitlementProvider() {
         return entitlementProvider;
-    }
-
-    public Entitlement getEntitlement() {
-        return entitlement;
-    }
-
-    public IPlayable getPlayable() {
-        return this.playable;
-    }
-
-    public String getSessionId() {
-        if (entitlement == null) {
-            return null;
-        }
-        if (playable != null && playable instanceof EmpOfflineAsset) {
-            return "offline-" + playbackUUID.toString();
-        }
-        return entitlement.playSessionId;
     }
 
 }
