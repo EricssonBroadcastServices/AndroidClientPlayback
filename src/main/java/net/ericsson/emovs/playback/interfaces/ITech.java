@@ -49,6 +49,12 @@ public interface ITech {
     void release();
 
     /**
+     * Method that checks if ExoPlayer is paused
+     * @return
+     */
+    boolean isPaused();
+
+    /**
      * Pauses ongoing playback
      */
     void pause();

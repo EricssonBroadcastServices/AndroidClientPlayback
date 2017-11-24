@@ -84,6 +84,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      */
     public void release() {
         if (this.tech != null) {
+            if (this.tech.isPlaying()) {
+                this.stop();
+            }
             this.tech.release();
             this.tech = null;
         }
@@ -96,7 +99,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      */
     public void pause() {
         if (this.tech != null) {
-            this.tech.pause();
+            if (this.tech.isPaused() == false) {
+                this.tech.pause();
+            }
         }
     }
 

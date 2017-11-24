@@ -87,6 +87,18 @@ public class ExoPlayerTech implements ITech {
         return isPlaying;
     }
 
+    /**
+     * Method that checks if ExoPlayer is paused
+     * @return
+     */
+    @Override
+    public boolean isPaused() {
+        if (this.isPlaying()) {
+            return !this.player.getPlayWhenReady();
+        }
+        return false;
+    }
+
     void seekStart(boolean seekStart) {
         this.seekStart = seekStart;
     }
