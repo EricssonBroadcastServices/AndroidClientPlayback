@@ -300,6 +300,11 @@ public class ExoPlayerTech implements ITech {
         return -1;
     }
 
+    /**
+     * Returns a list of audio languages available to be chosen
+     *
+     * @return
+     */
     @Override
     public String[] getAudioTracks() {
         MappingTrackSelector.MappedTrackInfo tracksInfo = trackSelector.getCurrentMappedTrackInfo();
@@ -319,9 +324,68 @@ public class ExoPlayerTech implements ITech {
         return audioTracksOutput;
     }
 
+    /**
+     * Selects audio track
+     *
+     * @param language language code to select the audio track (e.g.: en, pt, es, fr)
+     */
     @Override
     public void selectAudioTrack(String language) {
         trackSelector.setParameters(trackSelector.getParameters().withPreferredAudioLanguage(language));
+    }
+
+    /**
+     * Returns selected audio track
+     *
+     * @return selected audio language
+     */
+    @Override
+    public String getSelectedAudioTrack() {
+        return trackSelector.getParameters().preferredAudioLanguage;
+    }
+
+    /**
+     * Returns a list of text languages available to be chosen
+     *
+     * @return
+     */
+    @Override
+    public String[] getTextTracks() {
+        MappingTrackSelector.MappedTrackInfo tracksInfo = trackSelector.getCurrentMappedTrackInfo();
+        TrackGroupArray textTracks = tracksInfo.getTrackGroups(TRACK_GROUP_TEXT);
+
+        if (textTracks.length == 0) {
+            return null;
+        }
+
+        String[] textTracksOutput = new String[textTracks.length];
+        for (int i = 0; i < textTracks.length; ++i) {
+            if (textTracks.get(i).length > 0) {
+                textTracksOutput[i] = textTracks.get(i).getFormat(0).language;
+            }
+        }
+
+        return textTracksOutput;
+    }
+
+    /**
+     * Selects text track
+     *
+     * @param language language code to select the text track (e.g.: en, pt, es, fr)
+     */
+    @Override
+    public void selectTextTrack(String language) {
+        trackSelector.setParameters(trackSelector.getParameters().withPreferredTextLanguage(language));
+    }
+
+    /**
+     * Returns selected text track
+     *
+     * @return selected text language
+     */
+    @Override
+    public String getSelectedTextTrack() {
+        return trackSelector.getParameters().preferredTextLanguage;
     }
 
     /**
@@ -333,6 +397,9 @@ public class ExoPlayerTech implements ITech {
         this.player.setVolume(0);
     }
 
+    /**
+     * Unmutes the audio (volume will be last heard volume [0..1]
+     */
     @Override
     public void unmute() {
         if (this.lastVolume == 0f) {
@@ -341,6 +408,11 @@ public class ExoPlayerTech implements ITech {
         this.player.setVolume(this.lastVolume);
     }
 
+    /**
+     * Sets the audio volume level
+     *
+     * @param volume volume level [0..1]
+     */
     @Override
     public void setVolume(float volume) {
         if (this.player == null) {

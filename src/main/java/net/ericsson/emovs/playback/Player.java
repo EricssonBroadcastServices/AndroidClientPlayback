@@ -282,14 +282,12 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      */
     public String[] getAudioTracks() {
         if (this.tech == null) {
-            return;
+            return null;
         }
         return this.tech.getAudioTracks();
     }
 
     /**
-     *
-     *
      * @param language language code to select the audio track (e.g.: en, pt, es, fr)
      */
     @Override
@@ -298,6 +296,32 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
             return;
         }
         this.tech.selectAudioTrack(language);
+    }
+
+    /**
+     * Returns selected audio track
+     *
+     * @return selected audio language
+     */
+    @Override
+    public String getSelectedAudioTrack() {
+        if (this.tech == null) {
+            return null;
+        }
+        return this.tech.getSelectedAudioTrack();
+    }
+
+    /**
+     * Returns selected text track
+     *
+     * @return selected text language
+     */
+    @Override
+    public String getSelectedTextTrack() {
+        if (this.tech == null) {
+            return null;
+        }
+        return this.tech.getSelectedTextTrack();
     }
 
     protected boolean init(PlaybackProperties properties) throws Exception {

@@ -85,18 +85,46 @@ public interface ITech {
     long getDuration();
 
     /**
-     * Returns a list of languages available to be chosen
+     * Returns a list of audio languages available to be chosen
      *
      * @return
      */
     String[] getAudioTracks();
 
     /**
-     *
+     * Selects audio track
      *
      * @param language language code to select the audio track (e.g.: en, pt, es, fr)
      */
     void selectAudioTrack(String language);
+
+    /**
+     * Returns selected audio track
+     *
+     * @return selected audio language
+     */
+    String getSelectedAudioTrack();
+
+    /**
+     * Returns a list of text languages available to be chosen
+     *
+     * @return
+     */
+    String[] getTextTracks();
+
+    /**
+     * Selects text track
+     *
+     * @param language language code to select the text track (e.g.: en, pt, es, fr)
+     */
+    void selectTextTrack(String language);
+
+    /**
+     * Returns selected text track
+     *
+     * @return selected text language
+     */
+    String getSelectedTextTrack();
 
     /**
      * Mutes the audio
