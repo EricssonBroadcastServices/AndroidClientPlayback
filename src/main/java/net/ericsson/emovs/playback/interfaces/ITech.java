@@ -85,6 +85,37 @@ public interface ITech {
     long getDuration();
 
     /**
+     * Returns a list of languages available to be chosen
+     *
+     * @return
+     */
+    String[] getAudioTracks();
+
+    /**
+     *
+     *
+     * @param language language code to select the audio track (e.g.: en, pt, es, fr)
+     */
+    void selectAudioTrack(String language);
+
+    /**
+     * Mutes the audio
+     */
+    void mute();
+
+    /**
+     * Unmutes the audio (volume will be last heard volume [0..1]
+     */
+    void unmute();
+
+    /**
+     * Sets the audio volume level
+     *
+     * @param volume volume level [0..1]
+     */
+    void setVolume(float volume);
+
+    /**
      * Returns the current bitrate being displayed by the tech
      *
      * @return

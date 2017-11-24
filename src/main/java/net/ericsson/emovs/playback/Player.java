@@ -233,15 +233,72 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return context.getString(R.string.emplayer_version);
     }
 
+    @Override
+    public void mute() {
+        if (this.tech == null) {
+            return;
+        }
+        this.tech.mute();
+    }
+
+    /**
+     * Unmutes the audio (volume will be last heard volume [0..1]
+     */
+    @Override
+    public void unmute() {
+        if (this.tech == null) {
+            return;
+        }
+        this.tech.unmute();
+    }
+
+    /**
+     * Sets the audio volume level
+     *
+     * @param volume volume level [0..1]
+     */
+    @Override
+    public void setVolume(float volume) {
+        if (this.tech == null) {
+            return;
+        }
+        this.tech.setVolume(volume);
+    }
+
     /**
      * Returns if the playback is going to auto play or not
      *
      * @return
      */
+    @Override
     public boolean isAutoPlay() {
         return getPlaybackProperties().isAutoplay();
     }
 
+    /**
+     * Returns a list of languages available to be chosen
+     *
+     * @return
+     */
+    public String[] getAudioTracks() {
+        if (this.tech == null) {
+            return;
+        }
+        return this.tech.getAudioTracks();
+    }
+
+    /**
+     *
+     *
+     * @param language language code to select the audio track (e.g.: en, pt, es, fr)
+     */
+    @Override
+    public void selectAudioTrack(String language) {
+        if (this.tech == null) {
+            return;
+        }
+        this.tech.selectAudioTrack(language);
+    }
 
     protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;

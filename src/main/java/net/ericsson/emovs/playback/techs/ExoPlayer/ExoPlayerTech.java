@@ -38,6 +38,7 @@ import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
@@ -59,6 +60,10 @@ public class ExoPlayerTech implements ITech {
     private final String FLUX_EXOPLAYER_WIDEVINE_KEYSTORE = "FLUX_EXOPLAYER_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID = "key_offline_asset_id_";
 
+    private static final int TRACK_GROUP_VIDEO = 0;
+    private static final int TRACK_GROUP_AUDIO = 1;
+    private static final int TRACK_GROUP_TEXT = 2;
+
     ViewGroup host;
     Activity ctx;
     SimpleExoPlayer player;
@@ -66,6 +71,7 @@ public class ExoPlayerTech implements ITech {
     String playToken;
     Player parent;
 
+    float lastVolume;
     boolean isPlaying;
     boolean isReady;
     boolean loadStarted;
@@ -99,10 +105,12 @@ public class ExoPlayerTech implements ITech {
         this.properties = properties;
     }
 
+    DefaultTrackSelector trackSelector = null;
+
     public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
         //DefaultTrackSelector.Parameters currentParameters = trackSelector.getParameters();
         //DefaultTrackSelector.Parameters newParameters = currentParameters.withMaxVideoBitrate(500000);
@@ -244,7 +252,6 @@ public class ExoPlayerTech implements ITech {
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         MediaSource mediaSource = new DashMediaSource(Uri.parse(dashManifestUrl), dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
         this.player.prepare(mediaSource);
-
     }
 
     public void release() {
@@ -291,6 +298,55 @@ public class ExoPlayerTech implements ITech {
             return this.player.getDuration();
         }
         return -1;
+    }
+
+    @Override
+    public String[] getAudioTracks() {
+        MappingTrackSelector.MappedTrackInfo tracksInfo = trackSelector.getCurrentMappedTrackInfo();
+        TrackGroupArray audioTracks = tracksInfo.getTrackGroups(TRACK_GROUP_AUDIO);
+
+        if (audioTracks.length == 0) {
+            return null;
+        }
+
+        String[] audioTracksOutput = new String[audioTracks.length];
+        for (int i = 0; i < audioTracks.length; ++i) {
+            if (audioTracks.get(i).length > 0) {
+                audioTracksOutput[i] = audioTracks.get(i).getFormat(0).language;
+            }
+        }
+
+        return audioTracksOutput;
+    }
+
+    @Override
+    public void selectAudioTrack(String language) {
+        trackSelector.setParameters(trackSelector.getParameters().withPreferredAudioLanguage(language));
+    }
+
+    /**
+     * Mutes the audio
+     */
+    @Override
+    public void mute() {
+        this.lastVolume = this.player.getVolume();
+        this.player.setVolume(0);
+    }
+
+    @Override
+    public void unmute() {
+        if (this.lastVolume == 0f) {
+            this.lastVolume = 1.0f;
+        }
+        this.player.setVolume(this.lastVolume);
+    }
+
+    @Override
+    public void setVolume(float volume) {
+        if (this.player == null) {
+            return;
+        }
+        this.player.setVolume(volume);
     }
 
     public int getCurrentBitrate() {
