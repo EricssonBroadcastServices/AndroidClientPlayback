@@ -102,13 +102,11 @@ public class SimplePlaybackActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.player_menu, menu);
 
-        this.audiosAdapter = new LanguageAdapter(this, R.id.audio_tracks, null);
-        this.subsAdapter = new LanguageAdapter(this, R.id.audio_tracks, null);
-
         MenuItem itemAudio = menu.findItem(R.id.audio_tracks);
         Spinner audioTrackSpinner = (Spinner) itemAudio.getActionView();
         /*audioTrackSpinner.setBackground(getResources().getDrawable(R.drawable.ic_audiotrack_white_24dp));
         audioTrackSpinner.setPadding(0,0,50,0);*/
+        this.audiosAdapter = new LanguageAdapter(audioTrackSpinner, this, R.drawable.ic_audiotrack_white_24dp, null);
         audioTrackSpinner.setAdapter(audiosAdapter);
         audioTrackSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -131,6 +129,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         Spinner textTrackSpinner = (Spinner) itemText.getActionView();
         //textTrackSpinner.setBackground(getResources().getDrawable(R.drawable.ic_subtitles_white_24dp));
         //textTrackSpinner.setPadding(0,0,50,0);
+        this.subsAdapter = new LanguageAdapter(textTrackSpinner, this, R.drawable.ic_subtitles_white_24dp, null);
         textTrackSpinner.setAdapter(subsAdapter);
         textTrackSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
