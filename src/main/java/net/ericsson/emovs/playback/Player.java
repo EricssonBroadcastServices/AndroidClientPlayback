@@ -285,11 +285,25 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      *
      * @return
      */
+    @Override
     public String[] getAudioTracks() {
         if (this.tech == null) {
             return null;
         }
         return this.tech.getAudioTracks();
+    }
+
+    /**
+     * Returns a list of languages available to be chosen
+     *
+     * @return
+     */
+    @Override
+    public String[] getTextTracks() {
+        if (this.tech == null) {
+            return null;
+        }
+        return this.tech.getTextTracks();
     }
 
     /**
@@ -301,6 +315,17 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
             return;
         }
         this.tech.selectAudioTrack(language);
+    }
+
+    /**
+     * @param language language code to select the text track (e.g.: en, pt, es, fr)
+     */
+    @Override
+    public void selectTextTrack(String language) {
+        if (this.tech == null) {
+            return;
+        }
+        this.tech.selectTextTrack(language);
     }
 
     /**
