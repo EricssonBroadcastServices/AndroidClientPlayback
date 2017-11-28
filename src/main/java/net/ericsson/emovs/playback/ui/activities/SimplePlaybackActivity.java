@@ -246,12 +246,13 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 @Override
                 public void onLoad() {
                     Toolbar toolbar = findViewById(R.id.toolbar);
-
+                    int visibleCount = 0;
                     MenuItem audioMenu = toolbar.getMenu().findItem(R.id.audio_tracks);
                     Spinner audioSpinner = (Spinner) audioMenu.getActionView();
                     if(view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1) {
                         ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioTracks());
                         audioMenu.setVisible(true);
+                        visibleCount++;
                     }
 
                     MenuItem subsMenu = toolbar.getMenu().findItem(R.id.subs_tracks);
@@ -259,6 +260,11 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     if (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
                         ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
                         subsMenu.setVisible(true);
+                        visibleCount++;
+                    }
+
+                    if (visibleCount == 0){
+                       getSupportActionBar().hide();
                     }
                 }
 
@@ -273,7 +279,8 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                             decorView.setSystemUiVisibility(uiOptions);
                         }
                     }
-                    else {
+                    else if (view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1  &&
+                             view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
                         getSupportActionBar().show();
                     }
                 }
