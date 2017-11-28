@@ -1,6 +1,9 @@
 package net.ericsson.emovs.playback.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +59,9 @@ public class LanguageAdapter extends ArrayAdapter<String> {
         if (pickerLangCodes == null) {
             return 0;
         }
+        if (trackType == TrackType.SUBS) {
+            return pickerLangCodes.length + 1;
+        }
         return pickerLangCodes.length;
     }
 
@@ -74,8 +80,16 @@ public class LanguageAdapter extends ArrayAdapter<String> {
         View view = inflater.inflate(R.layout.menu_item_language, parent, false);
 
         TextView langNameView = (TextView) view.findViewById(R.id.lang_label);
-        Locale loc = new Locale(pickerLangCodes[position]);
-        langNameView.setText(loc.getDisplayLanguage().substring(0, 1).toUpperCase() + loc.getDisplayLanguage().substring(1));
+        if (position >= pickerLangCodes.length) {
+            SpannableString spanString = new SpannableString("Disable");
+            spanString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanString.length(), 0);
+            langNameView.setText(spanString);
+        }
+        else {
+            Locale loc = new Locale(pickerLangCodes[position]);
+            langNameView.setText(loc.getDisplayLanguage().substring(0, 1).toUpperCase() + loc.getDisplayLanguage().substring(1));
+        }
+
 
         if(hideIcon) {
             ImageView langIconView = view.findViewById(R.id.lang_icon);
@@ -108,7 +122,12 @@ public class LanguageAdapter extends ArrayAdapter<String> {
                     if (trackType == TrackType.AUDIO) {
                         pView.getPlayer().selectAudioTrack(getLangCode(i));
                     } else if(trackType == TrackType.SUBS) {
-                        pView.getPlayer().selectTextTrack(getLangCode(i));
+                        if (i >= pickerLangCodes.length) {
+                            pView.getPlayer().selectTextTrack(null);
+                        }
+                        else {
+                            pView.getPlayer().selectTextTrack(getLangCode(i));
+                        }
                     }
                 }
             }
