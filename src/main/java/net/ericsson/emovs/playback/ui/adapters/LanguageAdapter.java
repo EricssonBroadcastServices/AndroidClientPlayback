@@ -4,12 +4,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.extractor.mp4.Track;
+
 import net.ericsson.emovs.playback.R;
+import net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity;
+import net.ericsson.emovs.playback.ui.views.EMPPlayerView;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,15 +25,22 @@ import java.util.Locale;
  */
 
 public class LanguageAdapter extends ArrayAdapter<String> {
+    public enum TrackType {
+        AUDIO,
+        SUBS
+    };
+
     private static final String[] languages = Locale.getISOLanguages();
     private String[] pickerLangCodes;
     private int iconResId;
-    private Spinner holder;
+    private final Spinner holder;
+    private TrackType trackType;
 
-    public LanguageAdapter(Spinner holder, Context context, int iconResId, List<String> objects) {
-        super(context, iconResId, objects);
+    public LanguageAdapter(Spinner holder, SimplePlaybackActivity context, TrackType trackType, List<String> objects) {
+        super(context, 0, objects);
         this.iconResId = iconResId;
         this.holder = holder;
+        bindSpinnerSpecificActions();
     }
 
     public void setLanguages(String[] langs) {
@@ -74,10 +87,45 @@ public class LanguageAdapter extends ArrayAdapter<String> {
         }
         else {
             ImageView langIconView = view.findViewById(R.id.lang_icon);
-            langIconView.setImageDrawable(view.getResources().getDrawable(this.iconResId));
+            if (trackType == TrackType.AUDIO) {
+                langIconView.setImageDrawable(view.getResources().getDrawable(R.drawable.ic_audiotrack_white_24dp));
+            } else if(trackType == TrackType.SUBS) {
+                langIconView.setImageDrawable(view.getResources().getDrawable(R.drawable.ic_subtitles_white_24dp));
+            }
             langNameView.setVisibility(View.GONE);
         }
 
         return view;
+    }
+
+    private void bindSpinnerSpecificActions() {
+        holder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                for (final EMPPlayerView pView : ((SimplePlaybackActivity) getContext()).getPlayerViews()) {
+                    if(pView == null || pView.getPlayer() == null) {
+                        continue;
+                    }
+                    pView.getPlayer().selectTextTrack(getLangCode(i));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        holder.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                holder.setDropDownVerticalOffset(
+                        holder.getDropDownVerticalOffset() + holder.getHeight());
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    holder.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    holder.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        });
     }
 }

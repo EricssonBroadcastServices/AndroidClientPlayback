@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -74,6 +75,10 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         }
     }
 
+    public ArrayList<EMPPlayerView> getPlayerViews() {
+        return playerViews;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,58 +100,19 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         startPlayback();
     }
 
-    LanguageAdapter audiosAdapter;
-    LanguageAdapter subsAdapter;
-
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.player_menu, menu);
 
         MenuItem itemAudio = menu.findItem(R.id.audio_tracks);
-        Spinner audioTrackSpinner = (Spinner) itemAudio.getActionView();
-        /*audioTrackSpinner.setBackground(getResources().getDrawable(R.drawable.ic_audiotrack_white_24dp));
-        audioTrackSpinner.setPadding(0,0,50,0);*/
-        this.audiosAdapter = new LanguageAdapter(audioTrackSpinner, this, R.drawable.ic_audiotrack_white_24dp, null);
+        final Spinner audioTrackSpinner = (Spinner) itemAudio.getActionView();
+        LanguageAdapter audiosAdapter = new LanguageAdapter(audioTrackSpinner, this, LanguageAdapter.TrackType.AUDIO, null);
         audioTrackSpinner.setAdapter(audiosAdapter);
-        audioTrackSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                for (final EMPPlayerView pView : playerViews) {
-                    if(pView == null || pView.getPlayer() == null) {
-                        continue;
-                    }
-                    pView.getPlayer().selectAudioTrack(audiosAdapter.getLangCode(i));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
 
         MenuItem itemText = menu.findItem(R.id.subs_tracks);
-        Spinner textTrackSpinner = (Spinner) itemText.getActionView();
-        //textTrackSpinner.setBackground(getResources().getDrawable(R.drawable.ic_subtitles_white_24dp));
-        //textTrackSpinner.setPadding(0,0,50,0);
-        this.subsAdapter = new LanguageAdapter(textTrackSpinner, this, R.drawable.ic_subtitles_white_24dp, null);
+        final Spinner textTrackSpinner = (Spinner) itemText.getActionView();
+        LanguageAdapter subsAdapter = new LanguageAdapter(textTrackSpinner, this, LanguageAdapter.TrackType.SUBS, null);
         textTrackSpinner.setAdapter(subsAdapter);
-        textTrackSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                for (final EMPPlayerView pView : playerViews) {
-                    if(pView == null || pView.getPlayer() == null) {
-                        continue;
-                    }
-                    pView.getPlayer().selectTextTrack(subsAdapter.getLangCode(i));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
 
         return true;
     }
@@ -250,14 +216,15 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 @Override
                 public void onLoad() {
                     Toolbar toolbar = findViewById(R.id.toolbar);
-
-                    audiosAdapter.setLanguages(view.getPlayer().getAudioTracks());
+                    Spinner audioSpinner = (Spinner) toolbar.getMenu().findItem(R.id.audio_tracks).getActionView();
+                    ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioTracks());
                     if(view.getPlayer().getAudioTracks() != null) {
                         MenuItem item = toolbar.getMenu().getItem(0);
                         item.setVisible(true);
                     }
 
-                    subsAdapter.setLanguages(view.getPlayer().getTextTracks());
+                    Spinner subsSpinner = (Spinner) toolbar.getMenu().findItem(R.id.subs_tracks).getActionView();
+                    ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
                     if(view.getPlayer().getTextTracks() != null) {
                         MenuItem item = toolbar.getMenu().getItem(1);
                         item.setVisible(true);
@@ -294,4 +261,5 @@ public class SimplePlaybackActivity extends AppCompatActivity {
             view.getPlayer().pause();
         }
     }
+
 }

@@ -3,19 +3,16 @@
     <item android:id="@+id/audio_tracks"
         android:name="actionButtonStyle"
         android:title="Audio Tracks"
-        android:icon="@drawable/ic_audiotrack_white_24dp"
         app:showAsAction="always"
+        android:layout_marginTop="20dp"
         app:actionViewClass="android.widget.Spinner"
         android:visible="false"/>
-        <!-- app:showAsAction="collapseActionView|ifRoom"-
-        app:actionViewClass="android.widget.SearchView"  /> -->
+
     <item android:id="@+id/subs_tracks"
         android:name="actionButtonStyle"
         android:title="Text Tracks"
-        android:icon="@drawable/ic_subtitles_white_24dp"
         app:showAsAction="always"
         app:actionViewClass="android.widget.Spinner"
         android:visible="false"/>
-        <!-- app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.widget.SearchView" /> -->
+
 </menu>
