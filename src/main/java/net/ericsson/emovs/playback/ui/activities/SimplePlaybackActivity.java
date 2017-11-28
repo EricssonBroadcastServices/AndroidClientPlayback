@@ -2,6 +2,7 @@ package net.ericsson.emovs.playback.ui.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -110,6 +111,23 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         refresh();
         extractExtras();
         startPlayback();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            View decorView = getWindow().getDecorView();
+            int uiOptions = decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            View decorView = getWindow().getDecorView();
+            int uiOptions = decorView.getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION & ~View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+
     }
 
     @Override
@@ -249,6 +267,11 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 public void onControllerVisibility(ControllerVisibility visibility) {
                     if (visibility == ControllerVisibility.Hidden) {
                         getSupportActionBar().hide();
+                        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            View decorView = getWindow().getDecorView();
+                            int uiOptions = decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+                            decorView.setSystemUiVisibility(uiOptions);
+                        }
                     }
                     else {
                         getSupportActionBar().show();
