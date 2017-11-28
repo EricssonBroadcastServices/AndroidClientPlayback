@@ -103,4 +103,11 @@ public interface IPlaybackEventListener {
      * @param errorMessage
      */
     void onError(int errorCode, String errorMessage);
+
+    /**
+     * Fired when controller visibility changes (hidden or visible)
+     *
+     * @param visibility
+     */
+    void onControllerVisibility(ControllerVisibility visibility);
 }

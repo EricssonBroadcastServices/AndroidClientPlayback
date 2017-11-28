@@ -1,5 +1,6 @@
 package net.ericsson.emovs.playback;
 
+import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 
 import java.util.HashMap;
@@ -271,6 +272,16 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
         }
         for (IPlaybackEventListener listener : eventListeners.keySet()) {
             listener.onError(errorCode, errorMessage);
+        }
+    }
+
+    @Override
+    public void onControllerVisibility(ControllerVisibility visibility) {
+        if (eventListeners == null) {
+            return;
+        }
+        for (IPlaybackEventListener listener : eventListeners.keySet()) {
+            listener.onControllerVisibility(visibility);
         }
     }
 }

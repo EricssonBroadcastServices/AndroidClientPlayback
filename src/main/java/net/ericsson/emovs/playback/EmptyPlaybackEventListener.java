@@ -1,6 +1,7 @@
 package net.ericsson.emovs.playback;
 
 
+import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 
 /**
@@ -131,6 +132,11 @@ public class EmptyPlaybackEventListener implements IPlaybackEventListener {
 
     @Override
     public void onError(int errorCode, String errorMessage) {
+
+    }
+
+    @Override
+    public void onControllerVisibility(ControllerVisibility visibility) {
 
     }
 }

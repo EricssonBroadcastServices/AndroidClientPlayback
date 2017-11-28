@@ -2,6 +2,9 @@ package net.ericsson.emovs.playback.ui.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,10 +13,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
@@ -93,7 +98,14 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         }
 
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        //getSupportActionBar().setTitle("");
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xcc000000));
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
 
         refresh();
         extractExtras();
@@ -229,6 +241,17 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     if (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
                         ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
                         subsMenu.setVisible(true);
+                    }
+                }
+
+
+                @Override
+                public void onControllerVisibility(ControllerVisibility visibility) {
+                    if (visibility == ControllerVisibility.Hidden) {
+                        getSupportActionBar().hide();
+                    }
+                    else {
+                        getSupportActionBar().show();
                     }
                 }
             });

@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="10dp">
     <ImageView
         android:id="@+id/lang_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_gravity="bottom"
+        android:layout_height="match_parent" />
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/lang_label"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
-        android:text="English"></TextView>
+        android:text=""></TextView>
 </LinearLayout>

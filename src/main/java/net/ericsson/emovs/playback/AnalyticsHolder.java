@@ -1,5 +1,6 @@
 package net.ericsson.emovs.playback;
 
+import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 
@@ -98,5 +99,9 @@ public class AnalyticsHolder implements IPlaybackEventListener {
     @Override
     public void onError(int errorCode, String errorMessage) {
         this.connector.onError(errorCode, errorMessage);
+    }
+
+    @Override
+    public void onControllerVisibility(ControllerVisibility visibility) {
     }
 }
