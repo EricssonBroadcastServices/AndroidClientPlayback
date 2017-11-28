@@ -216,18 +216,19 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 @Override
                 public void onLoad() {
                     Toolbar toolbar = findViewById(R.id.toolbar);
-                    Spinner audioSpinner = (Spinner) toolbar.getMenu().findItem(R.id.audio_tracks).getActionView();
-                    ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioTracks());
-                    if(view.getPlayer().getAudioTracks() != null) {
-                        MenuItem item = toolbar.getMenu().getItem(0);
-                        item.setVisible(true);
+
+                    MenuItem audioMenu = toolbar.getMenu().findItem(R.id.audio_tracks);
+                    Spinner audioSpinner = (Spinner) audioMenu.getActionView();
+                    if(view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1) {
+                        ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioTracks());
+                        audioMenu.setVisible(true);
                     }
 
-                    Spinner subsSpinner = (Spinner) toolbar.getMenu().findItem(R.id.subs_tracks).getActionView();
-                    ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
-                    if(view.getPlayer().getTextTracks() != null) {
-                        MenuItem item = toolbar.getMenu().getItem(1);
-                        item.setVisible(true);
+                    MenuItem subsMenu = toolbar.getMenu().findItem(R.id.subs_tracks);
+                    Spinner subsSpinner = (Spinner) subsMenu.getActionView();
+                    if (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
+                        ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
+                        subsMenu.setVisible(true);
                     }
                 }
             });

@@ -32,13 +32,12 @@ public class LanguageAdapter extends ArrayAdapter<String> {
 
     private static final String[] languages = Locale.getISOLanguages();
     private String[] pickerLangCodes;
-    private int iconResId;
     private final Spinner holder;
     private TrackType trackType;
 
     public LanguageAdapter(Spinner holder, SimplePlaybackActivity context, TrackType trackType, List<String> objects) {
         super(context, 0, objects);
-        this.iconResId = iconResId;
+        this.trackType = trackType;
         this.holder = holder;
         bindSpinnerSpecificActions();
     }
@@ -106,7 +105,11 @@ public class LanguageAdapter extends ArrayAdapter<String> {
                     if(pView == null || pView.getPlayer() == null) {
                         continue;
                     }
-                    pView.getPlayer().selectTextTrack(getLangCode(i));
+                    if (trackType == TrackType.AUDIO) {
+                        pView.getPlayer().selectAudioTrack(getLangCode(i));
+                    } else if(trackType == TrackType.SUBS) {
+                        pView.getPlayer().selectTextTrack(getLangCode(i));
+                    }
                 }
             }
 
