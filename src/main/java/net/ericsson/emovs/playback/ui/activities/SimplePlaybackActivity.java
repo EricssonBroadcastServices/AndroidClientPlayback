@@ -256,7 +256,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
 
                     MenuItem subsMenu = toolbar.getMenu().findItem(R.id.subs_tracks);
                     Spinner subsSpinner = (Spinner) subsMenu.getActionView();
-                    if (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
+                    if (view.getPlayer().getTextTracks() != null && view.getPlayer().getTextTracks().length > 0) {
                         ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
                         subsMenu.setVisible(true);
                         visibleCount++;
