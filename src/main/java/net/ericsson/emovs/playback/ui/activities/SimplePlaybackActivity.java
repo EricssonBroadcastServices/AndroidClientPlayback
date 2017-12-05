@@ -270,6 +270,10 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                         visibleCount++;
                     }
 
+                    if (EMPRegistry.chromecastAppId() != null) {
+                        visibleCount++;
+                    }
+
                     if (visibleCount == 0){
                        getSupportActionBar().hide();
                     }
@@ -286,8 +290,11 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                             decorView.setSystemUiVisibility(uiOptions);
                         }
                     }
-                    else if (view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1  &&
-                             view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0) {
+                    else if ((view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1)  ||
+                             (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0)) {
+                        getSupportActionBar().show();
+                    }
+                    else if(EMPRegistry.chromecastAppId() != null) {
                         getSupportActionBar().show();
                     }
                 }
