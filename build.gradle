@@ -87,12 +87,14 @@ dependencies {
     if (project.hasProperty('hasParentProject')) {
         compile project(':libraries:utilities')
         if (lightweight() == false) {
+            compile project(':libraries:cast')
             compile project(':libraries:analytics')
         }
     }
     else {
         compile "com.github.EricssonBroadcastServices:AndroidClientUtilities:${project.ext.libraryTag}"
         if (lightweight() == false) {
+            compile "com.github.EricssonBroadcastServices:AndroidClientCast:${project.ext.libraryTag}"
             compile "com.github.EricssonBroadcastServices:AndroidClientAnalytics:${project.ext.libraryTag}"
         }
     }

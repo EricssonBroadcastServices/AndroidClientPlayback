@@ -19,8 +19,12 @@ import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.cast.framework.CastButtonFactory;
+
+import net.ericsson.emovs.cast.EMPCastProvider;
 import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
+import net.ericsson.emovs.utilities.emp.EMPRegistry;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
@@ -142,6 +146,10 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         final Spinner textTrackSpinner = (Spinner) itemText.getActionView();
         LanguageAdapter subsAdapter = new LanguageAdapter(textTrackSpinner, this, LanguageAdapter.TrackType.SUBS, null);
         textTrackSpinner.setAdapter(subsAdapter);
+
+        if (EMPRegistry.chromecastAppId() != null) {
+            CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
+        }
 
         return true;
     }
@@ -285,6 +293,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 }
             });
             view.getPlayer().play(empPlaylist.poll(), this.properties);
+
             if (empPlaylist.size() == 0) {
                 break;
             }
