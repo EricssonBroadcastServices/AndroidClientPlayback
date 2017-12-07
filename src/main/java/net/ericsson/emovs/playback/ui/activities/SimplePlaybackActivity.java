@@ -1,26 +1,26 @@
 package net.ericsson.emovs.playback.ui.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.Session;
+import com.google.android.gms.cast.framework.SessionManagerListener;
 
+import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.cast.EMPCastProvider;
 import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
@@ -34,6 +34,7 @@ import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.ui.views.EMPPlayerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import static android.view.Window.FEATURE_NO_TITLE;
@@ -59,6 +60,8 @@ public class SimplePlaybackActivity extends AppCompatActivity {
 
     protected Integer contentViewLayoutId;
     protected PlaybackProperties properties;
+
+    protected SessionManagerListener<Session> castListener;
 
     /**
      * Default constructor
@@ -114,6 +117,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         refresh();
         extractExtras();
         startPlayback();
+        setupCastListener();
     }
 
     @Override
@@ -308,6 +312,10 @@ public class SimplePlaybackActivity extends AppCompatActivity {
     }
 
     private void releaseAllEmpClients() {
+        CastContext castContext = EMPCastProvider.getInstance().getCastContext();
+        if (castContext != null && this.castListener != null) {
+            castContext.getSessionManager().removeSessionManagerListener(this.castListener);
+        }
         if (this.playerViews == null) {
             return;
         }
@@ -328,6 +336,100 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 continue;
             }
             view.getPlayer().pause();
+        }
+    }
+
+    private void setupCastListener() {
+        CastContext castContext = EMPCastProvider.getInstance().getCastContext();
+
+        if (castContext == null) {
+            return;
+        }
+
+        if (this.castListener != null) {
+            castContext.getSessionManager().removeSessionManagerListener(this.castListener);
+        }
+
+        this.castListener = new SessionManagerListener<Session>() {
+            @Override
+            public void onSessionStarting(Session session) {
+
+            }
+
+            @Override
+            public void onSessionStarted(Session session, String s) {
+                onApplicationConnected();
+            }
+
+            @Override
+            public void onSessionStartFailed(Session session, int i) {
+
+            }
+
+            @Override
+            public void onSessionEnding(Session session) {
+
+            }
+
+            @Override
+            public void onSessionEnded(Session session, int i) {
+
+            }
+
+            @Override
+            public void onSessionResuming(Session session, String s) {
+
+            }
+
+            @Override
+            public void onSessionResumed(Session session, boolean b) {
+                onApplicationConnected();
+            }
+
+            @Override
+            public void onSessionResumeFailed(Session session, int i) {
+
+            }
+
+            @Override
+            public void onSessionSuspended(Session session, int i) {
+
+            }
+
+            private void onApplicationConnected() {
+                if (playerViews == null) {
+                    return;
+                }
+                for (EMPPlayerView view : playerViews) {
+                    if (view == null || view.getPlayer() == null) {
+                        continue;
+                    }
+                    IPlayable playable = view.getPlayer().getPlayable();
+                    // TODO: make this runnable solution easier for customer dev
+                    EMPCastProvider.getInstance().startCasting(playable, new Runnable() {
+                        boolean invalidated = false;
+                        @Override
+                        public synchronized void run() {
+                            if(invalidated) {
+                                return;
+                            }
+                            invalidated = true;
+                            EMPCastProvider.getInstance().showExpandedControls();
+                            finish();
+                        }
+                    });
+                    if (view.getPlayer().isPlaying()) {
+                        String sessionId = view.getPlayer().getSessionId();
+                        long currentTime = view.getPlayer().getCurrentTime();
+                        EMPAnalyticsProvider.getInstance().startCasting(sessionId, currentTime, new HashMap<String, String>());
+                    }
+                    return;
+                }
+            }
+        };
+
+        if (castContext != null) {
+            castContext.getSessionManager().addSessionManagerListener(this.castListener);
         }
     }
 

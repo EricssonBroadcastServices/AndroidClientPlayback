@@ -333,7 +333,15 @@ public class ExoPlayerTech implements ITech {
      */
     @Override
     public String[] getAudioTracks() {
+        if (trackSelector == null) {
+            return null;
+        }
         MappingTrackSelector.MappedTrackInfo tracksInfo = trackSelector.getCurrentMappedTrackInfo();
+
+        if (tracksInfo == null) {
+            return null;
+        }
+
         TrackGroupArray audioTracks = tracksInfo.getTrackGroups(TRACK_GROUP_AUDIO);
 
         if (audioTracks.length == 0) {
@@ -377,7 +385,16 @@ public class ExoPlayerTech implements ITech {
      */
     @Override
     public String[] getTextTracks() {
+        if (trackSelector == null) {
+            return null;
+        }
+
         MappingTrackSelector.MappedTrackInfo tracksInfo = trackSelector.getCurrentMappedTrackInfo();
+
+        if (tracksInfo == null) {
+            return null;
+        }
+
         TrackGroupArray textTracks = tracksInfo.getTrackGroups(TRACK_GROUP_TEXT);
 
         if (textTracks.length == 0) {
