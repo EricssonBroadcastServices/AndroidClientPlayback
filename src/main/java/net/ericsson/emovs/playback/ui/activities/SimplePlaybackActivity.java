@@ -26,6 +26,7 @@ import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
 import net.ericsson.emovs.utilities.emp.EMPRegistry;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.system.OneTimeRunnable;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
 import net.ericsson.emovs.playback.EmptyPlaybackEventListener;
@@ -405,19 +406,18 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                         continue;
                     }
                     IPlayable playable = view.getPlayer().getPlayable();
-                    // TODO: make this runnable solution easier for customer dev
-                    EMPCastProvider.getInstance().startCasting(playable, new Runnable() {
-                        boolean invalidated = false;
+                    EMPCastProvider.getInstance().startCasting(playable, null, new OneTimeRunnable(new Runnable() {
                         @Override
                         public synchronized void run() {
-                            if(invalidated) {
-                                return;
-                            }
-                            invalidated = true;
                             EMPCastProvider.getInstance().showExpandedControls();
                             finish();
                         }
-                    });
+                    }), new OneTimeRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "CAST FAILED", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
                     if (view.getPlayer().isPlaying()) {
                         String sessionId = view.getPlayer().getSessionId();
                         long currentTime = view.getPlayer().getCurrentTime();
