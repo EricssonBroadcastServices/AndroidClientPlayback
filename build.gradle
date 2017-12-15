@@ -76,9 +76,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile "com.android.support:appcompat-v7:26.0.1"
     compile "com.android.support:design:26.0.1"
     compile "com.google.android.exoplayer:exoplayer:${project.ext.exoPlayerVersion}"
@@ -98,6 +95,10 @@ dependencies {
             compile "com.github.EricssonBroadcastServices:AndroidClientAnalytics:${project.ext.libraryTag}"
         }
     }
+
+    // Test Dependencies
+    testCompile "org.mockito:mockito-core:2.+"
+    testCompile "org.robolectric:robolectric:3.5.1"
     testCompile 'junit:junit:4.12'
 }
 
@@ -124,3 +125,5 @@ artifacts {
     archives sourcesJar
     archives javadocJar
 }
+
+apply from: 'https://raw.githubusercontent.com/EricssonBroadcastServices/AndroidClientUtilities/master/jacoco.gradle'
