@@ -12,6 +12,7 @@ public class PlaybackProperties {
     boolean autoplay;
     Long startTime;
     boolean useLastViewedOffset;
+    DRMProperties drmProperties;
 
     public PlaybackProperties() {
         this.nativeControls = true;
@@ -71,6 +72,15 @@ public class PlaybackProperties {
         return this;
     }
 
+    public PlaybackProperties withDRMProperties(DRMProperties drmProperties) {
+        this.drmProperties = drmProperties;
+        return this;
+    }
+
+    public DRMProperties getDRMProperties() {
+        return this.drmProperties;
+    }
+
     /**
      * When set to true it will instruct the player to resume from last watched position
      * @param useLastViewedOffset
@@ -91,4 +101,8 @@ public class PlaybackProperties {
         return this;
     }
 
+    public static class DRMProperties {
+        public String licenseServerUrl;
+        public String initDataBase64;
+    }
 }

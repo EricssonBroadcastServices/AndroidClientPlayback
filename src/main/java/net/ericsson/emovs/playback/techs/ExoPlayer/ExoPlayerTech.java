@@ -133,6 +133,11 @@ public class ExoPlayerTech implements ITech {
 
         Pair<String, String> licenseDetails = DashLicenseDetails.getLicenseDetails(manifestUrl, isOffline);
 
+        if (licenseDetails == null && properties.getDRMProperties() != null) {
+            PlaybackProperties.DRMProperties drmProps = properties.getDRMProperties();
+            licenseDetails = new Pair<>(drmProps.licenseServerUrl, drmProps.initDataBase64);
+        }
+
         if (licenseDetails != null) {
             String[] keyRequestPropertiesArray = {};
             String licenseWithToken = Uri.parse(licenseDetails.first)

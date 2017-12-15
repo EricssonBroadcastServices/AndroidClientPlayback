@@ -153,6 +153,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 if(self.properties != null && self.properties.useLastViewedOffset()) {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
+                if(self.properties != null && entitlement.licenseServerUrl != null) {
+                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
+                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
+                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
+                    self.properties.withDRMProperties(drmProps);
+                }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
                 tech.init(self, context, entitlement.playToken, self.properties);
                 tech.load(entitlement.channelId, entitlement.mediaLocator, false);
@@ -185,6 +191,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 if(self.properties != null && self.properties.useLastViewedOffset()) {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
                 }
+                if(self.properties != null && entitlement.licenseServerUrl != null) {
+                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
+                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
+                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
+                    self.properties.withDRMProperties(drmProps);
+                }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
                 tech.init(self, context, entitlement.playToken, self.properties);
                 tech.load(entitlement.programId, entitlement.mediaLocator, false);
@@ -216,6 +228,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 self.onEntitlementChange();
                 if(self.properties != null && self.properties.useLastViewedOffset()) {
                     self.properties.withStartTime(entitlement.lastViewedOffset);
+                }
+                if(self.properties != null && entitlement.licenseServerUrl != null) {
+                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
+                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
+                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
+                    self.properties.withDRMProperties(drmProps);
                 }
                 Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
                 tech.init(self, context, entitlement.playToken, self.properties);

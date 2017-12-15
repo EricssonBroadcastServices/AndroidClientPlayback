@@ -86,8 +86,10 @@ public class LanguageAdapter extends ArrayAdapter<String> {
             langNameView.setText(spanString);
         }
         else {
-            Locale loc = new Locale(pickerLangCodes[position]);
-            langNameView.setText(loc.getDisplayLanguage().substring(0, 1).toUpperCase() + loc.getDisplayLanguage().substring(1));
+            if (pickerLangCodes[position] != null) {
+                Locale loc = new Locale(pickerLangCodes[position]);
+                langNameView.setText(loc.getDisplayLanguage().substring(0, 1).toUpperCase() + loc.getDisplayLanguage().substring(1));
+            }
         }
 
 
