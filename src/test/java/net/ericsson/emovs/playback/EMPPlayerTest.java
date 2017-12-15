@@ -1,16 +1,12 @@
 package net.ericsson.emovs.playback;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import junit.framework.Assert;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
-
-import static org.junit.Assert.*;
 
 /*
  * Copyright (c) 2017 Ericsson. All Rights Reserved
@@ -24,7 +20,7 @@ import static org.junit.Assert.*;
  * THE PRODUCT.
  */
 
-//@RunWith(AndroidJUnit4.class)
+@RunWith(RobolectricTestRunner.class)
 public class EMPPlayerTest {
 
     @Before
