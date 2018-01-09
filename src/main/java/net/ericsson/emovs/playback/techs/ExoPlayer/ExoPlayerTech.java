@@ -125,6 +125,10 @@ public class ExoPlayerTech implements ITech {
 
     DefaultTrackSelector trackSelector = null;
 
+    private boolean isUnifiedPackager() {
+        return manifestUrl.toString().contains(".isml");
+    }
+
     public void overrideExoControls() {
         // FastForward: exo_ffwd
         // FastRewing: exo_rew
@@ -136,21 +140,21 @@ public class ExoPlayerTech implements ITech {
         View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
 
-        ff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: do this only if entitlement stream is unified
-                setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
-            }
-        });
+        if (isUnifiedPackager()) {
+            ff.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
+                }
+            });
 
-        rw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: do this only if entitlement stream is unified
-                setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
-            }
-        });
+            rw.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
+                }
+            });
+        }
     }
 
     public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
@@ -315,6 +319,7 @@ public class ExoPlayerTech implements ITech {
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         MediaSource mediaSource = new DashMediaSource(this.manifestUrl, dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
         this.player.prepare(mediaSource);
+        overrideExoControls();
     }
 
     public void release() {
@@ -630,7 +635,6 @@ public class ExoPlayerTech implements ITech {
 
                 if(initialExoView != null && initialExoView instanceof SimpleExoPlayerView) {
                     view = (SimpleExoPlayerView) initialExoView;
-                    overrideExoControls();
                     return;
                 }
 
@@ -652,7 +656,6 @@ public class ExoPlayerTech implements ITech {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
-                overrideExoControls();
             }
         });
 
