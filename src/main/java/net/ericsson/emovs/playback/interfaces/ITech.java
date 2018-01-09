@@ -169,4 +169,8 @@ public interface ITech {
      * @return
      */
     String getVersion();
+
+    long getTimehisftDelay();
+
+    void setTimeshiftDelay(long timeshift);
 }

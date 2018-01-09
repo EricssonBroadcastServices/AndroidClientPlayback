@@ -67,6 +67,8 @@ public class ExoPlayerTech implements ITech {
     private static final int TRACK_GROUP_AUDIO = 1;
     private static final int TRACK_GROUP_TEXT = 2;
 
+    private static final long TIMESHIFT_VAL = 30;
+
     ViewGroup host;
     Activity ctx;
     SimpleExoPlayer player;
@@ -81,6 +83,7 @@ public class ExoPlayerTech implements ITech {
     boolean seekStart;
     int currentBitrate;
     PlaybackProperties properties;
+    Uri manifestUrl;
 
     Player getParent() {
         return parent;
@@ -121,6 +124,34 @@ public class ExoPlayerTech implements ITech {
     }
 
     DefaultTrackSelector trackSelector = null;
+
+    public void overrideExoControls() {
+        // FastForward: exo_ffwd
+        // FastRewing: exo_rew
+        // Pause: exo_pause
+        // Play: exo_play
+        // Next: exo_next
+        // Previous: exo_prev
+        // Shuffle: exo_shuffle
+        View ff = (View) view.findViewById(R.id.exo_ffwd);
+        View rw = (View) view.findViewById(R.id.exo_rew);
+
+        ff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: do this only if entitlement stream is unified
+                setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
+            }
+        });
+
+        rw.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: do this only if entitlement stream is unified
+                setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
+            }
+        });
+    }
 
     public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -265,6 +296,7 @@ public class ExoPlayerTech implements ITech {
     }
 
     public void play(String dashManifestUrl) {
+        this.manifestUrl = Uri.parse(dashManifestUrl);
         this.view.setPlayer(this.player);
         this.view.setUseController(this.properties == null ? PlaybackProperties.DEFAULT.hasNativeControls() : this.properties.hasNativeControls());
         this.view.requestFocus();
@@ -281,7 +313,7 @@ public class ExoPlayerTech implements ITech {
         });
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
-        MediaSource mediaSource = new DashMediaSource(Uri.parse(dashManifestUrl), dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
+        MediaSource mediaSource = new DashMediaSource(this.manifestUrl, dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
         this.player.prepare(mediaSource);
     }
 
@@ -491,6 +523,35 @@ public class ExoPlayerTech implements ITech {
         return ctx.getString(R.string.exoplayer_version);
     }
 
+    public long getTimehisftDelay() {
+        String timeshiftOldValue = this.manifestUrl.getQueryParameter("time_shift");
+        if (timeshiftOldValue == null || "".equals(timeshiftOldValue)) {
+            return 0;
+        }
+        return Long.parseLong(timeshiftOldValue);
+    }
+
+    public void setTimeshiftDelay(long timeshift) {
+        if (isPlaying()) {
+            String newManifestUrl = null;
+            String timeshiftOldValue = this.manifestUrl.getQueryParameter("time_shift");
+            if (timeshiftOldValue == null) {
+                newManifestUrl = this.manifestUrl.buildUpon()
+                        .appendQueryParameter("time_shift", Long.toString(timeshift))
+                        .build().toString();
+            }
+            else {
+                newManifestUrl = this.manifestUrl.buildUpon().build().toString()
+                        .replace("time_shift=", Long.toString(timeshift));
+            }
+            if (newManifestUrl != null) {
+                // TODO: what to do with analytics? Also very slow solution
+                play(newManifestUrl);
+            }
+        }
+    }
+
+
     private DrmSessionManager<FrameworkMediaCrypto> buildOfflineDrmSessionManager(String mediaId, UUID uuid, String licenseUrl, String initDataB64/*, Map<String, String> keyRequestProperties*/) {
         try {
             WidevinePlaybackLicenseManager licenseDownloadManager = new WidevinePlaybackLicenseManager(ctx);
@@ -569,6 +630,7 @@ public class ExoPlayerTech implements ITech {
 
                 if(initialExoView != null && initialExoView instanceof SimpleExoPlayerView) {
                     view = (SimpleExoPlayerView) initialExoView;
+                    overrideExoControls();
                     return;
                 }
 
@@ -590,6 +652,7 @@ public class ExoPlayerTech implements ITech {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
+                overrideExoControls();
             }
         });
 

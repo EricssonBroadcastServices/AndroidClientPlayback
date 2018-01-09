@@ -143,42 +143,50 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    private void preparePlayback(String mediaId, final Entitlement entitlement) {
+        this.entitlement = entitlement;
+        this.onEntitlementChange();
+        if(this.properties != null && this.properties.useLastViewedOffset()) {
+            this.properties.withStartTime(entitlement.lastViewedOffset);
+        }
+        if(this.properties != null && entitlement.licenseServerUrl != null) {
+            PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
+            drmProps.licenseServerUrl = entitlement.licenseServerUrl;
+            drmProps.initDataBase64 = entitlement.drmInitDataBase64;
+            this.properties.withDRMProperties(drmProps);
+        }
+        Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
+        tech.init(this, context, entitlement.playToken, this.properties);
+        tech.load(mediaId, entitlement.mediaLocator, false);
+        context.runOnUiThread(new Runnable() {
+            public void run() {
+                if (tech != null) {
+                    tech.play(entitlement.mediaLocator);
+                }
+            }
+        });
+    }
+
+    private ErrorRunnable getErrorRunnable() {
+        final ErrorRunnable onErrorRunnable = new ErrorRunnable() {
+            @Override
+            public void run(int errorCode, String errorMessage) {
+                onError(errorCode, errorMessage);
+            }
+        };
+        return onErrorRunnable;
+    }
+
     private void playLive(final String channelId) {
         final EMPPlayer self = this;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                self.entitlement = entitlement;
-                self.onEntitlementChange();
-                if(self.properties != null && self.properties.useLastViewedOffset()) {
-                    self.properties.withStartTime(entitlement.lastViewedOffset);
-                }
-                if(self.properties != null && entitlement.licenseServerUrl != null) {
-                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
-                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
-                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
-                    self.properties.withDRMProperties(drmProps);
-                }
-                Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(self, context, entitlement.playToken, self.properties);
-                tech.load(entitlement.channelId, entitlement.mediaLocator, false);
-                context.runOnUiThread(new Runnable() {
-                    public void run() {
-                        tech.play(entitlement.mediaLocator);
-                    }
-                });
-            }
-        };
-        final ErrorRunnable onErrorRunnable = new ErrorRunnable() {
-            @Override
-            public void run(int errorCode, String errorMessage) {
-                if (self != null) {
-                    self.onError(errorCode, errorMessage);
-                }
+                preparePlayback(entitlement.channelId, entitlement);
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playLive(channelId, new EntitlementCallback(null, channelId, null, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playLive(channelId, new EntitlementCallback(null, channelId, null, onEntitlementRunnable, getErrorRunnable()));
     }
 
     private void playCatchup(final String channelId, final String programId) {
@@ -186,37 +194,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                self.entitlement = entitlement;
-                self.onEntitlementChange();
-                if(self.properties != null && self.properties.useLastViewedOffset()) {
-                    self.properties.withStartTime(entitlement.lastViewedOffset);
-                }
-                if(self.properties != null && entitlement.licenseServerUrl != null) {
-                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
-                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
-                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
-                    self.properties.withDRMProperties(drmProps);
-                }
-                Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(self, context, entitlement.playToken, self.properties);
-                tech.load(entitlement.programId, entitlement.mediaLocator, false);
-                context.runOnUiThread(new Runnable() {
-                    public void run() {
-                        tech.play(entitlement.mediaLocator);
-                    }
-                });
-            }
-        };
-        final ErrorRunnable onErrorRunnable = new ErrorRunnable() {
-            @Override
-            public void run(int errorCode, String errorMessage) {
-                if (self != null) {
-                    self.onError(errorCode, errorMessage);
-                }
+                preparePlayback(entitlement.programId, entitlement);
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playCatchup(channelId, programId, new EntitlementCallback(null, channelId, programId, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playCatchup(channelId, programId, new EntitlementCallback(null, channelId, programId, onEntitlementRunnable, getErrorRunnable()));
     }
 
     private void playVod(final String assetId) {
@@ -224,42 +206,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                self.entitlement = entitlement;
-                self.onEntitlementChange();
-                if(self.properties != null && self.properties.useLastViewedOffset()) {
-                    self.properties.withStartTime(entitlement.lastViewedOffset);
-                }
-                if(self.properties != null && entitlement.licenseServerUrl != null) {
-                    PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
-                    drmProps.licenseServerUrl = entitlement.licenseServerUrl;
-                    drmProps.initDataBase64 = entitlement.drmInitDataBase64;
-                    self.properties.withDRMProperties(drmProps);
-                }
-                Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-                tech.init(self, context, entitlement.playToken, self.properties);
-                tech.load(entitlement.assetId, entitlement.mediaLocator, false);
-                context.runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (tech != null) {
-                            tech.play(entitlement.mediaLocator);
-                        }
-                        else {
-                            // TODO: handle
-                        }
-                    }
-                });
-            }
-        };
-        final ErrorRunnable onErrorRunnable = new ErrorRunnable() {
-            @Override
-            public void run(int errorCode, String errorMessage) {
-                if (self != null) {
-                    self.onError(errorCode, errorMessage);
-                }
+                preparePlayback(entitlement.assetId, entitlement);
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, onErrorRunnable));
+        getEntitlementProvider().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, getErrorRunnable()));
     }
 
     private boolean playOffline(final String manifestPath) {
