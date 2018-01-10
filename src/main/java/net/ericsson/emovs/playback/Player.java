@@ -360,8 +360,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     public void setTimeshiftDelay(long timeshift) {
-        if (isPlaying()) {
-            // TODO: implement
+        if (this.tech != null) {
             this.tech.setTimeshiftDelay(timeshift);
         }
     }

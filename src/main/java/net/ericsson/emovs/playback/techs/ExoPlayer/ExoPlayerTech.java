@@ -137,10 +137,19 @@ public class ExoPlayerTech implements ITech {
         // Next: exo_next
         // Previous: exo_prev
         // Shuffle: exo_shuffle
+        // TODO: what about VOD? get use cases for VOD and implement them
+        // TODO: if future code shows stuff, do not forget to check if props enable the default controller
         View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
+        View timeline = (View) view.findViewById(R.id.exo_progress);
+        View duration = (View) view.findViewById(R.id.exo_duration);
+        View position = (View) view.findViewById(R.id.exo_position);
 
         if (isUnifiedPackager()) {
+            timeline.setVisibility(View.INVISIBLE);
+            duration.setVisibility(View.INVISIBLE);
+            position.setVisibility(View.INVISIBLE);
+
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -529,6 +538,9 @@ public class ExoPlayerTech implements ITech {
     }
 
     public long getTimehisftDelay() {
+        if (this.manifestUrl == null) {
+            return 0;
+        }
         String timeshiftOldValue = this.manifestUrl.getQueryParameter("time_shift");
         if (timeshiftOldValue == null || "".equals(timeshiftOldValue)) {
             return 0;
