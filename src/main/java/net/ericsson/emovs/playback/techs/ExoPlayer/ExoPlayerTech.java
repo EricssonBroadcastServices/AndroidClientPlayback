@@ -109,7 +109,7 @@ public class ExoPlayerTech implements ITech {
         this.seekStart = seekStart;
     }
 
-    public void init(Player parent, Activity ctx, String playToken, PlaybackProperties properties){
+    public void init(Player parent, Activity ctx, String playToken, PlaybackProperties properties) {
         this.parent = parent;
         this.ctx = ctx;
 
@@ -126,7 +126,7 @@ public class ExoPlayerTech implements ITech {
     DefaultTrackSelector trackSelector = null;
 
     private boolean isUnifiedPackager() {
-        return manifestUrl.toString().contains(".isml");
+        return manifestUrl != null && manifestUrl.toString().contains(".isml");
     }
 
     public void overrideExoControls() {
@@ -137,7 +137,7 @@ public class ExoPlayerTech implements ITech {
         // Next: exo_next
         // Previous: exo_prev
         // Shuffle: exo_shuffle
-        // TODO: what about VOD? get use cases for VOD and implement them
+        // TODO: what about VOD/catchup? get use cases for VOD and implement them
         // TODO: if future code shows stuff, do not forget to check if props enable the default controller
         View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
