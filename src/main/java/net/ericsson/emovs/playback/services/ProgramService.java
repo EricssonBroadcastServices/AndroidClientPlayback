@@ -67,7 +67,7 @@ public class ProgramService extends Thread {
                                     boolean isEntitled = EMPEntitlementProvider.getInstance().isEntitled(program.assetId);
                                     if (isEntitled == false) {
                                         // TODO: trigger error?
-                                        tech.error();
+                                        //tech.error();
                                         tech.stop();
                                         return;
                                     }
@@ -78,7 +78,7 @@ public class ProgramService extends Thread {
                         @Override
                         public void onError(Error error) {
                             // TODO: trigger error?
-                            tech.error();
+                            //tech.error();
                             tech.stop();
                             return;
                         }
