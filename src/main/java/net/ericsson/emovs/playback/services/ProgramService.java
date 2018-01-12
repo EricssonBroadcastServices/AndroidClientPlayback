@@ -30,7 +30,6 @@ public class ProgramService extends Thread {
 
     Entitlement entitlement;
     IPlayer player;
-    MonotonicTimeService timeService;
     EmpProgram currentProgram;
 
     public ProgramService(IPlayer player, Entitlement entitlement) {
@@ -38,7 +37,7 @@ public class ProgramService extends Thread {
         this.entitlement = entitlement;
     }
 
-    public void isSeekEntitled(long timeToCheck, final Runnable onAllowed, final Runnable onForbidden) {
+    public void isEntitled(long timeToCheck, final Runnable onAllowed, final Runnable onForbidden) {
         if (currentProgram == null) {
             // TODO: throw error maybe?
             if (onForbidden != null) {
@@ -99,9 +98,6 @@ public class ProgramService extends Thread {
     }
 
     public void run () {
-        this.timeService = new MonotonicTimeService();
-        this.timeService.start();
-
         for(;;) {
             try {
                 if (this.player == null || this.entitlement == null || this.entitlement.channelId == null) {
@@ -130,10 +126,6 @@ public class ProgramService extends Thread {
                 Log.d(TAG, "Program service interrupted.");
                 break;
             }
-        }
-
-        if (this.timeService.isAlive() && this.timeService.isInterrupted() == false) {
-            this.timeService.interrupt();
         }
     }
 

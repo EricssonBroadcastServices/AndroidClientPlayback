@@ -52,6 +52,8 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
+import java.lang.reflect.Field;
+import java.util.Hashtable;
 import java.util.UUID;
 
 
@@ -153,14 +155,14 @@ public class ExoPlayerTech implements ITech {
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
+                    parent.setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
                 }
             });
 
             rw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
+                    parent.setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
                 }
             });
         }
@@ -363,8 +365,18 @@ public class ExoPlayerTech implements ITech {
         }
     }
 
+
     public long getCurrentTime() {
         if (this.player != null) {
+            //try {
+            //    Field field = this.player.getCurrentTimeline().getClass().getDeclaredField("windowStartTimeMs");
+            //    field.setAccessible(true);
+            //    Long value = (Long) field.get(this.player.getCurrentTimeline());
+            //    return value.longValue() + this.player.getCurrentPosition();
+            //}
+            //catch (NoSuchFieldException | IllegalAccessException e) {
+            //    e.printStackTrace();
+            //}
             return this.player.getCurrentPosition();
         }
         return -1;

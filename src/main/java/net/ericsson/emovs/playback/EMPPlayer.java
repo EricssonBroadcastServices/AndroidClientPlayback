@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
@@ -147,6 +148,27 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             return "offline-" + playbackUUID.toString();
         }
         return entitlement.playSessionId;
+    }
+
+    @Override
+    public void setTimeshiftDelay(final long timeshift) {
+        if (this.programService == null) {
+            return;
+        }
+        long timeshiftUnixTime = MonotonicTimeService.getInstance().currentTime() - timeshift * 1000;
+        this.programService.isEntitled (timeshiftUnixTime, new Runnable() {
+            @Override
+            public void run() {
+                if (tech != null) {
+                    tech.setTimeshiftDelay(timeshift);
+                }
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                // TODO: handle the error
+            }
+        });
     }
 
     @Override
