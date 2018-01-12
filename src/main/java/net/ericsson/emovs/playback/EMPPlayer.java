@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
@@ -31,6 +32,23 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     private IPlayable playable;
     private Entitlement entitlement;
     private IEntitlementProvider entitlementProvider;
+    private ProgramService programService;
+    private EmptyPlaybackEventListener empPlaybackListener = new EmptyPlaybackEventListener(this) {
+        @Override
+        public void onPlaybackEnd() {
+            disposeProgrameService();
+        }
+
+        @Override
+        public void onDispose() {
+            disposeProgrameService();
+        }
+
+        @Override
+        public void onStop() {
+            disposeProgrameService();
+        }
+    };
 
     /**
      * Constructor of a EMPPlayer instance - must be instanciated from a PlayerFactory
@@ -144,6 +162,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void preparePlayback(String mediaId, final Entitlement entitlement) {
+        if (empPlaybackListener != null) {
+            addListener(empPlaybackListener);
+        }
         this.entitlement = entitlement;
         this.onEntitlementChange();
         if(this.properties != null && this.properties.useLastViewedOffset()) {
@@ -167,6 +188,18 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         });
     }
 
+    private void prepareProgramService() {
+        disposeProgrameService();
+        this.programService = new ProgramService(this, getEntitlement());
+        this.programService.start();
+    }
+
+    private void disposeProgrameService() {
+        if (this.programService != null && this.programService.isAlive() && this.programService.isInterrupted() == false) {
+            this.programService.interrupt();
+        }
+    }
+
     private ErrorRunnable getErrorRunnable() {
         final ErrorRunnable onErrorRunnable = new ErrorRunnable() {
             @Override
@@ -178,11 +211,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void playLive(final String channelId) {
-        final EMPPlayer self = this;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
                 preparePlayback(entitlement.channelId, entitlement);
+                prepareProgramService();
             }
         };
         super.onEntitlementLoadStart();
@@ -190,11 +223,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void playCatchup(final String channelId, final String programId) {
-        final EMPPlayer self = this;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
                 preparePlayback(entitlement.programId, entitlement);
+                prepareProgramService();
             }
         };
         super.onEntitlementLoadStart();
@@ -202,7 +235,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void playVod(final String assetId) {
-        final EMPPlayer self = this;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {

@@ -7,10 +7,14 @@ import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
-import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.Error;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import java.util.ArrayList;
 
@@ -25,25 +29,82 @@ public class ProgramService extends Thread {
     private static final int WAIT_TIME = 30000;
 
     Entitlement entitlement;
-    ITech tech;
+    IPlayer player;
+    MonotonicTimeService timeService;
+    EmpProgram currentProgram;
 
-    public ProgramService(ITech tech, Entitlement entitlement) {
-        this.tech = tech;
+    public ProgramService(IPlayer player, Entitlement entitlement) {
+        this.player = player;
         this.entitlement = entitlement;
     }
 
-    public boolean isTimeshiftAllowed(long seekWallclockTime) {
-        // TODO: implement
-        return true;
+    public void isSeekEntitled(long timeToCheck, final Runnable onAllowed, final Runnable onForbidden) {
+        if (currentProgram == null) {
+            // TODO: throw error maybe?
+            if (onForbidden != null) {
+                onForbidden.run();
+            }
+        }
+        else {
+            Duration dStart = new Duration(new DateTime(timeToCheck), currentProgram.startDateTime);
+            Duration dEnd = new Duration(new DateTime(timeToCheck), currentProgram.endDateTime);
+
+            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+                if (onAllowed != null) {
+                    onAllowed.run();
+                }
+            }
+            else {
+                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
+            }
+        }
+    }
+
+    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final Runnable onForbidden, final boolean updateProgram) {
+        EpgQueryParameters epgParams = EpgQueryParameters.DEFAULT;
+        epgParams.setFutureTimeFrame(0);
+        epgParams.setPastTimeFrame(0);
+
+        EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+            @Override
+            public void onMetadata(ArrayList<EmpProgram> programs) {
+                for (EmpProgram program : programs) {
+                    Duration dStart = new Duration(new DateTime(timeToCheck), program.startDateTime);
+                    Duration dEnd = new Duration(new DateTime(timeToCheck), program.endDateTime);
+
+                    if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+                        if (updateProgram) {
+                            currentProgram = program;
+                        }
+                        boolean isEntitled = EMPEntitlementProvider.getInstance().isEntitled(program.assetId);
+                        if (isEntitled == false) {
+                            if (onForbidden != null) {
+                                onForbidden.run();
+                            }
+                            return;
+                        }
+                    }
+                }
+                if (onAllowed != null) {
+                    onAllowed.run();
+                }
+            }
+
+            @Override
+            public void onError(Error error) {
+                player.fail(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
+                player.stop();
+            }
+        }, epgParams);
     }
 
     public void run () {
-        //MonotonicTimeService timeservice = new MonotonicTimeService();
-        //timeservice.start();
+        this.timeService = new MonotonicTimeService();
+        this.timeService.start();
 
         for(;;) {
             try {
-                if (tech == null || this.entitlement == null || this.entitlement.channelId == null) {
+                if (this.player == null || this.entitlement == null || this.entitlement.channelId == null) {
                     return;
                 }
 
@@ -51,38 +112,16 @@ public class ProgramService extends Thread {
                     return;
                 }
 
-                if (tech.isPlaying()) {
-                    long currentTime = tech.getCurrentTime();
+                if (this.player.isPlaying()) {
+                    long currentTime = this.player.getCurrentTime();
                     Log.d("PlaybackCurrentTime", Long.toString(currentTime));
-
-                    EpgQueryParameters epgParams = EpgQueryParameters.DEFAULT;
-                    epgParams.setFutureTimeFrame(0);
-                    epgParams.setPastTimeFrame(0);
-
-                    EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, currentTime, new IMetadataCallback<ArrayList<EmpProgram>>() {
+                    checkTimeshiftAllowance(currentTime, null, new Runnable() {
                         @Override
-                        public void onMetadata(ArrayList<EmpProgram> programs) {
-                            for (EmpProgram program : programs) {
-                                if (program.liveNow()) {
-                                    boolean isEntitled = EMPEntitlementProvider.getInstance().isEntitled(program.assetId);
-                                    if (isEntitled == false) {
-                                        // TODO: trigger error?
-                                        //tech.error();
-                                        tech.stop();
-                                        return;
-                                    }
-                                }
-                            }
+                        public void run() {
+                            player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, "");
+                            player.stop();
                         }
-
-                        @Override
-                        public void onError(Error error) {
-                            // TODO: trigger error?
-                            //tech.error();
-                            tech.stop();
-                            return;
-                        }
-                    }, epgParams);
+                    }, true);
                 }
 
                 Thread.sleep(WAIT_TIME);
@@ -93,10 +132,9 @@ public class ProgramService extends Thread {
             }
         }
 
-        //if (timeservice.isAlive() && timeservice.isInterrupted() == false) {
-        //    timeservice.interrupt();
-        //}
-
+        if (this.timeService.isAlive() && this.timeService.isInterrupted() == false) {
+            this.timeService.interrupt();
+        }
     }
 
 }

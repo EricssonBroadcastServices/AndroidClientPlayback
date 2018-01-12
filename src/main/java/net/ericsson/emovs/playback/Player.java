@@ -365,6 +365,10 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         }
     }
 
+    public void fail(int errorCode, String errorMessage) {
+        this.onError(errorCode, errorMessage);
+    }
+
 
     protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;
