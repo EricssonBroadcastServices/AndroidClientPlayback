@@ -3,6 +3,7 @@ package net.ericsson.emovs.playback;
 import android.app.Activity;
 import android.content.Context;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
@@ -413,8 +414,14 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
-    public void fail(int errorCode, String errorMessage) {
+    public void fail(final int errorCode, final String errorMessage) {
         this.onError(errorCode, errorMessage);
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public Activity getActivity() {

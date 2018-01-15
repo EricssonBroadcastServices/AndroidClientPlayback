@@ -9,6 +9,7 @@ import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 import net.ericsson.emovs.utilities.system.RunnableThread;
@@ -38,10 +39,10 @@ public class ProgramService extends Thread {
         this.entitlement = entitlement;
     }
 
-    public void isEntitled(final long timeToCheck, final Runnable onAllowed, final Runnable onForbidden) {
+    public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden) {
         if (currentProgram == null) {
             if (onForbidden != null) {
-                onForbidden.run();
+                onForbidden.run(ErrorCodes.PLAYBACK_NOT_ENTITLED, "ProgramID is null");
             }
         }
         else {
@@ -60,7 +61,7 @@ public class ProgramService extends Thread {
                         boolean isEntitled = EMPEntitlementProvider.getInstance().isEntitled(currentProgram.assetId);
                         if (isEntitled == false) {
                             if (onForbidden != null) {
-                                onForbidden.run();
+                                onForbidden.run(ErrorCodes.PLAYBACK_NOT_ENTITLED, "User not entitled");
                             }
                             return;
                         }
@@ -75,7 +76,7 @@ public class ProgramService extends Thread {
         }
     }
 
-    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final Runnable onForbidden, final boolean updateProgram) {
+    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram) {
         EpgQueryParameters epgParams = EpgQueryParameters.DEFAULT;
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
@@ -100,9 +101,14 @@ public class ProgramService extends Thread {
             }
 
             @Override
-            public void onError(Error error) {
-                player.fail(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
-                player.stop();
+            public void onError(final Error error) {
+                player.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.fail(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
+                        player.stop();
+                    }
+                });
             }
         }, epgParams);
     }
@@ -121,13 +127,13 @@ public class ProgramService extends Thread {
                 if (this.player.isPlaying()) {
                     long currentTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(currentTime));
-                    checkTimeshiftAllowance(currentTime, null, new Runnable() {
+                    checkTimeshiftAllowance(currentTime, null, new ErrorRunnable() {
                         @Override
-                        public void run() {
+                        public void run(int code, final String message) {
                             player.getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, "");
+                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
                                     player.stop();
                                 }
                             });

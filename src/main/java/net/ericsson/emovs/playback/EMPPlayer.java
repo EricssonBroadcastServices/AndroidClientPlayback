@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
@@ -169,10 +170,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     });
                 }
             }
-        }, new Runnable() {
+        }, new ErrorRunnable() {
             @Override
-            public void run() {
-                // TODO: handle the error
+            public void run(final int errorCode, final String errorMessage) {
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
