@@ -1,6 +1,7 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -160,7 +161,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             @Override
             public void run() {
                 if (tech != null) {
-                    tech.setTimeshiftDelay(timeshift);
+                    context.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tech.setTimeshiftDelay(timeshift);
+                        }
+                    });
                 }
             }
         }, new Runnable() {

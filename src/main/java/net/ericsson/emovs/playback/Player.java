@@ -417,6 +417,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         this.onError(errorCode, errorMessage);
     }
 
+    public Activity getActivity() {
+        return context;
+    }
 
     protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;

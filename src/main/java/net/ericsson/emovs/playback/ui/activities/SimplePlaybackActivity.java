@@ -420,7 +420,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     }));
                     if (view.getPlayer().isPlaying()) {
                         String sessionId = view.getPlayer().getSessionId();
-                        long currentTime = view.getPlayer().getCurrentTime();
+                        long currentTime = view.getPlayer().getPlayheadTime();
                         EMPAnalyticsProvider.getInstance().startCasting(sessionId, currentTime, new HashMap<String, String>());
                     }
                     return;
