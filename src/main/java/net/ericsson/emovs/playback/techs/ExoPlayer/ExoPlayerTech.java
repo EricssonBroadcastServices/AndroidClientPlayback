@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
@@ -342,44 +343,95 @@ public class ExoPlayerTech implements ITech {
     }
 
     public void pause() {
-        if(player != null) {
+        if (player != null) {
             this.player.setPlayWhenReady(false);
         }
     }
 
     public void resume() {
-        if(player != null) {
+        if (player != null) {
             this.player.setPlayWhenReady(true);
         }
     }
 
     public void stop() {
-        if(player != null) {
+        if (player != null) {
             this.player.stop();
         }
     }
 
     public void seekTo(long positionMs) {
-        if(player != null) {
+        if (player != null) {
             this.player.seekTo(positionMs);
         }
     }
 
+    public void seekToTime(long unixTimeMs) {
+        if (player != null) {
+            long windowStartTime = getWindowStartTime();
+            this.player.seekTo(unixTimeMs - windowStartTime);
+        }
+    }
 
-    public long getCurrentTime() {
+    public long getPlayheadTime() {
         if (this.player != null) {
-            //try {
-            //    Field field = this.player.getCurrentTimeline().getClass().getDeclaredField("windowStartTimeMs");
-            //    field.setAccessible(true);
-            //    Long value = (Long) field.get(this.player.getCurrentTimeline());
-            //    return value.longValue() + this.player.getCurrentPosition();
-            //}
-            //catch (NoSuchFieldException | IllegalAccessException e) {
-            //    e.printStackTrace();
-            //}
+            long windowStartTime = getWindowStartTime();
+            return windowStartTime + getPlayheadPosition();
+        }
+        return -1;
+    }
+
+    public long getPlayheadPosition() {
+        if (this.player != null) {
             return this.player.getCurrentPosition();
         }
         return -1;
+    }
+
+    public long getCurrentTime() {
+        return MonotonicTimeService.getInstance().currentTime();
+    }
+
+    public long[] getBufferedRange() {
+        if (this.player == null) {
+            return null;
+        }
+        long[] range = new long[2];
+        range[0] = this.getPlayheadPosition();
+        range[1] = this.player.getBufferedPosition();
+        return range;
+    }
+
+    public long[] getBufferedTimeRange() {
+        if (this.player == null) {
+            return null;
+        }
+        long windowStartTime = getWindowStartTime();
+        long[] range = getBufferedRange();
+        range[0] += windowStartTime;
+        range[1] += windowStartTime;
+        return range;
+    }
+
+    public long[] getSeekRange() {
+        if (this.player == null) {
+            return null;
+        }
+        long[] range = new long[2];
+        range[0] = 0;
+        range[1] = getDuration();
+        return range;
+    }
+
+    public long[] getSeekTimeRange() {
+        if (this.player == null) {
+            return null;
+        }
+        long windowStartTime = getWindowStartTime();
+        long[] range = getSeekRange();
+        range[0] += windowStartTime;
+        range[1] += windowStartTime;
+        return range;
     }
 
     public long getDuration() {
@@ -387,6 +439,22 @@ public class ExoPlayerTech implements ITech {
             return this.player.getDuration();
         }
         return -1;
+    }
+
+    private long getWindowStartTime() {
+        try {
+            if (this.player == null) {
+                return 0;
+            }
+            Field field = this.player.getCurrentTimeline().getClass().getDeclaredField("windowStartTimeMs");
+            field.setAccessible(true);
+            Long value = (Long) field.get(this.player.getCurrentTimeline());
+            return value.longValue();
+        }
+        catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /**

@@ -2,6 +2,7 @@ package net.ericsson.emovs.playback.interfaces;
 
 import android.app.Activity;
 
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.Player;
 
@@ -173,4 +174,12 @@ public interface ITech {
     long getTimehisftDelay();
 
     void setTimeshiftDelay(long timeshift);
+
+    void seekToTime(long unixTimeMs);
+    long getPlayheadTime();
+    long getPlayheadPosition();
+    long[] getSeekRange();
+    long[] getSeekTimeRange();
+    long[] getBufferedRange();
+    long[] getBufferedTimeRange();
 }

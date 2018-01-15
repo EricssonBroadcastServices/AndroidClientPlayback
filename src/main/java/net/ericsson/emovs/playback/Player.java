@@ -365,6 +365,54 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         }
     }
 
+    public void seekToTime(long unixTimeMs) {
+        if (this.tech != null) {
+            this.tech.seekToTime(unixTimeMs);
+        }
+    }
+
+    public long getPlayheadTime() {
+        if (this.tech != null) {
+            return this.tech.getPlayheadTime();
+        }
+        return 0;
+    }
+
+    public long getPlayheadPosition() {
+        if (this.tech != null) {
+            return this.tech.getPlayheadPosition();
+        }
+        return 0;
+    }
+
+    public long[] getSeekRange() {
+        if (this.tech != null) {
+            return this.tech.getSeekRange();
+        }
+        return null;
+    }
+
+    public long[] getSeekTimeRange() {
+        if (this.tech != null) {
+            return this.tech.getSeekTimeRange();
+        }
+        return null;
+    }
+
+    public long[] getBufferedRange() {
+        if (this.tech != null) {
+            return this.tech.getBufferedRange();
+        }
+        return null;
+    }
+
+    public long[] getBufferedTimeRange() {
+        if (this.tech != null) {
+            return this.tech.getBufferedTimeRange();
+        }
+        return null;
+    }
+
     public void fail(int errorCode, String errorMessage) {
         this.onError(errorCode, errorMessage);
     }
