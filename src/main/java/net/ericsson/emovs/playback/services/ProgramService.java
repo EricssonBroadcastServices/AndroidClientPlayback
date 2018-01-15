@@ -41,37 +41,19 @@ public class ProgramService extends Thread {
 
     public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden) {
         if (currentProgram == null) {
-            if (onForbidden != null) {
-                onForbidden.run(ErrorCodes.PLAYBACK_NOT_ENTITLED, "ProgramID is null");
-            }
+            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
         }
         else {
             Duration dStart = new Duration(new DateTime(timeToCheck), currentProgram.startDateTime);
             Duration dEnd = new Duration(new DateTime(timeToCheck), currentProgram.endDateTime);
 
-            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+            if (false && dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
                 if (onAllowed != null) {
                     onAllowed.run();
                 }
             }
             else {
-                new RunnableThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean isEntitled = EMPEntitlementProvider.getInstance().isEntitled(currentProgram.assetId);
-                        if (isEntitled == false) {
-                            if (onForbidden != null) {
-                                onForbidden.run(ErrorCodes.PLAYBACK_NOT_ENTITLED, "User not entitled");
-                            }
-                            return;
-                        }
-                        else {
-                            if (onAllowed != null) {
-                                onAllowed.run();
-                            }
-                        }
-                    }
-                }).start();
+                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
             }
         }
     }
@@ -89,10 +71,12 @@ public class ProgramService extends Thread {
                     Duration dEnd = new Duration(program.endDateTime, new DateTime(timeToCheck));
 
                     if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+                        if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
+                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
+                        }
                         if (updateProgram) {
                             currentProgram = program;
                         }
-                        EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
                     }
                 }
                 if (onAllowed != null) {

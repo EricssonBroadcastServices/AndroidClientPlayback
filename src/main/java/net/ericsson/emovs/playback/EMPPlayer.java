@@ -176,7 +176,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 context.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                        fail(errorCode, errorMessage);
+                        stop();
                     }
                 });
             }
