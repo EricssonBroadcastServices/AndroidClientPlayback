@@ -142,9 +142,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      *
      * @return
      */
-    public long getCurrentTime() {
+    public long getServerTime() {
         if (this.tech != null) {
-            return this.tech.getCurrentTime();
+            return this.tech.getServerTime();
         }
         return -1;
     }
@@ -356,7 +356,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     public long getTimehisftDelay() {
-        // TODO: implement
+        if (this.tech != null) {
+            return this.tech.getTimeshiftDelay();
+        }
         return 0;
     }
 

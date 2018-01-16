@@ -185,6 +185,14 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
+    public EmpProgram getCurrentProgram() {
+        if (this.programService != null) {
+            return this.programService.getCurrentProgram();
+        }
+        return null;
+    }
+
+    @Override
     protected boolean init(PlaybackProperties properties) throws Exception {
         super.init(properties);
         if (getEntitlementProvider() == null) {

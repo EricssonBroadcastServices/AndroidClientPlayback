@@ -7,7 +7,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
@@ -54,7 +53,6 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.lang.reflect.Field;
-import java.util.Hashtable;
 import java.util.UUID;
 
 
@@ -156,14 +154,14 @@ public class ExoPlayerTech implements ITech {
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    parent.setTimeshiftDelay(Math.max(0, getTimehisftDelay() - TIMESHIFT_VAL));
+                    parent.setTimeshiftDelay(Math.max(0, getTimeshiftDelay() - TIMESHIFT_VAL));
                 }
             });
 
             rw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    parent.setTimeshiftDelay(getTimehisftDelay() + TIMESHIFT_VAL);
+                    parent.setTimeshiftDelay(getTimeshiftDelay() + TIMESHIFT_VAL);
                 }
             });
         }
@@ -388,7 +386,7 @@ public class ExoPlayerTech implements ITech {
         return -1;
     }
 
-    public long getCurrentTime() {
+    public long getServerTime() {
         return MonotonicTimeService.getInstance().currentTime();
     }
 
@@ -452,7 +450,6 @@ public class ExoPlayerTech implements ITech {
             return value.longValue();
         }
         catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
         }
         return 0;
     }
@@ -617,7 +614,7 @@ public class ExoPlayerTech implements ITech {
         return ctx.getString(R.string.exoplayer_version);
     }
 
-    public long getTimehisftDelay() {
+    public long getTimeshiftDelay() {
         if (this.manifestUrl == null) {
             return 0;
         }
@@ -639,7 +636,7 @@ public class ExoPlayerTech implements ITech {
             }
             else {
                 newManifestUrl = this.manifestUrl.buildUpon().build().toString()
-                        .replace("time_shift=", Long.toString(timeshift));
+                        .replace("time_shift=" + timeshiftOldValue, "time_shift=" + Long.toString(timeshift));
             }
             if (newManifestUrl != null) {
                 // TODO: what to do with analytics? Also very slow solution

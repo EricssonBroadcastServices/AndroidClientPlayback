@@ -82,7 +82,7 @@ public interface ITech {
      *
      * @return
      */
-    long getCurrentTime();
+    long getServerTime();
 
     /**
      * Returns the duration of the media displayed by the tech
@@ -171,7 +171,7 @@ public interface ITech {
      */
     String getVersion();
 
-    long getTimehisftDelay();
+    long getTimeshiftDelay();
 
     void setTimeshiftDelay(long timeshift);
 

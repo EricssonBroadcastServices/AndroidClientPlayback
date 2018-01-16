@@ -24,6 +24,69 @@
         local:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         local:popupTheme="@style/ThemeOverlay.AppCompat.Light">
     </android.support.v7.widget.Toolbar>
+	<LinearLayout
+		android:id="@+id/testControls"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="10dp"
+		android:orientation="vertical">
+		<TextView
+			android:id="@+id/currentTime"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/timeRange"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:textSize="10dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/bufferedTimeRange"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:textSize="10dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/currentPosition"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:layout_marginTop="15dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/positionRange"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:textSize="10dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/bufferedRange"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:textSize="10dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/timeshiftDelay"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:layout_marginTop="15dp"
+			android:textColor="@color/white"/>
+		<TextView
+			android:id="@+id/currentProgram"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text=""
+			android:layout_marginTop="15dp"
+			android:textColor="@color/white"/>
+	</LinearLayout>
+
 </FrameLayout>
 
 

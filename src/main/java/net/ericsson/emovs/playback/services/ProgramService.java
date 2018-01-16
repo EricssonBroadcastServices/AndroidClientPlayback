@@ -27,7 +27,7 @@ import java.util.ArrayList;
  */
 public class ProgramService extends Thread {
     private static final String TAG = ProgramService.class.toString();
-    private static final int LONG_WAIT_TIME = 30000;
+    private static final int LONG_WAIT_TIME = 1000;
     private static final int SHORT_WAIT_TIME = 1000;
 
     Entitlement entitlement;
@@ -39,15 +39,19 @@ public class ProgramService extends Thread {
         this.entitlement = entitlement;
     }
 
+    public EmpProgram getCurrentProgram() {
+        return this.currentProgram;
+    }
+
     public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden) {
         if (currentProgram == null) {
             checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
         }
         else {
-            Duration dStart = new Duration(new DateTime(timeToCheck), currentProgram.startDateTime);
-            Duration dEnd = new Duration(new DateTime(timeToCheck), currentProgram.endDateTime);
+            Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
+            Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
 
-            if (false && dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
                 if (onAllowed != null) {
                     onAllowed.run();
                 }
@@ -63,21 +67,29 @@ public class ProgramService extends Thread {
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
 
+        if (currentProgram != null) {
+            Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
+            Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
+
+            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+                if (onAllowed != null) {
+                    onAllowed.run();
+                }
+                return;
+            }
+        }
+
         EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 for (EmpProgram program : programs) {
-                    Duration dStart = new Duration(program.startDateTime, new DateTime(timeToCheck));
-                    Duration dEnd = new Duration(program.endDateTime, new DateTime(timeToCheck));
-
-                    if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
-                        if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
-                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
-                        }
-                        if (updateProgram) {
-                            currentProgram = program;
-                        }
+                    if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
+                        EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
                     }
+                    if (updateProgram) {
+                        currentProgram = program;
+                    }
+                    break;
                 }
                 if (onAllowed != null) {
                     onAllowed.run();
@@ -86,6 +98,9 @@ public class ProgramService extends Thread {
 
             @Override
             public void onError(final Error error) {
+                if (onForbidden != null) {
+                    onForbidden.run(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
+                }
                 player.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -117,8 +132,10 @@ public class ProgramService extends Thread {
                             player.getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
-                                    player.stop();
+                                    // TODO: remove! do not commit!
+                                    //currentProgram = null;
+                                    //player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
+                                    //player.stop();
                                 }
                             });
                         }
