@@ -1,10 +1,8 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
@@ -193,6 +191,19 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
+    public void trigger(EventId eventId, Object param) {
+        super.trigger(eventId, param);
+
+        if (eventId == EventId.PROGRAM_CHANGED) {
+            EmpProgram paramProgram = null;
+            if (param instanceof EmpProgram) {
+                paramProgram = (EmpProgram) param;
+            }
+            onProgramChange(paramProgram);
+        }
+    }
+
+    @Override
     protected boolean init(PlaybackProperties properties) throws Exception {
         super.init(properties);
         if (getEntitlementProvider() == null) {
@@ -219,6 +230,16 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             drmProps.initDataBase64 = entitlement.drmInitDataBase64;
             this.properties.withDRMProperties(drmProps);
         }
+
+        /*if (entitlement.isCatchupAsLive) {
+            // TODO: remove hack that is only for test purposes!!
+            String dvrWindowOldValue = Uri.parse(entitlement.mediaLocator).getQueryParameter("dvr_window_length");
+            entitlement.mediaLocator = entitlement.mediaLocator
+                    .replace("dvr_window_length=" + dvrWindowOldValue, "dvr_window_length=" + Long.toString(3600*24));
+        }*/
+        //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
+
+
         Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
         tech.init(this, context, entitlement.playToken, this.properties);
         tech.load(mediaId, entitlement.mediaLocator, false);

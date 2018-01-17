@@ -1,7 +1,8 @@
 package net.ericsson.emovs.playback;
 
-import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
-import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
+import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
+import net.ericsson.emovs.utilities.models.EmpProgram;
 
 import java.util.HashMap;
 
@@ -282,6 +283,16 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
         }
         for (IPlaybackEventListener listener : eventListeners.keySet()) {
             listener.onControllerVisibility(visibility);
+        }
+    }
+
+    @Override
+    public void onProgramChange(EmpProgram newProgram) {
+        if (eventListeners == null) {
+            return;
+        }
+        for (IPlaybackEventListener listener : eventListeners.keySet()) {
+            listener.onProgramChange(newProgram);
         }
     }
 }

@@ -8,6 +8,7 @@ import android.widget.Toast;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
+import net.ericsson.emovs.utilities.models.EmpProgram;
 
 import java.util.UUID;
 
@@ -428,6 +429,10 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     public Activity getActivity() {
         return context;
+    }
+
+    @Override
+    public void trigger(EventId eventId, Object param) {
     }
 
     protected boolean init(PlaybackProperties properties) throws Exception {

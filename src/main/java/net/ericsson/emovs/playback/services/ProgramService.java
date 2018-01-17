@@ -6,13 +6,14 @@ import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
+import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
-import net.ericsson.emovs.utilities.system.RunnableThread;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -31,10 +32,10 @@ public class ProgramService extends Thread {
     private static final int SHORT_WAIT_TIME = 1000;
 
     Entitlement entitlement;
-    IPlayer player;
+    IEntitledPlayer player;
     EmpProgram currentProgram;
 
-    public ProgramService(IPlayer player, Entitlement entitlement) {
+    public ProgramService(IEntitledPlayer player, Entitlement entitlement) {
         this.player = player;
         this.entitlement = entitlement;
     }
@@ -88,6 +89,9 @@ public class ProgramService extends Thread {
                     }
                     if (updateProgram) {
                         currentProgram = program;
+                        if (player != null) {
+                            player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
+                        }
                     }
                     break;
                 }

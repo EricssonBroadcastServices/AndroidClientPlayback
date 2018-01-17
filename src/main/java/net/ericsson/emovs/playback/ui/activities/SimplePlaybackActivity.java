@@ -22,7 +22,7 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.cast.EMPCastProvider;
-import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
 import net.ericsson.emovs.utilities.emp.EMPRegistry;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;

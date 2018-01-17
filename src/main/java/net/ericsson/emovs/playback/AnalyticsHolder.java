@@ -1,8 +1,9 @@
 package net.ericsson.emovs.playback;
 
-import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
-import net.ericsson.emovs.playback.interfaces.IPlaybackEventListener;
+import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.models.EmpProgram;
 
 /**
  * This class is a bridde between the AnalyticsPlayBackConnector base class and the IPlaybackEventListener interface that is used by the player
@@ -103,5 +104,10 @@ public class AnalyticsHolder implements IPlaybackEventListener {
 
     @Override
     public void onControllerVisibility(ControllerVisibility visibility) {
+    }
+
+    @Override
+    public void onProgramChange(EmpProgram newProgram) {
+
     }
 }

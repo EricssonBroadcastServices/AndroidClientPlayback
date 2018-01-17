@@ -12,7 +12,7 @@ import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
-import net.ericsson.emovs.playback.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.utilities.drm.DashLicenseDetails;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 
@@ -147,9 +147,9 @@ public class ExoPlayerTech implements ITech {
         View position = (View) view.findViewById(R.id.exo_position);
 
         if (isUnifiedPackager()) {
-            timeline.setVisibility(View.INVISIBLE);
-            duration.setVisibility(View.INVISIBLE);
-            position.setVisibility(View.INVISIBLE);
+            //timeline.setVisibility(View.INVISIBLE);
+            //duration.setVisibility(View.INVISIBLE);
+            //position.setVisibility(View.INVISIBLE);
 
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
