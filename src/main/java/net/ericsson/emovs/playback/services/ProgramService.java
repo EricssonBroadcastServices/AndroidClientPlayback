@@ -132,10 +132,9 @@ public class ProgramService extends Thread {
                             player.getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    // TODO: remove! do not commit!
-                                    //currentProgram = null;
-                                    //player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
-                                    //player.stop();
+                                    currentProgram = null;
+                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
+                                    player.stop();
                                 }
                             });
                         }
