@@ -85,6 +85,8 @@ public class ExoPlayerTech implements ITech {
     int currentBitrate;
     PlaybackProperties properties;
     Uri manifestUrl;
+    long windowStartTimeMs = 0;
+    boolean startTimeSeekDone = false;
 
     Player getParent() {
         return parent;
@@ -154,20 +156,22 @@ public class ExoPlayerTech implements ITech {
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    parent.setTimeshiftDelay(Math.max(0, getTimeshiftDelay() - TIMESHIFT_VAL));
+                    parent.seekToTime(parent.getPlayheadTime() + 30000);
                 }
             });
 
             rw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    parent.setTimeshiftDelay(getTimeshiftDelay() + TIMESHIFT_VAL);
+                    parent.seekToTime(parent.getPlayheadTime() - 30000);
                 }
             });
         }
     }
 
     public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
+        this.startTimeSeekDone = false;
+        this.windowStartTimeMs = 0;
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
@@ -210,14 +214,15 @@ public class ExoPlayerTech implements ITech {
 
                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
                 this.player = HookedSimpleExoPlayer.newSimpleInstance(this, renderersFactory, trackSelector);
-                if (this.properties != null && this.properties.getStartTime() != null) {
-                    this.player.seekTo(this.properties.getStartTime());
-                }
                 this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
                 this.player.addListener(new com.google.android.exoplayer2.Player.EventListener(){
                     @Override
                     public void onTimelineChanged(Timeline timeline, Object manifest) {
-
+                        windowStartTimeMs = getWindowStartFromTimeline(timeline);
+                        if (startTimeSeekDone == false && properties != null && properties.getStartTime() != null) {
+                            ((HookedSimpleExoPlayer) player).seekToTime(properties.getStartTime());
+                            startTimeSeekDone = true;
+                        }
                     }
 
                     @Override
@@ -249,6 +254,7 @@ public class ExoPlayerTech implements ITech {
                                 isReady = true;
                             }
                             if (player != null && playWhenReady && !isPlaying) {
+                                view.setVisibility(View.VISIBLE);
                                 isPlaying = true;
                                 parent.onPlaying();
                             }
@@ -440,18 +446,24 @@ public class ExoPlayerTech implements ITech {
     }
 
     private long getWindowStartTime() {
+        if (this.player == null) {
+            return 0;
+        }
+        return windowStartTimeMs;
+    }
+
+    private long getWindowStartFromTimeline(Timeline timeline) {
+        Field field = null;
         try {
-            if (this.player == null) {
-                return 0;
-            }
-            Field field = this.player.getCurrentTimeline().getClass().getDeclaredField("windowStartTimeMs");
+            field = timeline.getClass().getDeclaredField("windowStartTimeMs");
             field.setAccessible(true);
-            Long value = (Long) field.get(this.player.getCurrentTimeline());
-            return value.longValue();
+            long lwindowStartTimeMs = (Long) field.get(player.getCurrentTimeline());
+            return lwindowStartTimeMs;
         }
-        catch (NoSuchFieldException | IllegalAccessException e) {
+        catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
         }
-        return 0;
+        return  0;
     }
 
     /**
@@ -745,6 +757,7 @@ public class ExoPlayerTech implements ITech {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
+                view.setVisibility(View.INVISIBLE);
             }
         });
 

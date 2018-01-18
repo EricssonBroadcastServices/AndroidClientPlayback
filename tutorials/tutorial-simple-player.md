@@ -45,7 +45,7 @@ intent.putExtra("playable", asset);
 context.startActivity(intent);
 ```
 
-**Catchup**
+**Program**
 
 ```java
 EmpProgram program = new EmpProgram();

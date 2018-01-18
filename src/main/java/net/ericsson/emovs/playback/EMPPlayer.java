@@ -1,6 +1,7 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -83,27 +84,22 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             if (playable instanceof EmpProgram) {
                 this.playable = playable;
                 EmpProgram playableProgram = (EmpProgram) playable;
-                if (playableProgram.liveNow()) {
-                    playLive(playableProgram.channelId);
-                }
-                else {
-                    playCatchup(playableProgram.assetId, playableProgram.programId);
-                }
+                playProgram(playableProgram);
             }
             else if (playable instanceof EmpOfflineAsset) {
                 this.playable = playable;
                 EmpOfflineAsset offlineAsset = (EmpOfflineAsset) playable;
-                playOffline(offlineAsset.localMediaPath);
+                playOffline(offlineAsset);
             }
             else if (playable instanceof EmpChannel) {
                 this.playable = playable;
                 EmpChannel channel = (EmpChannel) playable;
-                playLive(channel.channelId);
+                playLive(channel);
             }
             else if (playable instanceof EmpAsset) {
                 this.playable = playable;
                 EmpAsset asset = (EmpAsset) playable;
-                playVod(asset.assetId);
+                playVod(asset);
             }
             else {
                 this.onError(ErrorCodes.PLAYBACK_INVALID_EMP_PLAYABLE, "");
@@ -151,7 +147,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
-    public void setTimeshiftDelay(final long timeshift) {
+    protected void setTimeshiftDelay(final long timeshift) {
         if (this.programService == null) {
             return;
         }
@@ -215,7 +211,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
-    private void preparePlayback(String mediaId, final Entitlement entitlement) {
+    private void preparePlayback(String mediaId, final Entitlement entitlement, long dvrWindow, long ts) {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
         }
@@ -231,12 +227,14 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             this.properties.withDRMProperties(drmProps);
         }
 
-        /*if (entitlement.isCatchupAsLive) {
+        if (entitlement.programId != null && dvrWindow > 0) {
             // TODO: remove hack that is only for test purposes!!
             String dvrWindowOldValue = Uri.parse(entitlement.mediaLocator).getQueryParameter("dvr_window_length");
+            String timeshiftOld = Uri.parse(entitlement.mediaLocator).getQueryParameter("time_shift");
             entitlement.mediaLocator = entitlement.mediaLocator
-                    .replace("dvr_window_length=" + dvrWindowOldValue, "dvr_window_length=" + Long.toString(3600*24));
-        }*/
+                    .replace("dvr_window_length=" + dvrWindowOldValue, "dvr_window_length=" + Long.toString(dvrWindow))
+                    .replace("time_shift=" + timeshiftOld, "time_shift=" + Long.toString(ts));
+        }
         //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
 
 
@@ -274,47 +272,54 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return onErrorRunnable;
     }
 
-    private void playLive(final String channelId) {
+    private void playLive(final EmpChannel channel) {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                preparePlayback(entitlement.channelId, entitlement);
+                preparePlayback(entitlement.channelId, entitlement, 0, 0);
                 prepareProgramService();
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playLive(channelId, new EntitlementCallback(null, channelId, null, onEntitlementRunnable, getErrorRunnable()));
+        getEntitlementProvider().playLive(channel.channelId, new EntitlementCallback(null, channel.channelId, null, onEntitlementRunnable, getErrorRunnable()));
     }
 
-    private void playCatchup(final String channelId, final String programId) {
+    private void playProgram(final EmpProgram program) {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                preparePlayback(entitlement.programId, entitlement);
+                properties.withStartTime(program.startDateTime.getMillis());
+                long dvrWindow = 2 * (program.endDateTime.getMillis() - program.startDateTime.getMillis()) / 1000;
+                long timeshift = (System.currentTimeMillis() - program.endDateTime.getMillis()) / 1000;
+                if (timeshift < 0) {
+                    timeshift = 0;
+                }
+                preparePlayback(entitlement.programId, entitlement, dvrWindow, timeshift);
                 prepareProgramService();
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playCatchup(channelId, programId, new EntitlementCallback(null, channelId, programId, onEntitlementRunnable, getErrorRunnable()));
+        getEntitlementProvider().playCatchup(program.channelId, program.programId, new EntitlementCallback(null, program.channelId, program.programId, onEntitlementRunnable, getErrorRunnable()));
     }
 
-    private void playVod(final String assetId) {
+    private void playVod(final EmpAsset asset) {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                preparePlayback(entitlement.assetId, entitlement);
+                preparePlayback(entitlement.assetId, entitlement, 0, 0);
             }
         };
         super.onEntitlementLoadStart();
-        getEntitlementProvider().playVod(assetId, new EntitlementCallback(assetId, null, null, onEntitlementRunnable, getErrorRunnable()));
+        getEntitlementProvider().playVod(asset.assetId, new EntitlementCallback(asset.assetId, null, null, onEntitlementRunnable, getErrorRunnable()));
     }
 
-    private boolean playOffline(final String manifestPath) {
+    private boolean playOffline(final EmpOfflineAsset offlineAsset) {
         // TODO: missing eventListeners.onEntitlementLoadStart();
         final EMPPlayer self = this;
         new RunnableThread(new Runnable() {
             @Override
             public void run() {
+                final String manifestPath = offlineAsset.localMediaPath;
                 File manifestUrl = new File(manifestPath);
                 File manifestFolder = manifestUrl.getParentFile();
                 File entitlementFile = new File(manifestFolder, "entitlement.ser");

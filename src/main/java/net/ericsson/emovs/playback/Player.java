@@ -356,14 +356,14 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return this.tech.getSelectedTextTrack();
     }
 
-    public long getTimehisftDelay() {
+    protected long getTimehisftDelay() {
         if (this.tech != null) {
             return this.tech.getTimeshiftDelay();
         }
         return 0;
     }
 
-    public void setTimeshiftDelay(long timeshift) {
+    protected void setTimeshiftDelay(long timeshift) {
         if (this.tech != null) {
             this.tech.setTimeshiftDelay(timeshift);
         }

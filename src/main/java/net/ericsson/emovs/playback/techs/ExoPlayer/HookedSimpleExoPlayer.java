@@ -75,6 +75,13 @@ public class HookedSimpleExoPlayer extends SimpleExoPlayer {
         }
     }
 
+    public void seekToTime(long unixTimeMs) {
+        if(tech != null) {
+            tech.seekToTime(unixTimeMs);
+            tech.seekStart(true);
+        }
+    }
+
     @Override
     public void release() {
         super.release();
