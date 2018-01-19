@@ -2,12 +2,14 @@ package net.ericsson.emovs.playback;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 
+import java.io.Serializable;
+
 /**
  * Holder class of the playback properties
  *
  * Created by Joao Coelho on 2017-09-29.
  */
-public class PlaybackProperties {
+public class PlaybackProperties implements Serializable {
     public final static PlaybackProperties DEFAULT = new PlaybackProperties();
 
     boolean nativeControls;
@@ -89,7 +91,7 @@ public class PlaybackProperties {
         return newProps;
     }
 
-    public static class DRMProperties {
+    public static class DRMProperties implements Serializable {
         public String licenseServerUrl;
         public String initDataBase64;
 
@@ -104,7 +106,7 @@ public class PlaybackProperties {
 
     public interface IPlayFrom {};
 
-    public static class PlayFromItem implements IPlayFrom {
+    public static class PlayFromItem implements IPlayFrom, Serializable {
         public Integer type;
 
         PlayFromItem(Integer type) {

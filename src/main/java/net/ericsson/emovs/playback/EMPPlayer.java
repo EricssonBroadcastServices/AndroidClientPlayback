@@ -227,15 +227,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             // TODO: differentiate Live bookmark and vod/capthup bookmark?
             ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
         }
-        if(this.properties != null && entitlement.licenseServerUrl != null) {
+        if (this.properties != null && entitlement.licenseServerUrl != null) {
             PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
             drmProps.licenseServerUrl = entitlement.licenseServerUrl;
             drmProps.initDataBase64 = entitlement.drmInitDataBase64;
             this.properties.withDRMProperties(drmProps);
         }
 
+        // TODO: remove hack that is only for test purposes - this should be done on the backend
         if (entitlement.programId != null && dvrWindow > 0) {
-            // TODO: remove hack that is only for test purposes!!
             String dvrWindowOldValue = Uri.parse(entitlement.mediaLocator).getQueryParameter("dvr_window_length");
             String timeshiftOld = Uri.parse(entitlement.mediaLocator).getQueryParameter("time_shift");
             entitlement.mediaLocator = entitlement.mediaLocator

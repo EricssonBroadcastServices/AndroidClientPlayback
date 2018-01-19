@@ -234,6 +234,18 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 }
             }
         }
+        if (extras.containsKey("properties")) {
+            Object propertiesCandidate = extras.get("properties");
+            if (propertiesCandidate instanceof PlaybackProperties) {
+                this.properties = (PlaybackProperties) propertiesCandidate;
+            }
+            else {
+                this.properties = PlaybackProperties.DEFAULT;
+            }
+        }
+        else {
+            this.properties = PlaybackProperties.DEFAULT;
+        }
     }
 
     /**
