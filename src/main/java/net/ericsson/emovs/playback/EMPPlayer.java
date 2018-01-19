@@ -82,6 +82,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 return;
             }
             if (playable instanceof EmpProgram) {
+                if (this.properties.getPlayFrom() == null) {
+                    this.properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+                }
                 this.playable = playable;
                 EmpProgram playableProgram = (EmpProgram) playable;
                 playProgram(playableProgram);
@@ -92,6 +95,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 playOffline(offlineAsset);
             }
             else if (playable instanceof EmpChannel) {
+                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                 this.playable = playable;
                 EmpChannel channel = (EmpChannel) playable;
                 playLive(channel);
@@ -217,8 +221,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
         this.entitlement = entitlement;
         this.onEntitlementChange();
-        if(this.properties != null && this.properties.useLastViewedOffset()) {
-            this.properties.withStartTime(entitlement.lastViewedOffset);
+        if(this.properties != null && PlaybackProperties.PlayFrom.isBookmark(this.properties.getPlayFrom())) {
+            ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
         }
         if(this.properties != null && entitlement.licenseServerUrl != null) {
             PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
@@ -288,7 +292,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                properties.withStartTime(program.startDateTime.getMillis());
+                if (properties.getPlayFrom() != null && PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
+                    ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
+                }
+
                 long dvrWindow = 2 * (program.endDateTime.getMillis() - program.startDateTime.getMillis()) / 1000;
                 long timeshift = (System.currentTimeMillis() - program.endDateTime.getMillis()) / 1000;
                 if (timeshift < 0) {

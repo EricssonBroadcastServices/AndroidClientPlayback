@@ -219,8 +219,9 @@ public class ExoPlayerTech implements ITech {
                     @Override
                     public void onTimelineChanged(Timeline timeline, Object manifest) {
                         windowStartTimeMs = getWindowStartFromTimeline(timeline);
-                        if (startTimeSeekDone == false && properties != null && properties.getStartTime() != null) {
-                            ((HookedSimpleExoPlayer) player).seekToTime(properties.getStartTime());
+                        if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null && properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
+                            long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
+                            ((HookedSimpleExoPlayer) player).seekToTime(startTime);
                             startTimeSeekDone = true;
                         }
                     }
