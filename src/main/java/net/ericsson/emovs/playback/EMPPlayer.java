@@ -225,7 +225,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             this.properties.getPlayFrom() != null &&
             this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
             // TODO: differentiate Live bookmark and vod/capthup bookmark?
-            ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
+            if (entitlement.mediaLocator.contains(".isml")) {
+                ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedTime;
+            }
+            else {
+                ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
+            }
         }
         if (this.properties != null && entitlement.licenseServerUrl != null) {
             PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
