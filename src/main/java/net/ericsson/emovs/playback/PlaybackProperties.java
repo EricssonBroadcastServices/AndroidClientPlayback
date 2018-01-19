@@ -1,5 +1,7 @@
 package net.ericsson.emovs.playback;
 
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
+
 /**
  * Holder class of the playback properties
  *
@@ -77,9 +79,27 @@ public class PlaybackProperties {
         return this.playFrom;
     }
 
+    @Override
+    public PlaybackProperties clone() throws CloneNotSupportedException {
+        PlaybackProperties newProps = new PlaybackProperties();
+        newProps.nativeControls = this.nativeControls;
+        newProps.autoplay = this.autoplay;
+        newProps.playFrom = this.playFrom != null ? (PlayFromItem) this.playFrom.clone() : null;
+        newProps.drmProperties = this.drmProperties != null ? this.drmProperties.clone() : null;
+        return newProps;
+    }
+
     public static class DRMProperties {
         public String licenseServerUrl;
         public String initDataBase64;
+
+        @Override
+        public DRMProperties clone() throws CloneNotSupportedException {
+            DRMProperties newDRMProps = new DRMProperties();
+            newDRMProps.licenseServerUrl = this.licenseServerUrl;
+            newDRMProps.initDataBase64 = this.initDataBase64;
+            return newDRMProps;
+        }
     }
 
     public interface IPlayFrom {};
@@ -90,23 +110,49 @@ public class PlaybackProperties {
         PlayFromItem(Integer type) {
             this.type = type;
         }
+
+        @Override
+        public Object clone() throws CloneNotSupportedException {
+            return super.clone();
+        }
     }
 
     public static class PlayFrom {
-        public static PlayFromItem LIVE_EDGE = new PlayFromItem(1);
         public static PlayFromItem START_TIME_DEFAULT = new StartTime(0);
         public static PlayFromItem BOOKMARK = new Bookmark();
         public static PlayFromItem BEGINNING = new Beginning();
+        public static PlayFromItem LIVE_EDGE = new LiveEdge();
+
+        public static class LiveEdge extends StartTime {
+            public LiveEdge() {
+                super(1);
+            }
+
+            @Override
+            public Object clone() throws CloneNotSupportedException {
+                return new LiveEdge().withStartTime(this.startTime);
+            }
+        }
 
         public static class Beginning extends StartTime {
             public Beginning() {
                 super(0);
+            }
+
+            @Override
+            public Object clone() throws CloneNotSupportedException {
+                return new Beginning().withStartTime(this.startTime);
             }
         }
 
         public static class Bookmark extends StartTime {
             public Bookmark() {
                 super(2);
+            }
+
+            @Override
+            public Object clone() throws CloneNotSupportedException {
+                return new Bookmark().withStartTime(this.startTime);
             }
         }
 
@@ -121,6 +167,16 @@ public class PlaybackProperties {
             public StartTime(long startTime) {
                 super(3);
                 this.startTime = startTime;
+            }
+
+            public Object withStartTime(long startTime) {
+                this.startTime = startTime;
+                return this;
+            }
+
+            @Override
+            public Object clone() throws CloneNotSupportedException {
+                return new StartTime(this.startTime);
             }
         };
 

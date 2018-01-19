@@ -204,8 +204,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
-    protected boolean init(PlaybackProperties properties) throws Exception {
-        super.init(properties);
+    protected boolean init(PlaybackProperties _properties) throws Exception {
+        super.init(_properties.clone());
         if (getEntitlementProvider() == null) {
             throw new Exception("Do not use default constructor on EMPPlayer.");
         }
@@ -221,7 +221,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
         this.entitlement = entitlement;
         this.onEntitlementChange();
-        if(this.properties != null && PlaybackProperties.PlayFrom.isBookmark(this.properties.getPlayFrom())) {
+        if (this.properties != null &&
+            this.properties.getPlayFrom() != null &&
+            this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
+            // TODO: differentiate Live bookmark and vod/capthup bookmark?
             ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
         }
         if(this.properties != null && entitlement.licenseServerUrl != null) {
@@ -238,6 +241,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             entitlement.mediaLocator = entitlement.mediaLocator
                     .replace("dvr_window_length=" + dvrWindowOldValue, "dvr_window_length=" + Long.toString(dvrWindow))
                     .replace("time_shift=" + timeshiftOld, "time_shift=" + Long.toString(ts));
+            if (timeshiftOld == null) {
+                entitlement.mediaLocator += "&time_shift=" + Long.toString(ts);
+            }
         }
         //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
 
@@ -292,7 +298,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                if (properties.getPlayFrom() != null && PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
+                if (properties.getPlayFrom() == null) {
+                    properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+                }
+
+                if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                     ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
                 }
 

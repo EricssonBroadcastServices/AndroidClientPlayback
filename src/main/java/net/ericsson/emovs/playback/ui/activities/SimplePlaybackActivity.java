@@ -304,6 +304,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     }
                 }
             });
+
             view.getPlayer().play(empPlaylist.poll(), this.properties);
 
             if (empPlaylist.size() == 0) {
