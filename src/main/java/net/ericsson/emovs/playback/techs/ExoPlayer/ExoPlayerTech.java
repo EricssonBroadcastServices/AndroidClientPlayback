@@ -665,6 +665,13 @@ public class ExoPlayerTech implements ITech {
         }
     }
 
+    public View getSubtitlesView() {
+        if (this.view != null) {
+          return this.view.findViewById(R.id.exo_subtitles);
+        }
+        return null;
+    }
+
 
     private DrmSessionManager<FrameworkMediaCrypto> buildOfflineDrmSessionManager(String mediaId, UUID uuid, String licenseUrl, String initDataB64/*, Map<String, String> keyRequestProperties*/) {
         try {

@@ -1,6 +1,7 @@
 package net.ericsson.emovs.playback.interfaces;
 
 import android.app.Activity;
+import android.view.View;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.PlaybackProperties;
@@ -182,4 +183,5 @@ public interface ITech {
     long[] getSeekTimeRange();
     long[] getBufferedRange();
     long[] getBufferedTimeRange();
+    View getSubtitlesView();
 }

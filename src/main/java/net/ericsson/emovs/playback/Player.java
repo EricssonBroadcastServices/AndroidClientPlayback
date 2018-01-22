@@ -2,6 +2,7 @@ package net.ericsson.emovs.playback;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -433,6 +434,15 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     @Override
     public void trigger(EventId eventId, Object param) {
+    }
+
+    @Override
+    public View getSubtitlesView() {
+        if (this.tech != null) {
+            return this.tech.getSubtitlesView();
+        }
+
+        return null;
     }
 
     protected boolean init(PlaybackProperties properties) throws Exception {
