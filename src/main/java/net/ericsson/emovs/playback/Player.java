@@ -437,6 +437,14 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     @Override
+    public boolean isPaused() {
+        if (this.tech != null) {
+            return this.tech.isPaused();
+        }
+        return false;
+    }
+
+    @Override
     public View getSubtitlesView() {
         if (this.tech != null) {
             return this.tech.getSubtitlesView();

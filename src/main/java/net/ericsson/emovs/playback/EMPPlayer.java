@@ -5,12 +5,18 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
+import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
+import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
+import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
+import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpAsset;
 import net.ericsson.emovs.utilities.models.EmpChannel;
 import net.ericsson.emovs.utilities.models.EmpOfflineAsset;
@@ -24,6 +30,7 @@ import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.system.RunnableThread;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -215,6 +222,46 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    @Override
+    public void seekToTime(final long unixTimeMs) {
+        if (this.tech != null) {
+            long[] range = getSeekTimeRange();
+            if (range != null && unixTimeMs >= range[0] && unixTimeMs <= range[1]) {
+                this.tech.seekToTime(unixTimeMs);
+            }
+            else if (this.entitlement != null && this.entitlement.channelId != null) {
+                EpgQueryParameters epgParams = new EpgQueryParameters();
+                epgParams.setFutureTimeFrame(0);
+                epgParams.setPastTimeFrame(0);
+
+                EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, unixTimeMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
+                    @Override
+                    public void onMetadata(ArrayList<EmpProgram> programs) {
+                        try {
+                            if (programs.size() > 0) {
+                                EmpProgram program = programs.get(0);
+                                PlaybackProperties newProps = properties.clone();
+                                newProps.playFrom = new PlaybackProperties.PlayFrom.StartTime(unixTimeMs);
+                                newProps.withAutoplay(isPaused() == false);
+                                play(program, newProps);
+                            }
+                            else {
+                                fail (ErrorCodes.PLAYBACK_PROGRAM_NOT_FOUND, Error.PROGRAM_NOT_FOUND.toString());
+                            }
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(final Error error) {
+                        fail (ErrorCodes.GENERIC_PLAYBACK_FAILED, error.toString());
+                    }
+                }, epgParams);
+            }
+        }
+    }
+
     private void preparePlayback(String mediaId, final Entitlement entitlement, long dvrWindow, long ts) {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
@@ -240,7 +287,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
 
         // TODO: remove hack that is only for test purposes - this should be done on the backend
-        if (entitlement.programId != null && dvrWindow > 0) {
+        /*if (entitlement.programId != null && dvrWindow > 0) {
             String dvrWindowOldValue = Uri.parse(entitlement.mediaLocator).getQueryParameter("dvr_window_length");
             String timeshiftOld = Uri.parse(entitlement.mediaLocator).getQueryParameter("time_shift");
             entitlement.mediaLocator = entitlement.mediaLocator
@@ -249,7 +296,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             if (timeshiftOld == null) {
                 entitlement.mediaLocator += "&time_shift=" + Long.toString(ts);
             }
-        }
+        }*/
         //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
 
 

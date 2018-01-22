@@ -64,7 +64,7 @@ public class ProgramService extends Thread {
     }
 
     public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram) {
-        EpgQueryParameters epgParams = EpgQueryParameters.DEFAULT;
+        EpgQueryParameters epgParams = new EpgQueryParameters();
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
 
