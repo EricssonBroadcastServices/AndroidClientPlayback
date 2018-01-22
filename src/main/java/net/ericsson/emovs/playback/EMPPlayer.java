@@ -223,8 +223,30 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
+    public void seekTo(final long positionMs) {
+        if (this.tech != null && this.isPlaying()) {
+            long playheadPosition = getPlayheadPosition();
+            if (positionMs > playheadPosition && this.entitlement.ffEnabled == false) {
+                return;
+            } else if (positionMs < playheadPosition && this.entitlement.rwEnabled == false) {
+                return;
+            }
+            this.tech.seekTo(positionMs);
+        }
+    }
+
+    @Override
     public void seekToTime(final long unixTimeMs) {
-        if (this.tech != null) {
+        if (this.tech != null && this.isPlaying()) {
+            long playheadTime = getPlayheadTime();
+
+            if (unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
+                return;
+            }
+            else if (unixTimeMs < playheadTime && this.entitlement.rwEnabled == false) {
+                return;
+            }
+
             long[] range = getSeekTimeRange();
             if (range != null && unixTimeMs >= range[0] && unixTimeMs <= range[1]) {
                 this.tech.seekToTime(unixTimeMs);
