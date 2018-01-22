@@ -31,6 +31,7 @@ import net.ericsson.emovs.utilities.system.RunnableThread;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -265,7 +266,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 PlaybackProperties newProps = properties.clone();
                                 newProps.playFrom = new PlaybackProperties.PlayFrom.StartTime(unixTimeMs);
                                 newProps.withAutoplay(isPaused() == false);
+                                HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
                                 play(program, newProps);
+                                for(IPlaybackEventListener listener : listeners.keySet()) {
+                                    addListener(listener);
+                                }
                             }
                             else {
                                 fail (ErrorCodes.PLAYBACK_PROGRAM_NOT_FOUND, Error.PROGRAM_NOT_FOUND.toString());

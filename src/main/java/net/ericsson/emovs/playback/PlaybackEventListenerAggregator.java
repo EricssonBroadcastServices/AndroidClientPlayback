@@ -12,7 +12,7 @@ import java.util.HashMap;
  * Created by Joao Coelho on 2017-09-27.
  */
 class PlaybackEventListenerAggregator implements IPlaybackEventListener {
-    HashMap<IPlaybackEventListener, IPlaybackEventListener> eventListeners;
+    protected HashMap<IPlaybackEventListener, IPlaybackEventListener> eventListeners;
 
     public PlaybackEventListenerAggregator() {
         this.eventListeners = new HashMap<>();
