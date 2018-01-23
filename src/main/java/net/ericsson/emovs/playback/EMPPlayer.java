@@ -90,9 +90,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 return;
             }
             if (playable instanceof EmpProgram) {
-                if (this.properties.getPlayFrom() == null) {
-                    this.properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
-                }
                 this.playable = playable;
                 EmpProgram playableProgram = (EmpProgram) playable;
                 playProgram(playableProgram);
@@ -289,23 +286,37 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
-    private void preparePlayback(String mediaId, final Entitlement entitlement, long dvrWindow, long ts) {
+    private void prepareBookmark(IPlayable playable, Entitlement entitlement) {
+        if (this.properties != null &&
+                this.properties.getPlayFrom() != null &&
+                this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
+            if (entitlement.lastViewedOffset != null && entitlement.lastViewedTime != null) {
+                if (entitlement.mediaLocator.contains(".isml")) {
+                    ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedTime;
+                }
+                else {
+                    ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
+                }
+            }
+            else if (playable instanceof EmpChannel) {
+                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+            }
+            else if (playable instanceof EmpProgram) {
+                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+            }
+            else {
+                this.properties.withPlayFrom(null);
+            }
+        }
+    }
+
+    private void preparePlayback(String mediaId, final Entitlement entitlement) {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
         }
         this.entitlement = entitlement;
         this.onEntitlementChange();
-        if (this.properties != null &&
-            this.properties.getPlayFrom() != null &&
-            this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
-            // TODO: differentiate Live bookmark and vod/capthup bookmark?
-            if (entitlement.mediaLocator.contains(".isml")) {
-                ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedTime;
-            }
-            else {
-                ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
-            }
-        }
+
         if (this.properties != null && entitlement.licenseServerUrl != null) {
             PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
             drmProps.licenseServerUrl = entitlement.licenseServerUrl;
@@ -365,7 +376,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                preparePlayback(entitlement.channelId, entitlement, 0, 0);
+                prepareBookmark(channel, entitlement);
+                preparePlayback(entitlement.channelId, entitlement);
                 prepareProgramService();
             }
         };
@@ -381,17 +393,49 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
                 }
 
-                if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
-                    ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
+                if (PlaybackProperties.PlayFrom.isBookmark(properties.getPlayFrom())) {
+                    prepareBookmark(program, entitlement);
                 }
 
-                long dvrWindow = 2 * (program.endDateTime.getMillis() - program.startDateTime.getMillis()) / 1000;
-                long timeshift = (System.currentTimeMillis() - program.endDateTime.getMillis()) / 1000;
-                if (timeshift < 0) {
-                    timeshift = 0;
+                if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom()) ||
+                    PlaybackProperties.PlayFrom.isLiveEdge(properties.getPlayFrom())) {
+                    if (program.startDateTime != null && program.endDateTime != null) {
+                        if (program.liveNow()) {
+                            properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                        }
+                        else {
+                            ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
+                        }
+                        preparePlayback(entitlement.programId, entitlement);
+                        prepareProgramService();
+                    }
+                    else {
+                        EMPMetadataProvider.getInstance().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
+                            @Override
+                            public void onMetadata(EmpProgram fullProgram) {
+                                if (fullProgram.liveNow()) {
+                                    properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                                }
+                                else {
+                                    ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = fullProgram.startDateTime.getMillis();
+                                }
+                                preparePlayback(entitlement.programId, entitlement);
+                                prepareProgramService();
+                            }
+
+                            @Override
+                            public void onError(Error error) {
+                                properties.withPlayFrom(null);
+                                preparePlayback(entitlement.programId, entitlement);
+                                prepareProgramService();
+                            }
+                        });
+                    }
                 }
-                preparePlayback(entitlement.programId, entitlement, dvrWindow, timeshift);
-                prepareProgramService();
+                else {
+                    preparePlayback(entitlement.programId, entitlement);
+                    prepareProgramService();
+                }
             }
         };
         super.onEntitlementLoadStart();
@@ -402,7 +446,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                preparePlayback(entitlement.assetId, entitlement, 0, 0);
+                prepareBookmark(asset, entitlement);
+                preparePlayback(entitlement.assetId, entitlement);
             }
         };
         super.onEntitlementLoadStart();
