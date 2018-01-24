@@ -235,14 +235,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     @Override
     public void seekToTime(final long unixTimeMs) {
-        if (this.tech != null && this.isPlaying()) {
-            long playheadTime = getPlayheadTime();
-
-            if (unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
-                return;
-            }
-            else if (unixTimeMs < playheadTime && this.entitlement.rwEnabled == false) {
-                return;
+        if (this.tech != null) {
+            if (this.isPlaying()) {
+                long playheadTime = getPlayheadTime();
+                if (unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
+                    return;
+                }
+                else if (unixTimeMs < playheadTime && this.entitlement.rwEnabled == false) {
+                    return;
+                }
             }
 
             long[] range = getSeekTimeRange();
@@ -292,7 +293,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
             if (entitlement.lastViewedOffset != null && entitlement.lastViewedTime != null) {
                 if (entitlement.mediaLocator.contains(".isml")) {
-                    ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedTime;
+                    ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.liveTime;
                 }
                 else {
                     ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
