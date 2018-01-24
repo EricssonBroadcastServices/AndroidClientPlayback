@@ -69,16 +69,17 @@ public class HookedSimpleExoPlayer extends SimpleExoPlayer {
 
     @Override
     public void seekTo(int windowIndex, long positionMs) {
-        super.seekTo(windowIndex, positionMs);
+        //super.seekTo(windowIndex, positionMs);
         if(tech != null && tech.isPlaying()) {
             tech.seekStart(true);
+            tech.getParent().seekTo(positionMs);
         }
     }
 
     public void seekToTime(long unixTimeMs) {
         if(tech != null) {
-            tech.seekToTime(unixTimeMs);
             tech.seekStart(true);
+            tech.getParent().seekToTime(unixTimeMs);
         }
     }
 
