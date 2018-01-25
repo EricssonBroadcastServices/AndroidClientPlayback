@@ -149,7 +149,7 @@ public class ExoPlayerTech implements ITech {
         // Shuffle: exo_shuffle
         // TODO: what about VOD/catchup? get use cases for VOD and implement them
         // TODO: if future code shows stuff, do not forget to check if props enable the default controller
-        View ff = (View) view.findViewById(R.id.exo_ffwd);
+        final View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
         View timeline = (View) view.findViewById(R.id.exo_progress);
         View duration = (View) view.findViewById(R.id.exo_duration);
@@ -162,7 +162,6 @@ public class ExoPlayerTech implements ITech {
         //    DefaultTimeBar timeBar = children.get(0);
         //    timeBar.setEnabled(false);
         //}
-        //ff.setEnabled(false);
         //hookSeekBar();
 
         if (isUnifiedPackager()) {
@@ -238,9 +237,9 @@ public class ExoPlayerTech implements ITech {
                         windowStartTimeMs = getWindowStartFromTimeline(timeline);
                         if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null) {
                             if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
-                                long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - 500;
-                                ((HookedSimpleExoPlayer) player).seekToTime(startTime);
-                                startTimeSeekDone = true;
+                                //long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - 500;
+                                //((HookedSimpleExoPlayer) player).seekToTime(startTime);
+                                //startTimeSeekDone = true;
                             }
                             else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
                                 long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
