@@ -100,7 +100,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 playOffline(offlineAsset);
             }
             else if (playable instanceof EmpChannel) {
-                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                if (this.properties.getPlayFrom() == null) {
+                    this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                }
                 this.playable = playable;
                 EmpChannel channel = (EmpChannel) playable;
                 playLive(channel);
@@ -299,12 +301,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.lastViewedOffset;
                 }
             }
-            else if (playable instanceof EmpChannel) {
-                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
-            }
-            else if (playable instanceof EmpProgram) {
-                this.properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
-            }
             else {
                 this.properties.withPlayFrom(null);
             }
@@ -377,7 +373,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                prepareBookmark(channel, entitlement);
+                if (PlaybackProperties.PlayFrom.isBookmark(properties.getPlayFrom())) {
+                    prepareBookmark(channel, entitlement);
+                }
                 preparePlayback(entitlement.channelId, entitlement);
                 prepareProgramService();
             }
@@ -390,21 +388,21 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
-                if (properties.getPlayFrom() == null) {
-                    properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
-                }
-
                 if (PlaybackProperties.PlayFrom.isBookmark(properties.getPlayFrom())) {
                     prepareBookmark(program, entitlement);
                 }
 
                 if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom()) ||
-                    PlaybackProperties.PlayFrom.isLiveEdge(properties.getPlayFrom())) {
+                    PlaybackProperties.PlayFrom.isLiveEdge(properties.getPlayFrom()) ||
+                    properties.getPlayFrom() == null) {
                     if (program.startDateTime != null && program.endDateTime != null) {
-                        if (program.liveNow()) {
+                        if (program.liveNow() && properties.getPlayFrom() == null) {
                             properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                         }
-                        else {
+                        if (!program.liveNow() && properties.getPlayFrom() == null) {
+                            properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+                        }
+                        if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                             ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
                         }
                         preparePlayback(entitlement.programId, entitlement);
@@ -414,10 +412,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         EMPMetadataProvider.getInstance().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
                             @Override
                             public void onMetadata(EmpProgram fullProgram) {
-                                if (fullProgram.liveNow()) {
+                                if (fullProgram.liveNow() && properties.getPlayFrom() == null) {
                                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                                 }
-                                else {
+                                if (!fullProgram.liveNow() && properties.getPlayFrom() == null) {
+                                    properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+                                }
+                                if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                                     ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = fullProgram.startDateTime.getMillis();
                                 }
                                 preparePlayback(entitlement.programId, entitlement);
