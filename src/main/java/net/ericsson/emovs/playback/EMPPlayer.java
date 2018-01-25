@@ -307,6 +307,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     @Override
     public boolean canPause() {
+        if (this.entitlement != null) {
+            return this.entitlement.timeshiftEnabled;
+        }
         return true;
     }
 
