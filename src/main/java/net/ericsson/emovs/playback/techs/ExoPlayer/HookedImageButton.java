@@ -28,7 +28,9 @@ public class HookedImageButton extends android.support.v7.widget.AppCompatImageB
     public void setEnabled(boolean enabled) {
         if (this.player != null) {
             if (this.getId() == R.id.exo_ffwd && !this.player.canSeekForward() ||
-                this.getId() == R.id.exo_rew && !this.player.canSeekBack()) {
+                this.getId() == R.id.exo_next && !this.player.canSeekForward() ||
+                this.getId() == R.id.exo_rew && !this.player.canSeekBack() ||
+                this.getId() == R.id.exo_prev && !this.player.canSeekBack()) {
                 super.setEnabled(false);
                 setImageAlpha(77);
             }
