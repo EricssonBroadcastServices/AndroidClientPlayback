@@ -183,19 +183,19 @@ public class PlaybackProperties implements Serializable {
         };
 
         public static boolean isBeginning(PlayFromItem candidate) {
-            return candidate.type == BEGINNING.type;
+            return candidate != null && candidate.type == BEGINNING.type;
         }
 
         public static boolean isLiveEdge(PlayFromItem candidate) {
-            return candidate.type == LIVE_EDGE.type;
+            return candidate != null && candidate.type == LIVE_EDGE.type;
         }
 
         public static boolean isBookmark(PlayFromItem candidate) {
-            return candidate.type == BOOKMARK.type;
+            return candidate != null && candidate.type == BOOKMARK.type;
         }
 
         public static boolean isStartTime(PlayFromItem candidate) {
-            return candidate.type == START_TIME_DEFAULT.type;
+            return candidate != null && candidate.type == START_TIME_DEFAULT.type;
         }
     };
 }

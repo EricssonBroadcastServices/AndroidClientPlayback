@@ -289,6 +289,28 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
+    @Override
+    public boolean canSeekForward() {
+        if (this.entitlement != null) {
+            return this.entitlement.ffEnabled;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBack() {
+        if (this.entitlement != null) {
+            return this.entitlement.rwEnabled;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+
     private void prepareBookmark(IPlayable playable, Entitlement entitlement) {
         if (this.properties != null &&
                 this.properties.getPlayFrom() != null &&

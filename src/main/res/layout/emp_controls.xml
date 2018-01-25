@@ -28,7 +28,7 @@
         <ImageButton android:id="@id/exo_prev"
             style="@style/ExoMediaButton.Previous"/>
 
-        <ImageButton android:id="@id/exo_rew"
+        <net.ericsson.emovs.playback.techs.ExoPlayer.HookedImageButton android:id="@id/exo_rew"
             style="@style/ExoMediaButton.Rewind"/>
 
         <!--<ImageButton android:id="@id/exo_shuffle"
@@ -43,7 +43,7 @@
         <ImageButton android:id="@id/exo_pause"
             style="@style/ExoMediaButton.Pause"/>
 
-        <ImageButton android:id="@id/exo_ffwd"
+        <net.ericsson.emovs.playback.techs.ExoPlayer.HookedImageButton android:id="@id/exo_ffwd"
             style="@style/ExoMediaButton.FastForward"/>
 
         <ImageButton android:id="@id/exo_next"

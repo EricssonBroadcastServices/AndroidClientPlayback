@@ -453,6 +453,21 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBack() {
+        return true;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
     protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;
         this.playbackUUID = null;

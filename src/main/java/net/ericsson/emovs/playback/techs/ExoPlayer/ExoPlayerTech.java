@@ -19,6 +19,7 @@ import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
+import net.ericsson.emovs.utilities.ui.ViewHelper;
 
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -55,6 +56,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -134,11 +136,6 @@ public class ExoPlayerTech implements ITech {
         return manifestUrl != null && manifestUrl.toString().contains(".isml");
     }
 
-    public void disenableExoControls() {
-        View ff = (View) view.findViewById(R.id.exo_ffwd);
-        ff.setEnabled(false);
-    }
-
     public void overrideExoControls() {
         // FastForward: exo_ffwd
         // FastRewing: exo_rew
@@ -154,17 +151,9 @@ public class ExoPlayerTech implements ITech {
         View timeline = (View) view.findViewById(R.id.exo_progress);
         View duration = (View) view.findViewById(R.id.exo_duration);
         View position = (View) view.findViewById(R.id.exo_position);
-        //ArrayList<DefaultTimeBar> children = ViewHelper.getViewsFromViewGroup(view, DefaultTimeBar.class);
 
 
-        //((ViewGroup) progressView.getParent()).removeView(progressView);
-        //if (children.size() > 0) {
-        //    DefaultTimeBar timeBar = children.get(0);
-        //    timeBar.setEnabled(false);
-        //}
-        //hookSeekBar();
-
-        if (isUnifiedPackager()) {
+        if (isUnifiedPackager() == false) {
             //timeline.setVisibility(View.INVISIBLE);
             //duration.setVisibility(View.INVISIBLE);
             //position.setVisibility(View.INVISIBLE);
@@ -788,8 +777,8 @@ public class ExoPlayerTech implements ITech {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
-                //hookSeekBar();
                 view.setVisibility(View.INVISIBLE);
+                registerPlayer();
             }
         });
 
@@ -797,10 +786,16 @@ public class ExoPlayerTech implements ITech {
 
     private void registerPlayer() {
         View timebar = view.findViewById(R.id.exo_progress);
-
         if (timebar instanceof HookedDefaultTimeBar) {
             HookedDefaultTimeBar hookedTimebar = (HookedDefaultTimeBar) timebar;
             hookedTimebar.bindPlayer(getParent());
+        }
+
+        ArrayList<HookedImageButton> hookedBtns = ViewHelper.getViewsFromViewGroup(view, HookedImageButton.class);
+        if (hookedBtns != null) {
+            for (HookedImageButton btn : hookedBtns) {
+                btn.bindPlayer(getParent());
+            }
         }
     }
 
