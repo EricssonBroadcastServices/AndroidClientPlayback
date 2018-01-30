@@ -76,12 +76,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     /**
      * Plays some media available in EMP backend
+     *
      * IPlayables supported:
      * - EmpChannel: default behaviour is to start playback from live edge
      * - EmpProgram: default behaviour is to start playback from beginning of program if program is NOT live, or start from live edge otherwise
      * - EmpAsset: default behaviour is to start playback from beginning of asset
+     *
      * If playFrom property set to use Bookmark, then playback starts from Bookmarked position.
      * If Bookmark is not set, then default start procedure shall apply.
+     *
      * @param playable the playable you want to play: asset, program or channel
      * @param properties playback properties, like autoplay, startTime, etc.. use PlaybackProperties.DEFAULT for default props
      */
@@ -240,6 +243,14 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
+    /**
+     * Seeks to a specific unix time (milliseconds)
+     * Catchup-as-live Scenarios:
+     * - If seek time is outside of the seek range, then the player does a entitlement call automatically
+     * - SEEK TO LIVE EDGE: get wallclock time from getServerTime() and seek to that point in time
+     * - START-OVER: get current program from getCurrentProgram() and then seek to the start time of that program
+     * - JUMP 30 SECONDS: get current playback time from getPlayheadTime(), add/subtract the 30000, then seek to that point in time
+     */
     @Override
     public void seekToTime(final long unixTimeMs) {
         if (this.tech != null) {
