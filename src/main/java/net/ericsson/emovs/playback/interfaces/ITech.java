@@ -172,16 +172,73 @@ public interface ITech {
      */
     String getVersion();
 
+    /**
+     * Returns timeshift delay of the stream
+     *
+     * @return
+     */
     long getTimeshiftDelay();
 
+    /**
+     * Sets timeshift delay property in manifest URL and reloads stream
+     *
+     * @return
+     */
     void setTimeshiftDelay(long timeshift);
 
+    /**
+     * Seeks to a specific unix timestamp (milliseconds)
+     *
+     * @return
+     */
     void seekToTime(long unixTimeMs);
+
+    /**
+     * Returns current playback time (unix timestamp in milliseconds)
+     *
+     * @return
+     */
     long getPlayheadTime();
+
+    /**
+     * Returns current playback position within the seek range (0..MAX_SEEKABLE_POSITION)
+     *
+     * @return
+     */
     long getPlayheadPosition();
+
+    /**
+     * Returns an array of 2 entries that is the overall seekable range without a new stream reload
+     *
+     * @return
+     */
     long[] getSeekRange();
+
+    /**
+     * Returns an array of 2 entries that is the overall seekable time range without a new stream reload
+     *
+     * @return
+     */
     long[] getSeekTimeRange();
+
+    /**
+     * Returns an array of 2 entries that is the range of currently buffered video
+     *
+     * @return
+     */
     long[] getBufferedRange();
+
+    /**
+     * Returns an array of 2 entries that is the unix time range of currently buffered video
+     *
+     * @return
+     */
     long[] getBufferedTimeRange();
+
+    /**
+     * Returns the subtitles view
+     *
+     * @return
+     */
     View getSubtitlesView();
 }

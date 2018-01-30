@@ -76,7 +76,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     /**
      * Plays some media available in EMP backend
-     *
+     * IPlayables supported:
+     * - EmpChannel: default behaviour is to start playback from live edge
+     * - EmpProgram: default behaviour is to start playback from beginning
+     * - EmpAsset: default behaviour is to start playback from beginning
+     * If playFrom property set to use Bookmark, then playback starts from Bookmarked position.
+     * If Bookmark is not set, then default start procedure shall apply.
      * @param playable the playable you want to play: asset, program or channel
      * @param properties playback properties, like autoplay, startTime, etc.. use PlaybackProperties.DEFAULT for default props
      */
@@ -358,6 +363,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             }
         }*/
         //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
+        //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/cgi-bin/proxy.py?t=2018-01-25T17:00:00.000";
 
 
         Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
