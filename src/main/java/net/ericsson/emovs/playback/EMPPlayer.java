@@ -78,8 +78,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      * Plays some media available in EMP backend
      * IPlayables supported:
      * - EmpChannel: default behaviour is to start playback from live edge
-     * - EmpProgram: default behaviour is to start playback from beginning
-     * - EmpAsset: default behaviour is to start playback from beginning
+     * - EmpProgram: default behaviour is to start playback from beginning of program if program is NOT live, or start from live edge otherwise
+     * - EmpAsset: default behaviour is to start playback from beginning of asset
      * If playFrom property set to use Bookmark, then playback starts from Bookmarked position.
      * If Bookmark is not set, then default start procedure shall apply.
      * @param playable the playable you want to play: asset, program or channel
