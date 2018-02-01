@@ -19,6 +19,7 @@ import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
+import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -56,6 +57,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.lang.reflect.Field;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -224,6 +226,13 @@ public class ExoPlayerTech implements ITech {
                     @Override
                     public void onTimelineChanged(Timeline timeline, Object manifest) {
                         windowStartTimeMs = getWindowStartFromTimeline(timeline);
+                        if (windowStartTimeMs < 0) {
+                            windowStartTimeMs = 0;
+                            long tParamStartTime = tParamStartTime();
+                            if (tParamStartTime >= 0) {
+                                windowStartTimeMs = tParamStartTime;
+                            }
+                        }
                         if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null) {
                             if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
                                 //long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - 500;
@@ -637,6 +646,27 @@ public class ExoPlayerTech implements ITech {
 
     public String getVersion() {
         return ctx.getString(R.string.exoplayer_version);
+    }
+
+    public long tParamStartTime() {
+        if (this.manifestUrl == null) {
+            return -1;
+        }
+        String t = this.manifestUrl.getQueryParameter("t");
+        if (t == null) {
+            return -1;
+        }
+        String[] tParts = t.replace("%3A", ":").split("-");
+        if (tParts.length < 4) {
+            return -1;
+        }
+        String tStart = tParts[0] + "-" + tParts[1] + "-" + tParts[2] + "Z";
+        try {
+            return DateTimeParser.parseUtcDateTime(tStart, true).getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     public long getTimeshiftDelay() {
