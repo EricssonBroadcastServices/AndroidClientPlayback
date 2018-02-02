@@ -12,6 +12,7 @@ import java.io.Serializable;
 public class PlaybackProperties implements Serializable {
     public final static PlaybackProperties DEFAULT = new PlaybackProperties();
 
+    Integer maxBitrate;
     boolean nativeControls;
     boolean autoplay;
     PlayFromItem playFrom;
@@ -81,6 +82,15 @@ public class PlaybackProperties implements Serializable {
         return this.playFrom;
     }
 
+    public PlaybackProperties withMaxBitrate(Integer maxBitrate) {
+        this.maxBitrate = maxBitrate;
+        return this;
+    }
+
+    public Integer getMaxBitrate() {
+        return this.maxBitrate;
+    }
+
     @Override
     public PlaybackProperties clone() throws CloneNotSupportedException {
         PlaybackProperties newProps = new PlaybackProperties();
@@ -88,6 +98,7 @@ public class PlaybackProperties implements Serializable {
         newProps.autoplay = this.autoplay;
         newProps.playFrom = this.playFrom != null ? (PlayFromItem) this.playFrom.clone() : null;
         newProps.drmProperties = this.drmProperties != null ? this.drmProperties.clone() : null;
+        newProps.maxBitrate = this.maxBitrate;
         return newProps;
     }
 

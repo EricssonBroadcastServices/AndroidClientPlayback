@@ -408,14 +408,22 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
         }
+
         this.entitlement = entitlement;
         this.onEntitlementChange();
 
-        if (this.properties != null && entitlement.licenseServerUrl != null) {
-            PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
-            drmProps.licenseServerUrl = entitlement.licenseServerUrl;
-            drmProps.initDataBase64 = entitlement.drmInitDataBase64;
-            this.properties.withDRMProperties(drmProps);
+        if (this.properties != null && entitlement != null) {
+            if (entitlement.licenseServerUrl != null) {
+                PlaybackProperties.DRMProperties drmProps = new PlaybackProperties.DRMProperties();
+                drmProps.licenseServerUrl = entitlement.licenseServerUrl;
+                drmProps.initDataBase64 = entitlement.drmInitDataBase64;
+                this.properties.withDRMProperties(drmProps);
+            }
+            else {
+                this.properties.withDRMProperties(null);
+            }
+
+            this.properties.withMaxBitrate(entitlement.maxBitrate);
         }
 
         // TODO: remove hack that is only for test purposes - this should be done on the backend
