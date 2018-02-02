@@ -40,7 +40,7 @@
         <ImageButton android:id="@id/exo_play"
             style="@style/ExoMediaButton.Play"/>
 
-        <ImageButton android:id="@id/exo_pause"
+        <net.ericsson.emovs.playback.techs.ExoPlayer.HookedImageButton android:id="@id/exo_pause"
             style="@style/ExoMediaButton.Pause"/>
 
         <net.ericsson.emovs.playback.techs.ExoPlayer.HookedImageButton android:id="@id/exo_ffwd"

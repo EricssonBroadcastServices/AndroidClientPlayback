@@ -102,6 +102,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      *
      */
     public void pause() {
+        if (!canPause()) {
+            return;
+        }
         if (this.tech != null) {
             if (this.tech.isPaused() == false) {
                 this.tech.pause();

@@ -147,14 +147,25 @@ public class ExoPlayerTech implements ITech {
         final View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
         View next = (View) view.findViewById(R.id.exo_next);
+        View pause = (View) view.findViewById(R.id.exo_pause);
+        View play = (View) view.findViewById(R.id.exo_play);
         View timeline = (View) view.findViewById(R.id.exo_progress);
         View duration = (View) view.findViewById(R.id.exo_duration);
         View position = (View) view.findViewById(R.id.exo_position);
 
+        pause.setEnabled(parent.canPause());
+        
         if (UniversalPackagerHelper.isUniversalPackager(this.manifestUrl.toString()) == true) {
             //timeline.setVisibility(View.INVISIBLE);
             //duration.setVisibility(View.INVISIBLE);
             //position.setVisibility(View.INVISIBLE);
+            pause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    parent.pause();
+                }
+            });
+
             next.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
