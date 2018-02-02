@@ -155,7 +155,7 @@ public class ExoPlayerTech implements ITech {
         View position = (View) view.findViewById(R.id.exo_position);
 
 
-        if (isUnifiedPackager() == false) {
+        if (isUnifiedPackager() == true) {
             //timeline.setVisibility(View.INVISIBLE);
             //duration.setVisibility(View.INVISIBLE);
             //position.setVisibility(View.INVISIBLE);
