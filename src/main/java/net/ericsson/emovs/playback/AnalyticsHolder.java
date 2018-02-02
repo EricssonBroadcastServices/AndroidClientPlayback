@@ -108,6 +108,6 @@ public class AnalyticsHolder implements IPlaybackEventListener {
 
     @Override
     public void onProgramChange(EmpProgram newProgram) {
-
+        this.connector.onProgramChange(newProgram);
     }
 }
