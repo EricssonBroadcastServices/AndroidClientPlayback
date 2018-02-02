@@ -1,16 +1,15 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
+import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.errors.Error;
@@ -252,23 +251,31 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      * - JUMP 30 SECONDS: get current playback time from getPlayheadTime(), add/subtract the 30000, then seek to that point in time
      */
     @Override
-    public void seekToTime(final long unixTimeMs) {
+    public void seekToTime(long _unixTimeMs) {
         if (this.tech != null) {
             if (this.isPlaying()) {
                 long playheadTime = getPlayheadTime();
-                if (unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
+                if (_unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
                     return;
                 }
-                else if (unixTimeMs < playheadTime && this.entitlement.rwEnabled == false) {
+                else if (_unixTimeMs < playheadTime && this.entitlement.rwEnabled == false) {
                     return;
                 }
             }
 
             long[] range = getSeekTimeRange();
-            if (range != null && unixTimeMs >= range[0] && unixTimeMs <= range[1]) {
-                this.tech.seekToTime(unixTimeMs);
+            if (range != null && _unixTimeMs >= range[0] && _unixTimeMs <= range[1]) {
+                this.tech.seekToTime(_unixTimeMs);
             }
             else if (this.entitlement != null && this.entitlement.channelId != null) {
+                if (range != null) {
+                    long[] rangeDiffs = { _unixTimeMs - range[0], range[1] - _unixTimeMs };
+                    if (rangeDiffs[1] < 0 && UniversalPackagerHelper.isDynamicCatchup(this.entitlement.mediaLocator)) {
+                        _unixTimeMs = range[1] - SAFETY_LIVE_DELAY;
+                    }
+                }
+                final long unixTimeMs = _unixTimeMs;
+
                 EpgQueryParameters epgParams = new EpgQueryParameters();
                 epgParams.setFutureTimeFrame(0);
                 epgParams.setPastTimeFrame(0);
@@ -329,13 +336,62 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    @Override
+    public void seekToLive() {
+        if (this.tech == null || this.entitlement == null || this.entitlement.channelId == null) {
+            return;
+        }
+        long[] seekTimeRange = getSeekTimeRange();
+        if (seekTimeRange == null) {
+            return;
+        }
+        long nowMs = getServerTime();
+        if (UniversalPackagerHelper.isStaticCatchup(this.entitlement.mediaLocator)) {
+            EpgQueryParameters epgParams = new EpgQueryParameters();
+            epgParams.setFutureTimeFrame(0);
+            epgParams.setPastTimeFrame(0);
+            EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, nowMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
+                @Override
+                public void onMetadata(ArrayList<EmpProgram> programs) {
+                    try {
+                        if (programs.size() > 0) {
+                            EmpProgram program = programs.get(0);
+                            PlaybackProperties newProps = properties.clone();
+                            newProps.playFrom = PlaybackProperties.PlayFrom.LIVE_EDGE;
+                            newProps.withAutoplay(isPaused() == false);
+                            HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
+                            play(program, newProps);
+                            for(IPlaybackEventListener listener : listeners.keySet()) {
+                                addListener(listener);
+                            }
+                        }
+                        else {
+                            fail (ErrorCodes.PLAYBACK_PROGRAM_NOT_FOUND, Error.PROGRAM_NOT_FOUND.toString());
+                        }
+                    }
+                    catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onError(final Error error) {
+                    fail (ErrorCodes.GENERIC_PLAYBACK_FAILED, error.toString());
+                }
+            }, epgParams);
+        }
+        else {
+            seekToTime(Math.min(nowMs, seekTimeRange[1] - SAFETY_LIVE_DELAY));
+        }
+    }
+
 
     private void prepareBookmark(IPlayable playable, Entitlement entitlement) {
         if (this.properties != null &&
                 this.properties.getPlayFrom() != null &&
                 this.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark) {
             if (entitlement.lastViewedOffset != null && entitlement.lastViewedTime != null) {
-                if (entitlement.mediaLocator.contains(".isml")) {
+                if (UniversalPackagerHelper.isUniversalPackager(entitlement.mediaLocator)) {
                     ((PlaybackProperties.PlayFrom.StartTime) this.properties.getPlayFrom()).startTime = entitlement.liveTime;
                 }
                 else {

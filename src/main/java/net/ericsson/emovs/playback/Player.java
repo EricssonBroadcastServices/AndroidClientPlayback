@@ -19,6 +19,7 @@ import java.util.UUID;
  * Created by Joao Coelho on 2017-08-30.
  */
 public class Player extends PlaybackEventListenerAggregator implements IPlayer {
+    public static long SAFETY_LIVE_DELAY = 10000L;
     protected AnalyticsPlaybackConnector analyticsConnector;
     protected Activity context;
     protected ViewGroup host;
@@ -466,6 +467,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     @Override
     public boolean canPause() {
         return true;
+    }
+
+    @Override
+    public void seekToLive() {
+
     }
 
     protected boolean init(PlaybackProperties properties) throws Exception {

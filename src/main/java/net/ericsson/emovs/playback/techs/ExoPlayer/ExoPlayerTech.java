@@ -7,8 +7,10 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
+import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
@@ -45,10 +47,8 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -134,10 +134,6 @@ public class ExoPlayerTech implements ITech {
 
     DefaultTrackSelector trackSelector = null;
 
-    private boolean isUnifiedPackager() {
-        return manifestUrl != null && manifestUrl.toString().contains(".isml");
-    }
-
     public void overrideExoControls() {
         // FastForward: exo_ffwd
         // FastRewing: exo_rew
@@ -150,15 +146,30 @@ public class ExoPlayerTech implements ITech {
         // TODO: if future code shows stuff, do not forget to check if props enable the default controller
         final View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
+        View next = (View) view.findViewById(R.id.exo_next);
         View timeline = (View) view.findViewById(R.id.exo_progress);
         View duration = (View) view.findViewById(R.id.exo_duration);
         View position = (View) view.findViewById(R.id.exo_position);
 
-
-        if (isUnifiedPackager() == true) {
+        if (UniversalPackagerHelper.isUniversalPackager(this.manifestUrl.toString()) == true) {
             //timeline.setVisibility(View.INVISIBLE);
             //duration.setVisibility(View.INVISIBLE);
             //position.setVisibility(View.INVISIBLE);
+            next.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    parent.seekToLive();
+                }
+            });
+
+            ff.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Toast.makeText(ctx, "Seeking to live...", Toast.LENGTH_SHORT).show();
+                    parent.seekToLive();
+                    return true;
+                }
+            });
 
             ff.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -235,9 +246,9 @@ public class ExoPlayerTech implements ITech {
                         }
                         if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null) {
                             if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
-                                //long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - 500;
-                                //((HookedSimpleExoPlayer) player).seekToTime(startTime);
-                                //startTimeSeekDone = true;
+                                long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
+                                ((HookedSimpleExoPlayer) player).seekToTime(startTime);
+                                startTimeSeekDone = true;
                             }
                             else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
                                 long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
