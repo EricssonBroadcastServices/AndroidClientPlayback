@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class PlaybackProperties implements Serializable {
     public final static PlaybackProperties DEFAULT = new PlaybackProperties();
-    
+
     String preferredTextLanguage;
     String preferredAudioLanguage;
     Integer maxBitrate;
