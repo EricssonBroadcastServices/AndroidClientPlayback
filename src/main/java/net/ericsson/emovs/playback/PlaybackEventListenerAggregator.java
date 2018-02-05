@@ -277,6 +277,16 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
     }
 
     @Override
+    public void onWarning(int warningCode, String warningMessage) {
+        if (eventListeners == null) {
+            return;
+        }
+        for (IPlaybackEventListener listener : eventListeners.keySet()) {
+            listener.onError(warningCode, warningMessage);
+        }
+    }
+
+    @Override
     public void onControllerVisibility(ControllerVisibility visibility) {
         if (eventListeners == null) {
             return;

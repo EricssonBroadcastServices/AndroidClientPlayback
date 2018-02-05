@@ -6,6 +6,7 @@ import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
+import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
@@ -83,17 +84,22 @@ public class ProgramService extends Thread {
         EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
-                for (EmpProgram program : programs) {
-                    if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
-                        EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
-                    }
-                    if (updateProgram) {
-                        currentProgram = program;
-                        if (player != null) {
-                            player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
+                if(programs != null) {
+                    for (EmpProgram program : programs) {
+                        if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
+                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
                         }
+                        if (updateProgram) {
+                            currentProgram = program;
+                            if (player != null) {
+                                player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
+                            }
+                        }
+                        break;
                     }
-                    break;
+                }
+                if (programs == null || programs.size() == 0) {
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.GAPS_IN_EPG);
                 }
                 if (onAllowed != null) {
                     onAllowed.run();

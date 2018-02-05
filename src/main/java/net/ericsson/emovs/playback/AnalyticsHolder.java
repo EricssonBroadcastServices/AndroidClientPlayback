@@ -103,6 +103,11 @@ public class AnalyticsHolder implements IPlaybackEventListener {
     }
 
     @Override
+    public void onWarning(int warningCode, String warningMessage) {
+
+    }
+
+    @Override
     public void onControllerVisibility(ControllerVisibility visibility) {
     }
 

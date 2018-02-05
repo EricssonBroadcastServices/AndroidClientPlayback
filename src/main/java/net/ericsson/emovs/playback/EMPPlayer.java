@@ -13,6 +13,7 @@ import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.errors.Error;
+import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
@@ -215,6 +216,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             }
             onProgramChange(paramProgram);
         }
+        else if (eventId == EventId.WARNING) {
+            Warning warningParam = null;
+            if (param instanceof Warning) {
+                warningParam = (Warning) param;
+            }
+            onWarning(warningParam.getCode(), warningParam.toString());
+        }
     }
 
     @Override
@@ -285,15 +293,25 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     public void onMetadata(ArrayList<EmpProgram> programs) {
                         try {
                             if (programs.size() > 0) {
-                                EmpProgram program = programs.get(0);
-                                PlaybackProperties newProps = properties.clone();
+                                final EmpProgram program = programs.get(0);
+                                final PlaybackProperties newProps = properties.clone();
                                 newProps.playFrom = new PlaybackProperties.PlayFrom.StartTime(unixTimeMs);
                                 newProps.withAutoplay(isPaused() == false);
-                                HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
-                                play(program, newProps);
-                                for(IPlaybackEventListener listener : listeners.keySet()) {
-                                    addListener(listener);
-                                }
+                                final HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
+                                programService.isEntitled (unixTimeMs, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        play(program, newProps);
+                                        for(IPlaybackEventListener listener : listeners.keySet()) {
+                                            addListener(listener);
+                                        }
+                                    }
+                                }, new ErrorRunnable() {
+                                    @Override
+                                    public void run(final int errorCode, final String errorMessage) {
+                                        onWarning(Warning.SEEK_NOT_POSSIBLE.getCode(), Warning.SEEK_NOT_POSSIBLE.toString());
+                                    }
+                                });
                             }
                             else {
                                 fail (ErrorCodes.PLAYBACK_PROGRAM_NOT_FOUND, Error.PROGRAM_NOT_FOUND.toString());

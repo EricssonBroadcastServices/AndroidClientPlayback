@@ -154,7 +154,7 @@ public class ExoPlayerTech implements ITech {
         View position = (View) view.findViewById(R.id.exo_position);
 
         pause.setEnabled(parent.canPause());
-        
+
         if (UniversalPackagerHelper.isUniversalPackager(this.manifestUrl.toString()) == true) {
             //timeline.setVisibility(View.INVISIBLE);
             //duration.setVisibility(View.INVISIBLE);
@@ -506,6 +506,9 @@ public class ExoPlayerTech implements ITech {
     }
 
     private long getWindowStartFromTimeline(Timeline timeline) {
+        if (player == null) {
+            return 0;
+        }
         Field field = null;
         try {
             field = timeline.getClass().getDeclaredField("windowStartTimeMs");
