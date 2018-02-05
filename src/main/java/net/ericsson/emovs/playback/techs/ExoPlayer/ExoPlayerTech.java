@@ -205,11 +205,25 @@ public class ExoPlayerTech implements ITech {
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        // Setting max bitrate
-        if (properties != null && properties.getMaxBitrate() != null) {
+        if (properties != null) {
             DefaultTrackSelector.Parameters currentParameters = trackSelector.getParameters();
-            DefaultTrackSelector.Parameters newParameters = currentParameters.withMaxVideoBitrate(properties.getMaxBitrate());
-            trackSelector.setParameters(newParameters);
+
+            // Setting max bitrate
+            if (properties.getMaxBitrate() != null) {
+                currentParameters = currentParameters.withMaxVideoBitrate(properties.getMaxBitrate());
+            }
+
+            // Setting preferred audio langugage
+            if (properties.getPreferredAudioLanguage() != null) {
+                currentParameters.withPreferredAudioLanguage(properties.getPreferredAudioLanguage());
+            }
+
+            // Setting preferred text language
+            if (properties.getPreferredTextLanguage() != null) {
+                currentParameters.withPreferredTextLanguage(properties.getPreferredTextLanguage());
+            }
+
+            trackSelector.setParameters(currentParameters);
         }
 
         Pair<String, String> licenseDetails = DashLicenseDetails.getLicenseDetails(manifestUrl, isOffline);

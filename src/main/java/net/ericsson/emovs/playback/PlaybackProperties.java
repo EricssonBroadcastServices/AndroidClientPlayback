@@ -11,7 +11,9 @@ import java.io.Serializable;
  */
 public class PlaybackProperties implements Serializable {
     public final static PlaybackProperties DEFAULT = new PlaybackProperties();
-
+    
+    String preferredTextLanguage;
+    String preferredAudioLanguage;
     Integer maxBitrate;
     boolean nativeControls;
     boolean autoplay;
@@ -82,14 +84,53 @@ public class PlaybackProperties implements Serializable {
         return this.playFrom;
     }
 
+    /**
+     * When set, it will limit playback's max bitrate
+     * @param maxBitrate
+     * @return
+     */
     public PlaybackProperties withMaxBitrate(Integer maxBitrate) {
         this.maxBitrate = maxBitrate;
         return this;
     }
 
+    /**
+     * Gets max bitrate limit
+     */
     public Integer getMaxBitrate() {
         return this.maxBitrate;
     }
+
+    /**
+     * Gets preferred text langugage code of playback
+     */
+    public String getPreferredTextLanguage() {
+        return preferredTextLanguage;
+    }
+
+    /**
+     * Sets preferred text langugage code of playback
+     */
+    public PlaybackProperties withPreferredTextLanguage(String preferredTextLanguage) {
+        this.preferredTextLanguage = preferredTextLanguage;
+        return this;
+    }
+
+    /**
+     * Gets preferred audio langugage code of playback
+     */
+    public String getPreferredAudioLanguage() {
+        return preferredAudioLanguage;
+    }
+
+    /**
+     * Sets preferred audio langugage code of playback
+     */
+    public PlaybackProperties withPreferredAudioLanguage(String preferredAudioLanguage) {
+        this.preferredAudioLanguage = preferredAudioLanguage;
+        return this;
+    }
+
 
     @Override
     public PlaybackProperties clone() throws CloneNotSupportedException {
