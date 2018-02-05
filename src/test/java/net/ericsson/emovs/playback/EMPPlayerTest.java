@@ -86,7 +86,7 @@ public class EMPPlayerTest {
     }
 
     @Test
-    public void playbackPropertiesTest() throws Exception {
+    public void playback_properties_test() throws Exception {
         PlaybackProperties props = new PlaybackProperties();
         props.withAutoplay(true).withNativeControls(false);
         Assert.assertFalse(props.hasNativeControls());
@@ -100,47 +100,83 @@ public class EMPPlayerTest {
 
         // Test Case 1: Live Program plays from Live Edge by DEFAULT
         player.play(live_program, DEFAULT_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
 
         // Test Case 2: Live Program plays from Beginning if props are set to start from BEGINNING
         player.play(live_program, BEGINNING_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
         Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == live_program.startDateTime.getMillis());
 
         // Test Case 3: Live Program plays from Bookmark if props are set to start from BOOKMARK
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
         player.play(live_program, BOOKMARK_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark);
         Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == entitlement_with_bookmark_emup.liveTime);
 
         // Test Case 4: Live Program plays from Live Edge if props are set to start from BOOKMARK but no bookmark is sent from Exposure
         fakeEE.setEntitlement(entitlement_no_bookmark);
         player.play(live_program, BOOKMARK_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
 
         // Test Case 5: Live Program plays from Live Edge if props are set to start from LIVE_EDGE
         player.play(live_program, LIVE_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
 
         // Test Case 6: Live Program plays from Start Time if props are set to start from specific StartTime
         player.play(live_program, STARTTIME_PLAYBACK_PROPS);
-        Thread.sleep(10);
+        Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
         Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
     }
 
     @Test
-    public void playbackPlayFromDynamicCatchupTest() throws Exception {
+    public void playback_play_from_catchup_test() throws Exception {
+        FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
+        EMPPlayer player = new EMPPlayer(null, fakeEE, techFactory, dummyActivity, null);
 
+        // Test Case 1: Catchup plays from Beginning by DEFAULT
+        player.play(catchup_program, DEFAULT_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+
+        // Test Case 2: Catchup plays from Beginning if props are set to start from BEGINNING
+        player.play(catchup_program, BEGINNING_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == catchup_program.startDateTime.getMillis());
+
+        // Test Case 3: Catchup plays from Bookmark if props are set to start from BOOKMARK
+        fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        player.play(catchup_program, BOOKMARK_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == entitlement_with_bookmark_emup.liveTime);
+
+        // Test Case 4: Catchup plays from Beginning if props are set to start from BOOKMARK but no bookmark is sent from Exposure
+        fakeEE.setEntitlement(entitlement_no_bookmark);
+        player.play(catchup_program, BOOKMARK_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+
+        // Test Case 5: Catchup plays from Beginning if props are set to start from BEGINNING
+        player.play(catchup_program, BEGINNING_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+
+        // Test Case 6: Catchup plays from Start Time if props are set to start from specific StartTime
+        player.play(catchup_program, STARTTIME_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
     }
 
     @Test
-    public void playbackPlayFromStaticCatchupTest() throws Exception {
+    public void playback_play_from_channel_test() throws Exception {
 
     }
 
