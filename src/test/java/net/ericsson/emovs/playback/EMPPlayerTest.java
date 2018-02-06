@@ -5,6 +5,8 @@ import android.view.View;
 
 import junit.framework.Assert;
 
+import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
+import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeTech;
 import net.ericsson.emovs.playback.interfaces.ITech;
@@ -15,6 +17,7 @@ import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.models.EmpChannel;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+import net.ericsson.emovs.utilities.test.TestUtils;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -25,6 +28,8 @@ import org.mockito.internal.matchers.InstanceOf;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
+
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,6 +62,8 @@ public class EMPPlayerTest {
     EmpProgram live_program;
     @Mock
     EmpProgram catchup_program;
+    @Mock
+    EmpChannel live_channel;
     @Mock
     TechFactory techFactory;
     @Mock
@@ -92,6 +99,8 @@ public class EMPPlayerTest {
         Assert.assertFalse(props.hasNativeControls());
         Assert.assertTrue(props.isAutoplay());
     }
+
+    // TODO: make unit tests to ensure cases where EmpProgram is passed without all information: like programStartTime and programEndTime
 
     @Test
     public void playback_play_from_live_program_test() throws Exception {
@@ -143,6 +152,7 @@ public class EMPPlayerTest {
         player.play(catchup_program, DEFAULT_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == catchup_program.startDateTime.getMillis());
 
         // Test Case 2: Catchup plays from Beginning if props are set to start from BEGINNING
         player.play(catchup_program, BEGINNING_PLAYBACK_PROPS);
@@ -162,11 +172,13 @@ public class EMPPlayerTest {
         player.play(catchup_program, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == catchup_program.startDateTime.getMillis());
 
         // Test Case 5: Catchup plays from Beginning if props are set to start from BEGINNING
         player.play(catchup_program, BEGINNING_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == catchup_program.startDateTime.getMillis());
 
         // Test Case 6: Catchup plays from Start Time if props are set to start from specific StartTime
         player.play(catchup_program, STARTTIME_PLAYBACK_PROPS);
@@ -177,7 +189,71 @@ public class EMPPlayerTest {
 
     @Test
     public void playback_play_from_channel_test() throws Exception {
+        FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
+        FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
+        TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
 
+        ArrayList<EmpProgram> singleProgramEpg = new ArrayList<EmpProgram>();
+        singleProgramEpg.add(live_program);
+
+        EMPPlayer player = new EMPPlayer(null, fakeEE, techFactory, dummyActivity, null);
+
+        // Test Case 1: Channel plays from LIVE_EDGE by DEFAULT
+        player.play(live_channel, DEFAULT_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
+
+        // Test Case 2: Channel plays from Bookmark if props are set to start from BOOKMARK
+        fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        player.play(live_channel, BOOKMARK_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Bookmark);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == entitlement_with_bookmark_emup.liveTime);
+
+        // Test Case 3: Channel plays from Live Edge if props are set to start from BOOKMARK but no bookmark is sent from Exposure
+        fakeEE.setEntitlement(entitlement_no_bookmark);
+        player.play(live_channel, BOOKMARK_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
+
+        // Test Case 4: Channel plays from StartTime if props are set to StartTime - No EPG
+        fakeMetadataProvider.mockEpg(null);
+        player.play(live_channel, STARTTIME_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+
+        // Test Case 5: Channel plays from StartTime if props are set to StartTime - With EPG
+        fakeMetadataProvider.mockEpg(singleProgramEpg);
+        player.play(live_channel, STARTTIME_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+
+        // Test Case 6: Channel plays from Beginning if props are set to Beginning and the Channel has EPG
+        fakeMetadataProvider.mockEpg(singleProgramEpg);
+        player.play(live_channel, BEGINNING_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.Beginning) player.getPlaybackProperties().getPlayFrom()).startTime == live_program.startDateTime.getMillis());
+
+        // Test Case 7: Channel plays from Live Edge if props are set to Beginning and the Channel has no EPG
+        fakeMetadataProvider.mockEpg(null);
+        player.play(live_channel, BEGINNING_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
+
+        // Test Case 8: Channel plays from Live Edge if props are set to start from LIVE_EDGE - No EPG
+        fakeMetadataProvider.mockEpg(null);
+        player.play(live_program, LIVE_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
+
+        // Test Case 9: Channel plays from Live Edge if props are set to start from LIVE_EDGE - With EPG
+        fakeMetadataProvider.mockEpg(singleProgramEpg);
+        player.play(live_program, LIVE_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
     }
 
 }

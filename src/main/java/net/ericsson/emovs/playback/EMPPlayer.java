@@ -108,9 +108,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 playOffline(offlineAsset);
             }
             else if (playable instanceof EmpChannel) {
-                if (this.properties.getPlayFrom() == null) {
-                    this.properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
-                }
                 this.playable = playable;
                 EmpChannel channel = (EmpChannel) playable;
                 playLive(channel);
@@ -368,6 +365,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             EpgQueryParameters epgParams = new EpgQueryParameters();
             epgParams.setFutureTimeFrame(0);
             epgParams.setPastTimeFrame(0);
+            epgParams.setPageSize(10);
             EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, nowMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
                 @Override
                 public void onMetadata(ArrayList<EmpProgram> programs) {
@@ -500,6 +498,60 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 if (PlaybackProperties.PlayFrom.isBookmark(properties.getPlayFrom())) {
                     prepareBookmark(channel, entitlement);
                 }
+
+                if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
+                    if (channel.programs != null) {
+                        boolean foundLive = false;
+                        for (EmpProgram program : channel.programs) {
+                            if (program.liveNow()) {
+                                PlaybackProperties.PlayFrom.Beginning beginningOpt = new PlaybackProperties.PlayFrom.Beginning();
+                                beginningOpt.withStartTime(program.startDateTime.getMillis());
+                                properties.withPlayFrom(beginningOpt);
+                                foundLive = true;
+                                break;
+                            }
+                        }
+                        if (!foundLive) {
+                            properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                        }
+                    }
+                    else {
+                        EpgQueryParameters epgParams = new EpgQueryParameters();
+                        epgParams.setFutureTimeFrame(0);
+                        epgParams.setPastTimeFrame(0);
+                        epgParams.setPageSize(10);
+                        EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, getServerTime(), new IMetadataCallback<ArrayList<EmpProgram>>() {
+                            @Override
+                            public void onMetadata(ArrayList<EmpProgram> programs) {
+                                if (programs.size() > 0) {
+                                    EmpProgram program = programs.get(0);
+                                    PlaybackProperties.PlayFrom.Beginning beginningOpt = new PlaybackProperties.PlayFrom.Beginning();
+                                    beginningOpt.withStartTime(program.startDateTime.getMillis());
+                                    properties.withPlayFrom(beginningOpt);
+                                }
+                                else {
+                                    properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                                }
+
+                                preparePlayback(entitlement.channelId, entitlement);
+                                prepareProgramService();
+                            }
+
+                            @Override
+                            public void onError(final Error error) {
+                                properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                                preparePlayback(entitlement.channelId, entitlement);
+                                prepareProgramService();
+                            }
+                        }, epgParams);
+                        return;
+                    }
+                }
+
+                if (properties.getPlayFrom() == null) {
+                    properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                }
+
                 preparePlayback(entitlement.channelId, entitlement);
                 prepareProgramService();
             }
