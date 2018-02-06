@@ -129,7 +129,7 @@ public class ProgramService extends Thread {
                     return;
                 }
 
-                if (!this.entitlement.isLive && !this.entitlement.isUnifiedStream) {
+                if (this.entitlement.isUnifiedStream == false) {
                     return;
                 }
 
