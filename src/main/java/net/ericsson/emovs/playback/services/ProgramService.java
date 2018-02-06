@@ -90,10 +90,10 @@ public class ProgramService extends Thread {
                             EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
                         }
                         if (updateProgram) {
-                            currentProgram = program;
-                            if (player != null) {
+                            if (player != null && currentProgram != null) {
                                 player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
                             }
+                            currentProgram = program;
                         }
                         break;
                     }
