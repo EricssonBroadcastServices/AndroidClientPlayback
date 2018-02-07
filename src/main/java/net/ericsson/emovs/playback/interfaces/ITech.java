@@ -79,13 +79,6 @@ public interface ITech {
     void seekTo(long positionMs);
 
     /**
-     * Returns the current time of the media being displayed
-     *
-     * @return
-     */
-    long getServerTime();
-
-    /**
      * Returns the duration of the media displayed by the tech
      *
      * @return

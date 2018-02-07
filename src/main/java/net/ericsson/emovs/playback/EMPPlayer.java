@@ -43,6 +43,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     private Entitlement entitlement;
     private IEntitlementProvider entitlementProvider;
     private ProgramService programService;
+    private long lastPlayTimeMs;
+
     private EmptyPlaybackEventListener empPlaybackListener = new EmptyPlaybackEventListener(this) {
         @Override
         public void onPlaybackEnd() {
@@ -90,6 +92,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      */
     public void play(IPlayable playable, PlaybackProperties properties) {
         try {
+            if (getServerTime() - lastPlayTimeMs < 1000L) {
+                return;
+            }
+            lastPlayTimeMs = getServerTime();
+
             init(properties);
 
             super.onPlay();

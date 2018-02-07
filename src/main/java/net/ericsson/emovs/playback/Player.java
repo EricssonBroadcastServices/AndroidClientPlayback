@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
@@ -149,10 +150,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return
      */
     public long getServerTime() {
-        if (this.tech != null) {
-            return this.tech.getServerTime();
-        }
-        return -1;
+        return MonotonicTimeService.getInstance().currentTime();
     }
 
     /**
@@ -360,6 +358,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         }
         return this.tech.getSelectedTextTrack();
     }
+
 
     protected long getTimehisftDelay() {
         if (this.tech != null) {

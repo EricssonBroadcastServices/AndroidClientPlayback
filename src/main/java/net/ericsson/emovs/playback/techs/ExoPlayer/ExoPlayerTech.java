@@ -459,10 +459,6 @@ public class ExoPlayerTech implements ITech {
         return -1;
     }
 
-    public long getServerTime() {
-        return MonotonicTimeService.getInstance().currentTime();
-    }
-
     public long[] getBufferedRange() {
         if (this.player == null) {
             return null;
@@ -527,10 +523,10 @@ public class ExoPlayerTech implements ITech {
         try {
             field = timeline.getClass().getDeclaredField("windowStartTimeMs");
             field.setAccessible(true);
-            long lwindowStartTimeMs = (Long) field.get(player.getCurrentTimeline());
+            long lwindowStartTimeMs = (Long) field.get(timeline);
             return lwindowStartTimeMs;
         }
-        catch (IllegalAccessException | NoSuchFieldException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
         return  0;
