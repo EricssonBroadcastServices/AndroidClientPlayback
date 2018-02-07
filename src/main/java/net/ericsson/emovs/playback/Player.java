@@ -477,6 +477,13 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     }
 
+    @Override
+    public void runOnUiThread(Runnable runnable) {
+        if (this.context != null) {
+            this.context.runOnUiThread(runnable);
+        }
+    }
+
     protected boolean init(PlaybackProperties properties) throws Exception {
         this.properties = properties;
         this.playbackUUID = null;

@@ -3,11 +3,18 @@ package net.ericsson.emovs.playback.helpers;
 import android.app.Activity;
 import android.view.View;
 
+import net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
+import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+
+import org.mockito.Mock;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * Created by Joao Coelho on 2018-02-06.
@@ -16,6 +23,13 @@ import net.ericsson.emovs.utilities.models.EmpProgram;
 public class FakeEntitledPlayer implements IEntitledPlayer {
     long playheadTime;
     boolean isPlaying;
+
+    public Warning lastWarning;
+    public int lastErrorCode;
+    public String lastErrorMessage;
+
+    public FakeEntitledPlayer() {
+    }
 
     public void mockPlayHeadTime(long _playheadTime) {
         this.playheadTime = _playheadTime;
@@ -47,7 +61,7 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
 
     @Override
     public void stop() {
-
+        isPlaying = false;
     }
 
     @Override
@@ -182,7 +196,8 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
 
     @Override
     public void fail(int errorCode, String errorMessage) {
-
+        this.lastErrorCode = errorCode;
+        this.lastErrorMessage = errorMessage;
     }
 
     @Override
@@ -192,7 +207,9 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
 
     @Override
     public void trigger(IPlaybackEventListener.EventId eventId, Object param) {
-
+        if (eventId == IPlaybackEventListener.EventId.WARNING) {
+            this.lastWarning = (Warning) param;
+        }
     }
 
     @Override
@@ -218,6 +235,13 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
     @Override
     public void seekToLive() {
 
+    }
+
+    @Override
+    public void runOnUiThread(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     @Override

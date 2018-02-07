@@ -13,7 +13,6 @@ import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.ErrorRunnable;
-import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 
 import org.joda.time.DateTime;
@@ -86,6 +85,10 @@ public class ProgramService extends Thread {
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
                     for (EmpProgram program : programs) {
+                        // Ignoring programs that are almost ending
+                        if (programs.size() > 1 && timeToCheck - program.endDateTime.getMillis() > -1000L) {
+                            continue;
+                        }
                         if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
                             EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
                         }
@@ -99,7 +102,7 @@ public class ProgramService extends Thread {
                     }
                 }
                 if (programs == null || programs.size() == 0) {
-                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.GAPS_IN_EPG);
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG);
                 }
                 if (onAllowed != null) {
                     onAllowed.run();
@@ -108,16 +111,12 @@ public class ProgramService extends Thread {
 
             @Override
             public void onError(final Error error) {
-                if (onForbidden != null) {
-                    onForbidden.run(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
+                if (onAllowed != null) {
+                    onAllowed.run();
                 }
-                player.getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        player.fail(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.toString());
-                        player.stop();
-                    }
-                });
+                if (player != null) {
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
+                }
             }
         }, epgParams);
     }
@@ -139,7 +138,7 @@ public class ProgramService extends Thread {
                     checkTimeshiftAllowance(currentTime, null, new ErrorRunnable() {
                         @Override
                         public void run(int code, final String message) {
-                            player.getActivity().runOnUiThread(new Runnable() {
+                            player.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     currentProgram = null;

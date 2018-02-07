@@ -4,6 +4,7 @@ import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+import net.ericsson.emovs.utilities.errors.Error;
 
 import java.util.ArrayList;
 
@@ -13,18 +14,33 @@ import java.util.ArrayList;
 
 public  class FakeEMPMetadataProvider extends EMPMetadataProvider {
     ArrayList<EmpProgram> epg;
+    boolean isBackendDown;
 
     public void mockEpg(ArrayList<EmpProgram> _epg){
         this.epg = _epg;
     }
 
+    public void mockBackendAvailability(boolean availability) {
+        isBackendDown = !availability;
+    }
+
     @Override
     public void getEpg(String channelId, IMetadataCallback<ArrayList<EmpProgram>> callback, EpgQueryParameters params) {
-        callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+        if (isBackendDown) {
+            callback.onError(Error.NETWORK_ERROR);
+        }
+        else {
+            callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+        }
     }
 
     @Override
     public void getEpgWithTime(String channelId, long epgTimeNowMs, IMetadataCallback<ArrayList<EmpProgram>> callback, EpgQueryParameters params) {
-        callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+        if (isBackendDown) {
+            callback.onError(Error.NETWORK_ERROR);
+        }
+        else {
+            callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+        }
     }
 }

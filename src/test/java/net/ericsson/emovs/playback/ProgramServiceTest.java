@@ -1,7 +1,5 @@
 package net.ericsson.emovs.playback;
 
-import android.app.Activity;
-
 import junit.framework.Assert;
 
 import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
@@ -9,11 +7,10 @@ import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEMPEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitledPlayer;
-import net.ericsson.emovs.playback.helpers.FakeEntitlementProvider;
-import net.ericsson.emovs.playback.helpers.FakeTech;
 import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
-import net.ericsson.emovs.utilities.models.EmpChannel;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.WarningCodes;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 import net.ericsson.emovs.utilities.test.TestUtils;
 
@@ -90,8 +87,9 @@ public class ProgramServiceTest {
     }
 
     @Test
-    public void live_program_boundary_crossing_test() throws Exception {
-        //TODO: test no finished
+    public void entitled_live_program_boundary_crossing_test() throws Exception {
+        // Test Case 1: Normal playback and program ends and starts a new program (User is ENTITLED to watch next program)
+
         FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
         TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
 
@@ -107,9 +105,11 @@ public class ProgramServiceTest {
         FakeEntitledPlayer player = new FakeEntitledPlayer();
         player.mockIsPlaying(true);
 
-        // Test Case 1: Normal playback and program ends and starts a new program (User is ENTITLED to watch next program)
+
         ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
 
+        fakeEntitlementProvider.mockIsEntitled(true);
+        fakeEntitlementProvider.forgetEntitlementCheck();
         fakeMetadataProvider.mockEpg(singleProgramEpg1);
         player.mockPlayHeadTime(live_program1.startDateTime.getMillis() + 1L);
 
@@ -119,10 +119,12 @@ public class ProgramServiceTest {
             Thread.sleep(10);
         }
 
-
         EmpProgram currentProgram = service.getCurrentProgram();
         Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
 
+        fakeEntitlementProvider.mockIsEntitled(true);
+        fakeEntitlementProvider.forgetEntitlementCheck();
         fakeMetadataProvider.mockEpg(singleProgramEpg2);
         player.mockPlayHeadTime(live_program2.startDateTime.getMillis() + 1L);
 
@@ -130,17 +132,168 @@ public class ProgramServiceTest {
 
         currentProgram = service.getCurrentProgram();
         Assert.assertTrue("@id/2".equals(currentProgram.assetId));
-
-
-        // Test Case 2: Normal playback and program ends and starts a new program (User is NOT ENTITLED to watch next program)
-
-        // Test Case 3: Normal playback and program ends but there is a gap in EPG (Entitlement check cannot be done)
-
-        // Test Case 4: Normal playback and program ends and starts a new program (Server crashes when performing entitlement check)
+        Assert.assertTrue(player.isPlaying());
+        Assert.assertTrue(player.lastErrorCode == 0);
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
 
         service.interrupt();
     }
 
+    @Test
+    public void not_entitled_live_program_boundary_crossing_test() throws Exception {
+        // Test Case 2: Normal playback and program ends and starts a new program (User is NOT ENTITLED to watch next program)
 
+        FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
+        TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
+
+        FakeEMPEntitlementProvider fakeEntitlementProvider = new FakeEMPEntitlementProvider();
+        TestUtils.mockProvider(EMPEntitlementProvider.class, fakeEntitlementProvider);
+
+        ArrayList<EmpProgram> singleProgramEpg1 = new ArrayList<>();
+        singleProgramEpg1.add(live_program1);
+
+        ArrayList<EmpProgram> singleProgramEpg2 = new ArrayList<>();
+        singleProgramEpg2.add(live_program2);
+
+        FakeEntitledPlayer player = new FakeEntitledPlayer();
+        player.mockIsPlaying(true);
+
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+
+        fakeEntitlementProvider.mockIsEntitled(true);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+        fakeMetadataProvider.mockEpg(singleProgramEpg1);
+        player.mockPlayHeadTime(live_program1.startDateTime.getMillis() + 1L);
+
+        service.start();
+
+        while(service.getCurrentProgram() == null) {
+            Thread.sleep(10);
+        }
+
+        EmpProgram currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
+
+        fakeMetadataProvider.mockEpg(singleProgramEpg2);
+        player.mockPlayHeadTime(live_program2.startDateTime.getMillis() + 1L);
+        fakeEntitlementProvider.mockIsEntitled(false);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+
+        Thread.sleep(2000);
+
+        currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/2".equals(currentProgram.assetId));
+
+        Assert.assertTrue(player.isPlaying() == false);
+        Assert.assertTrue(player.lastErrorCode == ErrorCodes.PLAYBACK_NOT_ENTITLED);
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
+
+        service.interrupt();
+    }
+
+    @Test
+    public void gap_in_epg_live_program_boundary_crossing_test() throws Exception {
+        // Test Case 3: Normal playback and program ends but there is a gap in EPG (Entitlement check cannot be done)
+
+        FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
+        TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
+
+        FakeEMPEntitlementProvider fakeEntitlementProvider = new FakeEMPEntitlementProvider();
+        TestUtils.mockProvider(EMPEntitlementProvider.class, fakeEntitlementProvider);
+
+        ArrayList<EmpProgram> singleProgramEpg1 = new ArrayList<>();
+        singleProgramEpg1.add(live_program1);
+
+        FakeEntitledPlayer player = new FakeEntitledPlayer();
+        player.mockIsPlaying(true);
+
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+
+        fakeEntitlementProvider.mockIsEntitled(true);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+        fakeMetadataProvider.mockEpg(singleProgramEpg1);
+        player.mockPlayHeadTime(live_program1.startDateTime.getMillis() + 1L);
+
+        service.start();
+
+        while(service.getCurrentProgram() == null) {
+            Thread.sleep(10);
+        }
+
+        EmpProgram currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
+
+        ArrayList<EmpProgram> empty_epg = new ArrayList<>();
+        fakeMetadataProvider.mockEpg(empty_epg);
+        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
+        fakeEntitlementProvider.mockIsEntitled(false);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+
+        Thread.sleep(2000);
+
+        currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+
+        Assert.assertTrue(player.isPlaying() == true);
+        Assert.assertTrue(player.lastErrorCode == 0);
+        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG);
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
+
+        service.interrupt();
+    }
+
+    @Test
+    public void backend_down_live_program_boundary_crossing_test() throws Exception {
+        // Test Case 4: Normal playback and program ends and starts a new program (Server crashes when performing entitlement check)
+
+        FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
+        TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
+
+        FakeEMPEntitlementProvider fakeEntitlementProvider = new FakeEMPEntitlementProvider();
+        TestUtils.mockProvider(EMPEntitlementProvider.class, fakeEntitlementProvider);
+
+        ArrayList<EmpProgram> singleProgramEpg1 = new ArrayList<>();
+        singleProgramEpg1.add(live_program1);
+
+        FakeEntitledPlayer player = new FakeEntitledPlayer();
+        player.mockIsPlaying(true);
+
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+
+        fakeEntitlementProvider.mockIsEntitled(true);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+        fakeMetadataProvider.mockEpg(singleProgramEpg1);
+        player.mockPlayHeadTime(live_program1.startDateTime.getMillis() + 1L);
+
+        service.start();
+
+        while(service.getCurrentProgram() == null) {
+            Thread.sleep(10);
+        }
+
+        EmpProgram currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
+
+        ArrayList<EmpProgram> empty_epg = new ArrayList<>();
+        fakeMetadataProvider.mockEpg(empty_epg);
+        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
+        fakeMetadataProvider.mockBackendAvailability(false);
+        fakeEntitlementProvider.forgetEntitlementCheck();
+
+        Thread.sleep(2000);
+
+        currentProgram = service.getCurrentProgram();
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+
+        Assert.assertTrue(player.isPlaying() == true);
+        Assert.assertTrue(player.lastErrorCode == 0);
+        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
+        Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
+
+        service.interrupt();
+    }
 
 }
