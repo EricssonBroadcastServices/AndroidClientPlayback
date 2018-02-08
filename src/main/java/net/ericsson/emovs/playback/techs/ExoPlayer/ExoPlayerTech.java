@@ -276,17 +276,17 @@ public class ExoPlayerTech implements ITech {
                             if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
                                 long[] seekTimeRange = parent.getSeekTimeRange();
                                 if (seekTimeRange != null) {
-                                    ((HookedSimpleExoPlayer) player).seekToTime(seekTimeRange[1] - Player.SAFETY_LIVE_DELAY);
+                                    seekToTime(seekTimeRange[1] - Player.SAFETY_LIVE_DELAY);
                                 }
                                 else {
                                     long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
-                                    ((HookedSimpleExoPlayer) player).seekToTime(startTime);
+                                    seekToTime(startTime);
                                 }
                                 startTimeSeekDone = true;
                             }
                             else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
                                 long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
-                                ((HookedSimpleExoPlayer) player).seekToTime(startTime);
+                                seekToTime(startTime);
                                 startTimeSeekDone = true;
                             }
                         }
