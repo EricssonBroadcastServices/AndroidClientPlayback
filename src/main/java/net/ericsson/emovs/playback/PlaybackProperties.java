@@ -102,14 +102,14 @@ public class PlaybackProperties implements Serializable {
     }
 
     /**
-     * Gets preferred text langugage code of playback
+     * Gets playback's preferred text langugage code
      */
     public String getPreferredTextLanguage() {
         return preferredTextLanguage;
     }
 
     /**
-     * Sets preferred text langugage code of playback
+     * Sets preferred text langugage code
      */
     public PlaybackProperties withPreferredTextLanguage(String preferredTextLanguage) {
         this.preferredTextLanguage = preferredTextLanguage;
@@ -117,14 +117,14 @@ public class PlaybackProperties implements Serializable {
     }
 
     /**
-     * Gets preferred audio langugage code of playback
+     * Gets playback's preferred audio langugage code
      */
     public String getPreferredAudioLanguage() {
         return preferredAudioLanguage;
     }
 
     /**
-     * Sets preferred audio langugage code of playback
+     * Sets preferred audio langugage code
      */
     public PlaybackProperties withPreferredAudioLanguage(String preferredAudioLanguage) {
         this.preferredAudioLanguage = preferredAudioLanguage;
@@ -140,6 +140,8 @@ public class PlaybackProperties implements Serializable {
         newProps.playFrom = this.playFrom != null ? (PlayFromItem) this.playFrom.clone() : null;
         newProps.drmProperties = this.drmProperties != null ? this.drmProperties.clone() : null;
         newProps.maxBitrate = this.maxBitrate;
+        newProps.preferredAudioLanguage = this.getPreferredAudioLanguage();
+        newProps.preferredTextLanguage = this.getPreferredTextLanguage();
         return newProps;
     }
 

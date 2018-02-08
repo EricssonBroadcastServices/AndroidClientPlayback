@@ -215,12 +215,12 @@ public class ExoPlayerTech implements ITech {
 
             // Setting preferred audio langugage
             if (properties.getPreferredAudioLanguage() != null) {
-                currentParameters.withPreferredAudioLanguage(properties.getPreferredAudioLanguage());
+                currentParameters = currentParameters.withPreferredAudioLanguage(properties.getPreferredAudioLanguage());
             }
 
             // Setting preferred text language
             if (properties.getPreferredTextLanguage() != null) {
-                currentParameters.withPreferredTextLanguage(properties.getPreferredTextLanguage());
+                currentParameters = currentParameters.withPreferredTextLanguage(properties.getPreferredTextLanguage());
             }
 
             trackSelector.setParameters(currentParameters);

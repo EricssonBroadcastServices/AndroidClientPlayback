@@ -13,6 +13,8 @@ import net.ericsson.emovs.utilities.entitlements.Entitlement;
  */
 
 public class FakeTech implements ITech {
+    public PlaybackProperties propsFedToTech;
+
     @Override
     public boolean isPlaying() {
         return false;
@@ -20,7 +22,7 @@ public class FakeTech implements ITech {
 
     @Override
     public void init(Player parent, Activity ctx, String playToken, PlaybackProperties properties) {
-
+        this.propsFedToTech = properties;
     }
 
     @Override
@@ -61,11 +63,6 @@ public class FakeTech implements ITech {
     @Override
     public void seekTo(long positionMs) {
 
-    }
-
-    @Override
-    public long getServerTime() {
-        return 0;
     }
 
     @Override

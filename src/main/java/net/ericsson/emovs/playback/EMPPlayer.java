@@ -39,11 +39,11 @@ import java.util.UUID;
  */
 
 public class EMPPlayer extends Player implements IEntitledPlayer {
-    private IPlayable playable;
-    private Entitlement entitlement;
-    private IEntitlementProvider entitlementProvider;
-    private ProgramService programService;
-    private long lastPlayTimeMs;
+    protected IPlayable playable;
+    protected Entitlement entitlement;
+    protected IEntitlementProvider entitlementProvider;
+    protected ProgramService programService;
+    protected long lastPlayTimeMs;
 
     private EmptyPlaybackEventListener empPlaybackListener = new EmptyPlaybackEventListener(this) {
         @Override
@@ -446,7 +446,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 this.properties.withDRMProperties(null);
             }
 
-            this.properties.withMaxBitrate(entitlement.maxBitrate);
+            if (entitlement.maxBitrate != null) {
+                this.properties.withMaxBitrate(entitlement.maxBitrate);
+            }
         }
 
         // TODO: remove hack that is only for test purposes - this should be done on the backend
