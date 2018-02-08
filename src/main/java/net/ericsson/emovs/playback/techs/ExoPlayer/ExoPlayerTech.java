@@ -147,6 +147,7 @@ public class ExoPlayerTech implements ITech {
         final View ff = (View) view.findViewById(R.id.exo_ffwd);
         View rw = (View) view.findViewById(R.id.exo_rew);
         View next = (View) view.findViewById(R.id.exo_next);
+        View prev = (View) view.findViewById(R.id.exo_prev);
         View pause = (View) view.findViewById(R.id.exo_pause);
         View play = (View) view.findViewById(R.id.exo_play);
         View timeline = (View) view.findViewById(R.id.exo_progress);
@@ -193,6 +194,13 @@ public class ExoPlayerTech implements ITech {
                 @Override
                 public void onClick(View btn) {
                     parent.seekToTime(parent.getPlayheadTime() - 30000);
+                }
+            });
+
+            prev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    parent.startOver();
                 }
             });
         }

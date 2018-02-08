@@ -359,6 +359,25 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     @Override
+    public void startOver() {
+        if (this.tech == null || this.playable == null) {
+            return;
+        }
+        if (this.playable instanceof EmpProgram) {
+            EmpProgram program = (EmpProgram) this.playable;
+            if (program.startDateTime != null) {
+                seekToTime(program.startDateTime.getMillis());
+            }
+            else {
+                seekTo(0);
+            }
+        }
+        else {
+            seekTo(0);
+        }
+    }
+
+    @Override
     public void seekToLive() {
         if (this.tech == null || this.entitlement == null || this.entitlement.channelId == null) {
             return;
