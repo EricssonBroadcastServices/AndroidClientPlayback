@@ -305,6 +305,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 programService.isEntitled (unixTimeMs, new Runnable() {
                                     @Override
                                     public void run() {
+                                        if(isPlaying()) {
+                                            stop();
+                                        }
                                         play(program, newProps);
                                         for(IPlaybackEventListener listener : listeners.keySet()) {
                                             addListener(listener);
