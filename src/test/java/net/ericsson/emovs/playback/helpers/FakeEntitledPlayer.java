@@ -245,6 +245,11 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
     }
 
     @Override
+    public void startOver() {
+
+    }
+
+    @Override
     public Entitlement getEntitlement() {
         return null;
     }
