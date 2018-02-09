@@ -48,6 +48,24 @@ public class LanguageAdapter extends ArrayAdapter<String> {
         notifyDataSetChanged();
     }
 
+    public void selectLanguage(String code) {
+        if(code == null) {
+            holder.setSelection(pickerLangCodes.length);
+        }
+        else {
+            boolean selected = false;
+            for (int i = 0; i < pickerLangCodes.length; ++i) {
+                if (code.equals(getLangCode(i))) {
+                    holder.setSelection(i);
+                    selected = true;
+                }
+            }
+            if (!selected) {
+                holder.setSelection(pickerLangCodes.length);
+            }
+        }
+    }
+
     public String getLangCode(int position) {
         return pickerLangCodes[position];
     }
@@ -134,6 +152,9 @@ public class LanguageAdapter extends ArrayAdapter<String> {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
+                for (final EMPPlayerView pView : ((SimplePlaybackActivity) getContext()).getPlayerViews()) {
+                    pView.getPlayer().selectTextLanguage(null);
+                }
 
             }
         });

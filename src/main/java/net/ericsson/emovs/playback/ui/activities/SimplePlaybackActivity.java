@@ -287,6 +287,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     if(view.getPlayer().getAudioLanguages() != null && view.getPlayer().getAudioLanguages().length > 1) {
                         ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioLanguages());
                         audioMenu.setVisible(true);
+                        ((LanguageAdapter) audioSpinner.getAdapter()).selectLanguage(view.getPlayer().getSelectedAudioLanguage());
                         visibleCount++;
                     }
 
@@ -295,6 +296,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     if (view.getPlayer().getTextLanguages() != null && view.getPlayer().getTextLanguages().length > 0) {
                         ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextLanguages());
                         subsMenu.setVisible(true);
+                        ((LanguageAdapter) subsSpinner.getAdapter()).selectLanguage(view.getPlayer().getSelectedTextLanguage());
                         visibleCount++;
                     }
 
