@@ -122,6 +122,8 @@ public class ProgramServiceTest {
         EmpProgram currentProgram = service.getCurrentProgram();
         Assert.assertTrue("@id/1".equals(currentProgram.assetId));
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
+        Assert.assertTrue(currentProgram.startDateTime.getMillis() == live_program1.startDateTime.getMillis());
+        Assert.assertTrue(currentProgram.endDateTime.getMillis() == live_program1.endDateTime.getMillis());
 
         fakeEntitlementProvider.mockIsEntitled(true);
         fakeEntitlementProvider.forgetEntitlementCheck();
@@ -132,6 +134,8 @@ public class ProgramServiceTest {
 
         currentProgram = service.getCurrentProgram();
         Assert.assertTrue("@id/2".equals(currentProgram.assetId));
+        Assert.assertTrue(currentProgram.startDateTime.getMillis() == live_program2.startDateTime.getMillis());
+        Assert.assertTrue(currentProgram.endDateTime.getMillis() == live_program2.endDateTime.getMillis());
         Assert.assertTrue(player.isPlaying());
         Assert.assertTrue(player.lastErrorCode == 0);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
