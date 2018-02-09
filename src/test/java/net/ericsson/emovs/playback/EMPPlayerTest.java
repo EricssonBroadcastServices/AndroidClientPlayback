@@ -59,6 +59,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
 public class EMPPlayerTest {
+    // TODO: make unit tests to ensure cases where EmpProgram is passed without all information: like programStartTime and programEndTime
+
     PlaybackProperties DEFAULT_PLAYBACK_PROPS = PlaybackProperties.DEFAULT;
     PlaybackProperties BEGINNING_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
     PlaybackProperties BOOKMARK_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(PlaybackProperties.PlayFrom.BOOKMARK);
@@ -80,6 +82,7 @@ public class EMPPlayerTest {
     @Mock
     Activity dummyActivity;
 
+    Entitlement entitlement_no_maxbitrate_contract;
     Entitlement entitlement_no_bookmark;
     Entitlement entitlement_with_bookmark_emup;
 
@@ -100,12 +103,18 @@ public class EMPPlayerTest {
         VALID_STARTTIME_LIVE_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(live_program.startDateTime.getMillis() + 1));
         VALID_STARTTIME_CATCHUP_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(catchup_program.startDateTime.getMillis() + 1));
 
+        entitlement_no_maxbitrate_contract = new Entitlement();
+        entitlement_no_maxbitrate_contract.mediaLocator = ".isml";
+
         entitlement_no_bookmark = new Entitlement();
+        entitlement_no_bookmark.maxBitrate = 1;
+
         entitlement_with_bookmark_emup = new Entitlement();
         entitlement_with_bookmark_emup.mediaLocator = ".isml";
         entitlement_with_bookmark_emup.lastViewedOffset = 1234L;
         entitlement_with_bookmark_emup.lastViewedTime = 54321L;
         entitlement_with_bookmark_emup.liveTime = 67890L;
+        entitlement_with_bookmark_emup.maxBitrate = 10000000;
 
         TestUtils.mockProvider(ExposureClient.class, new FakeExposureClient());
     }
@@ -121,6 +130,7 @@ public class EMPPlayerTest {
     @Test
     public void playback_with_subs_and_max_bitrare_props_test() throws Exception {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
+        fakeEE.setEntitlement(entitlement_with_bookmark_emup);
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
@@ -132,7 +142,33 @@ public class EMPPlayerTest {
         Assert.assertTrue(tech.propsFedToTech.getPreferredAudioLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredAudioLanguage());
     }
 
-    // TODO: make unit tests to ensure cases where EmpProgram is passed without all information: like programStartTime and programEndTime
+    @Test
+    public void playback_max_bitrare_props_test() throws Exception {
+        FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
+        fakeEE.setEntitlement(entitlement_no_bookmark);
+        EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
+
+        player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
+        Thread.sleep(50);
+
+        FakeTech tech = player.getTech();
+        Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == 1);
+        Assert.assertTrue(tech.propsFedToTech.getPreferredTextLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredTextLanguage());
+        Assert.assertTrue(tech.propsFedToTech.getPreferredAudioLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredAudioLanguage());
+    }
+
+    @Test
+    public void playback_max_bitrare_props_2_test() throws Exception {
+        FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
+        fakeEE.setEntitlement(entitlement_no_maxbitrate_contract);
+        EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
+
+        player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
+        Thread.sleep(50);
+
+        FakeTech tech = player.getTech();
+        Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == 1000000);
+    }
 
     @Test
     public void playback_play_from_live_program_test() throws Exception {

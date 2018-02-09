@@ -14,6 +14,7 @@ import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
+import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.utilities.drm.DashLicenseDetails;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
@@ -21,6 +22,7 @@ import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
@@ -295,8 +297,14 @@ public class ExoPlayerTech implements ITech {
                             }
                             else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
                                 long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
-                                seekToTime(startTime);
-                                startTimeSeekDone = true;
+                                long[] range = getSeekTimeRange();
+                                if (range != null && (startTime < range[0] || startTime > range[1])) {
+                                    parent.trigger(IPlaybackEventListener.EventId.WARNING, Warning.INVALID_START_TIME);
+                                }
+                                else {
+                                    seekToTime(startTime);
+                                    startTimeSeekDone = true;
+                                }
                             }
                         }
                     }
