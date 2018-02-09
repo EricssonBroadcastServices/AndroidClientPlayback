@@ -174,7 +174,7 @@ public class PlaybackProperties implements Serializable {
     }
 
     public static class PlayFrom {
-        public static PlayFromItem START_TIME_DEFAULT = new StartTime(0);
+        public static PlayFromItem START_TIME_DEFAULT = new StartTime(0L);
         public static PlayFromItem BOOKMARK = new Bookmark();
         public static PlayFromItem BEGINNING = new Beginning();
         public static PlayFromItem LIVE_EDGE = new LiveEdge();

@@ -18,7 +18,9 @@ import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.entitlements.IEntitlementCallback;
 import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.errors.ErrorRunnable;
+import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
+import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpChannel;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 import net.ericsson.emovs.utilities.test.TestUtils;
@@ -35,6 +37,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 
+import static net.ericsson.emovs.utilities.errors.WarningCodes.INVALID_START_TIME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -59,9 +62,12 @@ public class EMPPlayerTest {
     PlaybackProperties DEFAULT_PLAYBACK_PROPS = PlaybackProperties.DEFAULT;
     PlaybackProperties BEGINNING_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
     PlaybackProperties BOOKMARK_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(PlaybackProperties.PlayFrom.BOOKMARK);
-    PlaybackProperties STARTTIME_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(10000L));
     PlaybackProperties LIVE_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.LiveEdge());
     PlaybackProperties SUBS_AND_MAXBITRATE_PLAYBACK_PROPS = new PlaybackProperties().withMaxBitrate(1000000).withPreferredAudioLanguage("pt").withPreferredTextLanguage("pt");
+    PlaybackProperties INVALID_STARTTIME_LIVE_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(10000L));
+    PlaybackProperties INVALID_STARTTIME_CATCHUP_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(10000L));
+    PlaybackProperties VALID_STARTTIME_LIVE_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(10000L));
+    PlaybackProperties VALID_STARTTIME_CATCHUP_PLAYBACK_PROPS = new PlaybackProperties().withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(10000L));
 
     @Mock
     EmpProgram live_program;
@@ -84,10 +90,15 @@ public class EMPPlayerTest {
         when(catchup_program.liveNow()).thenReturn(false);
         when(techFactory.build()).thenReturn(new FakeTech());
 
-        live_program.startDateTime = DateTime.now();
-        live_program.endDateTime = DateTime.now();
-        catchup_program.startDateTime = DateTime.now();
-        catchup_program.endDateTime = DateTime.now();
+        live_program.startDateTime = DateTime.now().minusHours(1);
+        live_program.endDateTime = DateTime.now().plusHours(1);
+        catchup_program.startDateTime = DateTime.now().minusHours(1);
+        catchup_program.endDateTime = DateTime.now().minusMinutes(1);
+
+        INVALID_STARTTIME_LIVE_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(live_program.endDateTime.getMillis() + 1000));
+        INVALID_STARTTIME_CATCHUP_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(catchup_program.endDateTime.getMillis() + 1000));
+        VALID_STARTTIME_LIVE_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(live_program.startDateTime.getMillis() + 1));
+        VALID_STARTTIME_CATCHUP_PLAYBACK_PROPS.withPlayFrom(new PlaybackProperties.PlayFrom.StartTime(catchup_program.startDateTime.getMillis() + 1));
 
         entitlement_no_bookmark = new Entitlement();
         entitlement_with_bookmark_emup = new Entitlement();
@@ -163,10 +174,24 @@ public class EMPPlayerTest {
 
         // Test Case 6: Live Program plays from Start Time if props are set to start from specific StartTime
         player.reset();
-        player.play(live_program, STARTTIME_PLAYBACK_PROPS);
+        player.play(live_program, VALID_STARTTIME_LIVE_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
-        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) VALID_STARTTIME_LIVE_PLAYBACK_PROPS.getPlayFrom()).startTime);
+
+        // Test Case 7: Live Program plays from invalid StartTime
+        player.reset();
+        player.play(live_program, INVALID_STARTTIME_LIVE_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
+        Assert.assertTrue(player.warningCode == INVALID_START_TIME);
+
+        // Test Case 8: Catchup plays from invalid StartTime
+        player.reset();
+        player.play(catchup_program, INVALID_STARTTIME_CATCHUP_PLAYBACK_PROPS);
+        Thread.sleep(50);
+        Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
+        Assert.assertTrue(player.warningCode == INVALID_START_TIME);
     }
 
     @Test
@@ -212,10 +237,10 @@ public class EMPPlayerTest {
 
         // Test Case 6: Catchup plays from Start Time if props are set to start from specific StartTime
         player.reset();
-        player.play(catchup_program, STARTTIME_PLAYBACK_PROPS);
+        player.play(catchup_program, VALID_STARTTIME_CATCHUP_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
-        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) VALID_STARTTIME_CATCHUP_PLAYBACK_PROPS.getPlayFrom()).startTime);
     }
 
     @Test
@@ -252,18 +277,18 @@ public class EMPPlayerTest {
         // Test Case 4: Channel plays from StartTime if props are set to StartTime - No EPG
         fakeMetadataProvider.mockEpg(null);
         player.reset();
-        player.play(live_channel, STARTTIME_PLAYBACK_PROPS);
+        player.play(live_channel, VALID_STARTTIME_LIVE_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
-        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) VALID_STARTTIME_LIVE_PLAYBACK_PROPS.getPlayFrom()).startTime);
 
         // Test Case 5: Channel plays from StartTime if props are set to StartTime - With EPG
         fakeMetadataProvider.mockEpg(singleProgramEpg);
         player.reset();
-        player.play(live_channel, STARTTIME_PLAYBACK_PROPS);
+        player.play(live_channel, VALID_STARTTIME_LIVE_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime);
-        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) STARTTIME_PLAYBACK_PROPS.getPlayFrom()).startTime);
+        Assert.assertTrue(((PlaybackProperties.PlayFrom.StartTime) player.getPlaybackProperties().getPlayFrom()).startTime == ((PlaybackProperties.PlayFrom.StartTime) VALID_STARTTIME_LIVE_PLAYBACK_PROPS.getPlayFrom()).startTime);
 
         // Test Case 6: Channel plays from Beginning if props are set to Beginning and the Channel has EPG
         fakeMetadataProvider.mockEpg(singleProgramEpg);
@@ -296,6 +321,8 @@ public class EMPPlayerTest {
     }
 
     class EMPPlayerTechGetter extends EMPPlayer {
+        public int warningCode;
+
         public EMPPlayerTechGetter(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host) {
             super(analyticsConnector, entitlementProvider, techFactory, context, host);
         }
@@ -305,7 +332,15 @@ public class EMPPlayerTest {
         }
 
         public void reset() {
+            this.warningCode = -1;
             this.lastPlayTimeMs = 0L;
+        }
+
+        @Override
+        public void trigger(EventId eventId, Object param) {
+            if (eventId == EventId.WARNING) {
+                this.warningCode = ((Warning) param).getCode();
+            }
         }
     }
 }

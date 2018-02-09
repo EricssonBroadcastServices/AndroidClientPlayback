@@ -14,6 +14,7 @@ import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.Warning;
+import net.ericsson.emovs.utilities.errors.WarningCodes;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
@@ -481,21 +482,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             }
         }
 
-        // TODO: remove hack that is only for test purposes - this should be done on the backend
-        /*if (entitlement.programId != null && dvrWindow > 0) {
-            String dvrWindowOldValue = Uri.parse(entitlement.mediaLocator).getQueryParameter("dvr_window_length");
-            String timeshiftOld = Uri.parse(entitlement.mediaLocator).getQueryParameter("time_shift");
-            entitlement.mediaLocator = entitlement.mediaLocator
-                    .replace("dvr_window_length=" + dvrWindowOldValue, "dvr_window_length=" + Long.toString(dvrWindow))
-                    .replace("time_shift=" + timeshiftOld, "time_shift=" + Long.toString(ts));
-            if (timeshiftOld == null) {
-                entitlement.mediaLocator += "&time_shift=" + Long.toString(ts);
-            }
-        }*/
-        //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/nautical/nautical.isml/live.mpd?t=2018-01-17T13%3A30%3A00.000-2018-01-17T14%3A00%3A00.000";
-        //entitlement.mediaLocator = "https://nl-hvs-dev-cache2.cdn.ebsd.ericsson.net/L24/cgi-bin/proxy.py?t=2018-01-25T17:00:00.000";
-
-
         Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
         tech.init(this, context, entitlement.playToken, this.properties);
         tech.load(mediaId, entitlement.mediaLocator, false);
@@ -603,6 +589,19 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
+                if (PlaybackProperties.PlayFrom.isStartTime(properties.getPlayFrom()) && program.startDateTime != null && program.endDateTime != null) {
+                    long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
+                    if (startTime < program.startDateTime.getMillis() || startTime > program.endDateTime.getMillis()) {
+                        trigger(EventId.WARNING, Warning.INVALID_START_TIME);
+                        if (program.liveNow()) {
+                            properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
+                        }
+                        else {
+                            properties.withPlayFrom(PlaybackProperties.PlayFrom.BEGINNING);
+                        }
+                    }
+                }
+
                 if (PlaybackProperties.PlayFrom.isBookmark(properties.getPlayFrom())) {
                     prepareBookmark(program, entitlement);
                 }
