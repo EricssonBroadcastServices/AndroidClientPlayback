@@ -441,13 +441,19 @@ public class ExoPlayerTech implements ITech {
     }
 
     public void seekTo(long positionMs) {
-        if (player != null) {
+        if (player != null && positionMs >= 0) {
+            if (positionMs >= getDuration()) {
+                positionMs = getDuration();
+            }
             this.player.seekTo(positionMs);
         }
     }
 
     public void seekToTime(long unixTimeMs) {
         if (player != null) {
+            if (unixTimeMs >= MonotonicTimeService.getInstance().currentTime()) {
+                unixTimeMs = MonotonicTimeService.getInstance().currentTime();
+            }
             long windowStartTime = getWindowStartTime();
             this.player.seekTo(unixTimeMs - windowStartTime);
         }
