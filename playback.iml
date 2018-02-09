@@ -106,7 +106,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="org.ow2.asm:asm-tree:5.0.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-fragment-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-repository-metadata:2.2.1@jar" level="project" />
-    <orderEntry type="library" exported="" name="__local_jars__:C.\Wk\Ericsson\AndroidClient2\libraries\playback\libs\commons-io-2.5.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-annotations:26.0.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-vector-drawable-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven.wagon:wagon-http-shared:1.0-beta-6@jar" level="project" />

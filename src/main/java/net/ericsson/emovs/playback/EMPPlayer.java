@@ -366,8 +366,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         if (this.tech == null || this.playable == null) {
             return;
         }
-        if (this.playable instanceof EmpProgram) {
-            EmpProgram program = (EmpProgram) this.playable;
+        IPlayable currentPlayable = null;
+        if (this.programService != null) {
+            currentPlayable = this.programService.getCurrentProgram();
+        }
+        if (currentPlayable == null) {
+            currentPlayable = this.playable;
+        }
+        if (currentPlayable instanceof EmpProgram) {
+            EmpProgram program = (EmpProgram) currentPlayable;
             if (program.startDateTime != null) {
                 seekToTime(program.startDateTime.getMillis());
             }
@@ -468,7 +475,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 this.properties.withDRMProperties(null);
             }
 
-            if (entitlement.maxBitrate != null) {
+            if (entitlement.maxBitrate != null &&
+                    (this.properties.getMaxBitrate() == null || entitlement.maxBitrate < this.properties.getMaxBitrate())) {
                 this.properties.withMaxBitrate(entitlement.maxBitrate);
             }
         }
