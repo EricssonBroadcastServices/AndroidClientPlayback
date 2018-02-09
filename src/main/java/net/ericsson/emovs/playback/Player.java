@@ -10,7 +10,6 @@ import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
-import net.ericsson.emovs.utilities.models.EmpProgram;
 
 import java.util.UUID;
 
@@ -291,11 +290,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return
      */
     @Override
-    public String[] getAudioTracks() {
+    public String[] getAudioLanguages() {
         if (this.tech == null) {
             return null;
         }
-        return this.tech.getAudioTracks();
+        return this.tech.getAudioLanguages();
     }
 
     /**
@@ -304,33 +303,33 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return
      */
     @Override
-    public String[] getTextTracks() {
+    public String[] getTextLanguages() {
         if (this.tech == null) {
             return null;
         }
-        return this.tech.getTextTracks();
+        return this.tech.getTextLanguages();
     }
 
     /**
      * @param language language code to select the audio track (e.g.: en, pt, es, fr)
      */
     @Override
-    public void selectAudioTrack(String language) {
+    public void selectAudioLanguage(String language) {
         if (this.tech == null) {
             return;
         }
-        this.tech.selectAudioTrack(language);
+        this.tech.selectAudioLanguage(language);
     }
 
     /**
      * @param language language code to select the text track (e.g.: en, pt, es, fr)
      */
     @Override
-    public void selectTextTrack(String language) {
+    public void selectTextLanguage(String language) {
         if (this.tech == null) {
             return;
         }
-        this.tech.selectTextTrack(language);
+        this.tech.selectTextLanguage(language);
     }
 
     /**
@@ -339,11 +338,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return selected audio language
      */
     @Override
-    public String getSelectedAudioTrack() {
+    public String getSelectedAudioLanguage() {
         if (this.tech == null) {
             return null;
         }
-        return this.tech.getSelectedAudioTrack();
+        return this.tech.getSelectedAudioLanguage();
     }
 
     /**
@@ -352,11 +351,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return selected text language
      */
     @Override
-    public String getSelectedTextTrack() {
+    public String getSelectedTextLanguage() {
         if (this.tech == null) {
             return null;
         }
-        return this.tech.getSelectedTextTrack();
+        return this.tech.getSelectedTextLanguage();
     }
 
 

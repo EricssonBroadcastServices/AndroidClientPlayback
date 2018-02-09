@@ -59,6 +59,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 
@@ -546,7 +547,7 @@ public class ExoPlayerTech implements ITech {
      * @return
      */
     @Override
-    public String[] getAudioTracks() {
+    public String[] getAudioLanguages() {
         if (trackSelector == null) {
             return null;
         }
@@ -562,14 +563,19 @@ public class ExoPlayerTech implements ITech {
             return null;
         }
 
-        String[] audioTracksOutput = new String[audioTracks.length];
+        HashMap<String, String> memory = new HashMap<>();
+        ArrayList<String> audioTracksOutput = new ArrayList<>();
         for (int i = 0; i < audioTracks.length; ++i) {
             if (audioTracks.get(i).length > 0) {
-                audioTracksOutput[i] = audioTracks.get(i).getFormat(0).language;
+                String lang = audioTracks.get(i).getFormat(0).language;
+                if(memory.containsKey(lang) == false && lang != null) {
+                    audioTracksOutput.add(lang);
+                    memory.put(lang, lang);
+                }
             }
         }
 
-        return audioTracksOutput;
+        return audioTracksOutput.toArray(new String[audioTracksOutput.size()]);
     }
 
     /**
@@ -578,7 +584,7 @@ public class ExoPlayerTech implements ITech {
      * @param language language code to select the audio track (e.g.: en, pt, es, fr)
      */
     @Override
-    public void selectAudioTrack(String language) {
+    public void selectAudioLanguage(String language) {
         trackSelector.setParameters(trackSelector.getParameters().withPreferredAudioLanguage(language));
     }
 
@@ -588,7 +594,7 @@ public class ExoPlayerTech implements ITech {
      * @return selected audio language
      */
     @Override
-    public String getSelectedAudioTrack() {
+    public String getSelectedAudioLanguage() {
         return trackSelector.getParameters().preferredAudioLanguage;
     }
 
@@ -598,7 +604,7 @@ public class ExoPlayerTech implements ITech {
      * @return
      */
     @Override
-    public String[] getTextTracks() {
+    public String[] getTextLanguages() {
         if (trackSelector == null) {
             return null;
         }
@@ -615,14 +621,19 @@ public class ExoPlayerTech implements ITech {
             return null;
         }
 
-        String[] textTracksOutput = new String[textTracks.length];
+        ArrayList<String> textTracksOutput = new ArrayList<>();
+        HashMap<String, String> memory = new HashMap<>();
         for (int i = 0; i < textTracks.length; ++i) {
             if (textTracks.get(i).length > 0) {
-                textTracksOutput[i] = textTracks.get(i).getFormat(0).language;
+                String lang = textTracks.get(i).getFormat(0).language;
+                if (memory.containsKey(lang) == false && lang != null) {
+                    textTracksOutput.add(lang);
+                    memory.put(lang, lang);
+                }
             }
         }
 
-        return textTracksOutput;
+        return textTracksOutput.toArray(new String[textTracksOutput.size()]);
     }
 
     /**
@@ -631,7 +642,7 @@ public class ExoPlayerTech implements ITech {
      * @param language language code to select the text track (e.g.: en, pt, es, fr)
      */
     @Override
-    public void selectTextTrack(String language) {
+    public void selectTextLanguage(String language) {
         trackSelector.setParameters(trackSelector.getParameters().withPreferredTextLanguage(language));
     }
 
@@ -641,7 +652,7 @@ public class ExoPlayerTech implements ITech {
      * @return selected text language
      */
     @Override
-    public String getSelectedTextTrack() {
+    public String getSelectedTextLanguage() {
         return trackSelector.getParameters().preferredTextLanguage;
     }
 

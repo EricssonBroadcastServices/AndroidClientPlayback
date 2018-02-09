@@ -284,16 +284,16 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     int visibleCount = 0;
                     MenuItem audioMenu = toolbar.getMenu().findItem(R.id.audio_tracks);
                     Spinner audioSpinner = (Spinner) audioMenu.getActionView();
-                    if(view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1) {
-                        ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioTracks());
+                    if(view.getPlayer().getAudioLanguages() != null && view.getPlayer().getAudioLanguages().length > 1) {
+                        ((LanguageAdapter) audioSpinner.getAdapter()).setLanguages(view.getPlayer().getAudioLanguages());
                         audioMenu.setVisible(true);
                         visibleCount++;
                     }
 
                     MenuItem subsMenu = toolbar.getMenu().findItem(R.id.subs_tracks);
                     Spinner subsSpinner = (Spinner) subsMenu.getActionView();
-                    if (view.getPlayer().getTextTracks() != null && view.getPlayer().getTextTracks().length > 0) {
-                        ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextTracks());
+                    if (view.getPlayer().getTextLanguages() != null && view.getPlayer().getTextLanguages().length > 0) {
+                        ((LanguageAdapter) subsSpinner.getAdapter()).setLanguages(view.getPlayer().getTextLanguages());
                         subsMenu.setVisible(true);
                         visibleCount++;
                     }
@@ -318,8 +318,8 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                             decorView.setSystemUiVisibility(uiOptions);
                         }
                     }
-                    else if ((view.getPlayer().getAudioTracks() != null && view.getPlayer().getAudioTracks().length > 1)  ||
-                             (view.getPlayer().getTextTracks() != null && view.getPlayer().getAudioTracks().length > 0)) {
+                    else if ((view.getPlayer().getAudioLanguages() != null && view.getPlayer().getAudioLanguages().length > 1)  ||
+                             (view.getPlayer().getTextLanguages() != null && view.getPlayer().getAudioLanguages().length > 0)) {
                         getSupportActionBar().show();
                     }
                     else if(EMPRegistry.chromecastAppId() != null) {

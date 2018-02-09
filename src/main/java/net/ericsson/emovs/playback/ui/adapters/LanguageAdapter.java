@@ -14,8 +14,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.extractor.mp4.Track;
-
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity;
 import net.ericsson.emovs.playback.ui.views.EMPPlayerView;
@@ -122,13 +120,13 @@ public class LanguageAdapter extends ArrayAdapter<String> {
                         continue;
                     }
                     if (trackType == TrackType.AUDIO) {
-                        pView.getPlayer().selectAudioTrack(getLangCode(i));
+                        pView.getPlayer().selectAudioLanguage(getLangCode(i));
                     } else if(trackType == TrackType.SUBS) {
                         if (i >= pickerLangCodes.length) {
-                            pView.getPlayer().selectTextTrack(null);
+                            pView.getPlayer().selectTextLanguage(null);
                         }
                         else {
-                            pView.getPlayer().selectTextTrack(getLangCode(i));
+                            pView.getPlayer().selectTextLanguage(getLangCode(i));
                         }
                     }
                 }

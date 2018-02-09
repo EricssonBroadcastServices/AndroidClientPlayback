@@ -130,32 +130,32 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
     }
 
     @Override
-    public String[] getAudioTracks() {
+    public String[] getAudioLanguages() {
         return new String[0];
     }
 
     @Override
-    public String[] getTextTracks() {
+    public String[] getTextLanguages() {
         return new String[0];
     }
 
     @Override
-    public void selectAudioTrack(String language) {
+    public void selectAudioLanguage(String language) {
 
     }
 
     @Override
-    public void selectTextTrack(String language) {
+    public void selectTextLanguage(String language) {
 
     }
 
     @Override
-    public String getSelectedAudioTrack() {
+    public String getSelectedAudioLanguage() {
         return null;
     }
 
     @Override
-    public String getSelectedTextTrack() {
+    public String getSelectedTextLanguage() {
         return null;
     }
 

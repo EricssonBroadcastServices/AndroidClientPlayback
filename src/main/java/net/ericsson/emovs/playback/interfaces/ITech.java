@@ -90,42 +90,42 @@ public interface ITech {
      *
      * @return
      */
-    String[] getAudioTracks();
+    String[] getAudioLanguages();
 
     /**
      * Selects audio track
      *
      * @param language language code to select the audio track (e.g.: en, pt, es, fr)
      */
-    void selectAudioTrack(String language);
+    void selectAudioLanguage(String language);
 
     /**
      * Returns selected audio track
      *
      * @return selected audio language
      */
-    String getSelectedAudioTrack();
+    String getSelectedAudioLanguage();
 
     /**
      * Returns a list of text languages available to be chosen
      *
      * @return
      */
-    String[] getTextTracks();
+    String[] getTextLanguages();
 
     /**
      * Selects text track
      *
      * @param language language code to select the text track (e.g.: en, pt, es, fr)
      */
-    void selectTextTrack(String language);
+    void selectTextLanguage(String language);
 
     /**
      * Returns selected text track
      *
      * @return selected text language
      */
-    String getSelectedTextTrack();
+    String getSelectedTextLanguage();
 
     /**
      * Mutes the audio
