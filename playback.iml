@@ -126,7 +126,6 @@
     <orderEntry type="library" exported="" name="com.android.support:support-v4-26.0.1" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-dash-r2.5.0" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:animated-vector-drawable-26.0.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="org.mockito:mockito-core:2.13.0@jar" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.gms:play-services-cast-framework-10.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-artifact:2.2.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-hls-r2.5.0" level="project" />
@@ -158,6 +157,7 @@
     <orderEntry type="library" exported="" name="com.google.android.gms:play-services-basement-10.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.objenesis:objenesis:2.6@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-compat-26.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="org.mockito:mockito-core:2.15.0@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="com.almworks.sqlite4java:sqlite4java:0.282@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="net.bytebuddy:byte-buddy-agent:1.7.9@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven.wagon:wagon-provider-api:1.0-beta-6@jar" level="project" />

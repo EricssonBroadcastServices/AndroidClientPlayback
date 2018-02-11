@@ -36,9 +36,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * Created by Joao Coelho on 2017-11-17.
+ * Player with EMP business logic
  */
-
 public class EMPPlayer extends Player implements IEntitledPlayer {
     protected IPlayable playable;
     protected Entitlement entitlement;
@@ -78,16 +77,31 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     /**
-     * Plays some media available in EMP backend
-     *
-     * IPlayables supported:
-     * - EmpChannel: default behaviour is to start playback from live edge
-     * - EmpProgram: default behaviour is to start playback from beginning of program if program is NOT live, or start from live edge otherwise
-     * - EmpAsset: default behaviour is to start playback from beginning of asset
-     *
-     * If playFrom property set to use Bookmark, then playback starts from Bookmarked position.
-     * If Bookmark is not set, then default start procedure shall apply.
-     *
+     * <p>
+     *     Plays some media available in EMP backend
+     * </p>
+     *  <p>
+     *      IPlayables supported:
+     *  </p>
+     *  <p>
+     *    <ul>
+     *        <li>
+ *              EmpChannel: default behaviour is to start playback from live edge
+     *        </li>
+     *        <li>
+ *              EmpProgram: default behaviour is to start playback from beginning of program if program is NOT live, or start from live edge otherwise
+     *        </li>
+     *        <li>
+ *              EmpAsset: default behaviour is to start playback from beginning of asset
+     *        </li>
+     *    </ul>
+     *  </p>
+     *  <p>
+     *      If playFrom property set to use Bookmark, then playback starts from Bookmarked position.
+     *  </p>
+     *  <p>
+     *      If Bookmark is not set, then default start procedure shall apply.
+     *  </p>
      * @param playable the playable you want to play: asset, program or channel
      * @param properties playback properties, like autoplay, startTime, etc.. use PlaybackProperties.DEFAULT for default props
      */
@@ -138,27 +152,21 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     /**
-     * Returns the entitlement of a given playback session
-     *
-     * @return
+     * @return the entitlement of a given playback session
      */
     public Entitlement getEntitlement() {
         return entitlement;
     }
 
     /**
-     * Returns the playable from current playback session
-     *
-     * @return
+     * @return the playable from current playback session
      */
     public IPlayable getPlayable() {
         return this.playable;
     }
 
     /**
-     * Returns current playback session ID
-     *
-     * @return
+     * @return current playback session ID
      */
     public String getSessionId() {
         if (entitlement == null) {
@@ -170,6 +178,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return entitlement.playSessionId;
     }
 
+    /**
+     * Set timeshift delay for a stream (requires reloading the asset)
+     * @param timeshift sets timeshift delay (in seconds) from live point
+     */
     @Override
     protected void setTimeshiftDelay(final long timeshift) {
         if (this.programService == null) {
@@ -202,6 +214,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         });
     }
 
+    /**
+     * @return EmpProgram currently playing if stream has EPG and is Live or Catchup-as-Live. null is returned otherwise.
+     */
     @Override
     public EmpProgram getCurrentProgram() {
         if (this.programService != null) {
@@ -210,6 +225,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return null;
     }
 
+    /**
+     * Triggers an event from an external source
+     * @param eventId event type to be triggered
+     * @param param depending on event type: EmpProgram for ProgramChanged type, Warning for Warning type
+     */
     @Override
     public void trigger(EventId eventId, Object param) {
         super.trigger(eventId, param);
@@ -230,6 +250,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
+    /**
+     * Initializes the playback resources (this method should not be pubicly accessible)
+     * @param _properties playbacks specific properties
+     */
     @Override
     protected boolean init(PlaybackProperties _properties) throws Exception {
         super.init(_properties.clone());
@@ -242,6 +266,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    /**
+     * Seeks to a specific stream offset (range: [0..duration]
+     * @param positionMs offset in milliseconds
+     */
     @Override
     public void seekTo(final long positionMs) {
         if (this.tech != null && this.isPlaying()) {
@@ -256,12 +284,29 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     /**
-     * Seeks to a specific unix time (milliseconds)
-     * Catchup-as-live Scenarios:
-     * - If seek time is outside of the seek range, then the player does a entitlement call automatically
-     * - SEEK TO LIVE EDGE: get wallclock time from getServerTime() and seek to that point in time
-     * - START-OVER: get current program from getCurrentProgram() and then seek to the start time of that program
-     * - JUMP 30 SECONDS: get current playback time from getPlayheadTime(), add/subtract the 30000, then seek to that point in time
+     * <p>
+     *     Seeks to a specific unix time (milliseconds)
+     * </p>
+     * <p>
+     *      Catchup-as-live Scenarios:
+     * </p>
+     * <p>
+     *    <ul>
+     *        <li>
+     *          If seek time is outside of the seek range, then the player does a entitlement call automatically
+     *        </li>
+     *        <li>
+     *          SEEK TO LIVE EDGE: get wallclock time from getServerTime() and seek to that point in time
+     *        </li>
+     *        <li>
+     *          START-OVER: get current program from getCurrentProgram() and then seek to the start time of that program
+     *        </li>
+     *        <li>
+     *          JUMP 30 SECONDS: get current playback time from getPlayheadTime(), add/subtract the 30000, then seek to that point in time
+     *        </li>
+     *    </ul>
+     * </p>
+     * @param _unixTimeMs unix time to seek to in milliseconds
      */
     @Override
     public void seekToTime(long _unixTimeMs) {
@@ -338,6 +383,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
+    /**
+     * Use this method to check if stream can be seeked forward
+     */
     @Override
     public boolean canSeekForward() {
         if (this.entitlement != null) {
@@ -346,6 +394,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    /**
+     * Use this method to check if stream can be seeked backwards
+     */
     @Override
     public boolean canSeekBack() {
         if (this.entitlement != null) {
@@ -354,6 +405,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    /**
+     * Use this method to check if stream can be paused
+     */
     @Override
     public boolean canPause() {
         if (this.entitlement != null) {
@@ -362,6 +416,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
+    /**
+     * Use this method to start playback from start (0 for VOD or Program Start Time for Catchup
+     */
     @Override
     public void startOver() {
         if (this.tech == null || this.playable == null) {
@@ -388,6 +445,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
+    /**
+     * Use this method to seek to live edge (a reload is made if live edge belongs to another program)
+     */
     @Override
     public void seekToLive() {
         if (this.tech == null || this.entitlement == null || this.entitlement.channelId == null) {
