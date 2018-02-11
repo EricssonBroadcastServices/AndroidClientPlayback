@@ -9,8 +9,6 @@ import net.ericsson.emovs.playback.Player;
 
 /**
  * Use this factory if you want to instantiate a player without EMP integration and just to play a stream from manifest/playlist
- *
- * Created by Joao Coelho on 2017-11-17.
  */
 public class PlayerFactory {
 

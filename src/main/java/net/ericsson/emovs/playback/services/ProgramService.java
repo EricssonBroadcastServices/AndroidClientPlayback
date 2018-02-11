@@ -21,10 +21,16 @@ import org.joda.time.Duration;
 import java.util.ArrayList;
 
 /**
- * ProgramService should act on these scenarios:
- *  - Regular entitlement checks when live stream is playing
- *  - Entitlement check when timeshiftDelay is changed
- *  - Check licenseExpiration in entitlement?
+ * <p>
+ *     ProgramService should act on these scenarios:
+ * </p>
+ * <p>
+ *     <ul>
+ *         <li>Regular entitlement checks when live stream is playing</li>
+ *         <li>Entitlement check when timeshiftDelay is changed</li>
+ *         <li></li>
+ *     </ul>
+ * </p>
  */
 public class ProgramService extends Thread {
     private static final String TAG = ProgramService.class.toString();
