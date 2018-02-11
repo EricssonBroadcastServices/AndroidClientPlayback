@@ -6,8 +6,6 @@ import java.io.Serializable;
 
 /**
  * Holder class of the playback properties
- *
- * Created by Joao Coelho on 2017-09-29.
  */
 public class PlaybackProperties implements Serializable {
     public final static PlaybackProperties DEFAULT = new PlaybackProperties();
@@ -36,7 +34,7 @@ public class PlaybackProperties implements Serializable {
     /**
      * When set, it shows native UI controls during playback. To hide them pass false
      * @param useNativeControls
-     * @return
+     * @return this
      */
     public PlaybackProperties withNativeControls(boolean useNativeControls) {
         this.nativeControls = useNativeControls;
@@ -44,8 +42,7 @@ public class PlaybackProperties implements Serializable {
     }
 
     /**
-     * Returns if the playback is in autoplay mode
-     * @return
+     * @return whether the playback is in autoplay mode or not
      */
     public boolean isAutoplay() {
         return autoplay;
@@ -54,18 +51,26 @@ public class PlaybackProperties implements Serializable {
     /**
      * Sets the autoplay property of the playback
      * @param autoplay
-     * @return
+     * @return this
      */
     public PlaybackProperties withAutoplay(boolean autoplay) {
         this.autoplay = autoplay;
         return this;
     }
 
+    /**
+     * Sets the DRM properties
+     * @param drmProperties drm properties holder
+     * @return
+     */
     public PlaybackProperties withDRMProperties(DRMProperties drmProperties) {
         this.drmProperties = drmProperties;
         return this;
     }
 
+    /**
+     * @return drm properties holder
+     */
     public DRMProperties getDRMProperties() {
         return this.drmProperties;
     }
@@ -73,13 +78,16 @@ public class PlaybackProperties implements Serializable {
     /**
      * When set to true it will instruct the player to play from one of these positions: Beginning, Live Edge, Bookmark, Start Time
      * @param playFrom
-     * @return
+     * @return this
      */
     public PlaybackProperties withPlayFrom(PlayFromItem playFrom) {
         this.playFrom = playFrom;
         return this;
     }
 
+    /**
+     * @return playFrom property
+     */
     public PlayFromItem getPlayFrom() {
         return this.playFrom;
     }
@@ -87,7 +95,7 @@ public class PlaybackProperties implements Serializable {
     /**
      * When set, it will limit playback's max bitrate
      * @param maxBitrate
-     * @return
+     * @return this
      */
     public PlaybackProperties withMaxBitrate(Integer maxBitrate) {
         this.maxBitrate = maxBitrate;
@@ -130,7 +138,6 @@ public class PlaybackProperties implements Serializable {
         this.preferredAudioLanguage = preferredAudioLanguage;
         return this;
     }
-
 
     @Override
     public PlaybackProperties clone() throws CloneNotSupportedException {
