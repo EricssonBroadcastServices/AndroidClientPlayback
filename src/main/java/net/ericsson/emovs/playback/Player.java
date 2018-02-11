@@ -15,8 +15,7 @@ import java.util.UUID;
 
 
 /**
- *
- * Created by Joao Coelho on 2017-08-30.
+ * Base class for a player. This class only handles basic playback flows.
  */
 public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     public static long SAFETY_LIVE_DELAY = 10000L;
@@ -51,8 +50,8 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     /**
      * Plays media given a playlist/manifest URL
      *
-     * @param streamUrl
-     * @param properties
+     * @param streamUrl stream locator URL
+     * @param properties playback properties
      * @throws Exception
      */
     public void play(String streamUrl, PlaybackProperties properties) throws Exception {
@@ -63,7 +62,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     /**
      * Unregisters and clears all listeners of a player
-     *
      */
     @Override
     public void clearListeners() {
@@ -76,7 +74,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     /**
      * Returns wrapper ViewGroup of a specific player
      *
-     * @return
+     * @return ViewGroup that holds contains all player-related views
      */
     public ViewGroup getViewGroup() {
         return host;
@@ -84,7 +82,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     /**
      * Release a player instance and its tech if instanciated
-     *
      */
     public void release() {
         if (this.tech != null) {
@@ -99,7 +96,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     /**
      * Pauses an ongoing playback
-     *
      */
     public void pause() {
         if (!canPause()) {
@@ -114,7 +110,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     /**
      * Resumes an ongoing playback
-     *
      */
     public void resume() {
         if (this.tech != null) {
@@ -124,7 +119,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
     /**
      * Stops ongoing playback
-     *
      */
     public void stop() {
         if (this.tech != null) {
@@ -153,9 +147,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns the duration of the media
-     *
-     * @return
+     * @return duration of the media in milliseconds
      */
     public long getDuration() {
         if (this.tech != null) {
@@ -165,45 +157,35 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns a boolean to indicate if the media is currently playing or paused
-     *
-     * @return
+     * @return boolean to indicate if the media is currently playing or paused
      */
     public boolean isPlaying() {
         return this.tech != null && this.tech.isPlaying();
     }
 
     /**
-     * Returns current playback properties
-     *
-     * @return
+     * @return current playback properties
      */
     public PlaybackProperties getPlaybackProperties() {
         return properties;
     }
 
     /**
-     * Returns current bitrate being displayed
-     *
-     * @return
+     * @return current bitrate being displayed
      */
     public int getCurrentBitrate() {
         return this.tech == null ? -1 : tech.getCurrentBitrate();
     }
 
     /**
-     * Returns the Context associated with the player
-     *
-     * @return
+     * @return application context associated with the player
      */
     public Context getContext() {
         return context;
     }
 
     /**
-     * Returns current tech version
-     *
-     * @return
+     * @return current tech version
      */
     public String getTechVersion() {
         if (this.tech == null) {
@@ -213,9 +195,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns an identifier of the type of the tech being used - null if no tech is loaded yet
-     *
-     * @return
+     * @return an identifier of the type of the tech being used - null if no tech is loaded yet
      */
     public String getTechIdentifier() {
         if (this.tech == null) {
@@ -225,23 +205,22 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns an identifier of the type of the player being used
-     *
-     * @return
+     * @return an identifier of the type of the player being used
      */
     public String getIdentifier() {
         return context.getString(R.string.emplayer_name);
     }
 
     /**
-     * Returns the version of the player
-     *
-     * @return
+     * @return the version of the player
      */
     public String getVersion() {
         return context.getString(R.string.emplayer_version);
     }
 
+    /**
+     * Mutes the audio
+     */
     @Override
     public void mute() {
         if (this.tech == null) {
@@ -275,9 +254,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns if the playback is going to auto play or not
-     *
-     * @return
+     * @return if the playback is in auto play mode or not
      */
     @Override
     public boolean isAutoPlay() {
@@ -285,9 +262,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns a list of languages available to be chosen
-     *
-     * @return
+     * @return a list of audio languages available
      */
     @Override
     public String[] getAudioLanguages() {
@@ -298,9 +273,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns a list of languages available to be chosen
-     *
-     * @return
+     * @return a list of available text languages
      */
     @Override
     public String[] getTextLanguages() {
@@ -333,8 +306,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns selected audio track
-     *
      * @return selected audio language
      */
     @Override
@@ -346,8 +317,6 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     }
 
     /**
-     * Returns selected text track
-     *
      * @return selected text language
      */
     @Override
@@ -358,26 +327,15 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return this.tech.getSelectedTextLanguage();
     }
 
-
-    protected long getTimehisftDelay() {
-        if (this.tech != null) {
-            return this.tech.getTimeshiftDelay();
-        }
-        return 0;
-    }
-
-    protected void setTimeshiftDelay(long timeshift) {
-        if (this.tech != null) {
-            this.tech.setTimeshiftDelay(timeshift);
-        }
-    }
-
     public void seekToTime(long unixTimeMs) {
         if (this.tech != null) {
             this.tech.seekToTime(unixTimeMs);
         }
     }
 
+    /**
+     * @return unix time in milliseconds of current playback position
+     */
     public long getPlayheadTime() {
         if (this.tech != null) {
             return this.tech.getPlayheadTime();
@@ -385,6 +343,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return 0;
     }
 
+    /**
+     * @return offset of current playback position
+     */
     public long getPlayheadPosition() {
         if (this.tech != null) {
             return this.tech.getPlayheadPosition();
@@ -392,6 +353,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return 0;
     }
 
+    /**
+     * @return array[2] with seekable offsets [0, duration]
+     */
     public long[] getSeekRange() {
         if (this.tech != null) {
             return this.tech.getSeekRange();
@@ -399,6 +363,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
+    /**
+     * @return array[2] with seekable unix times [lowerBound, upperBound]
+     */
     public long[] getSeekTimeRange() {
         if (this.tech != null) {
             return this.tech.getSeekTimeRange();
@@ -406,6 +373,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
+    /**
+     * @return array[2] with buffered offsets [lowerBound, upperBound]
+     */
     public long[] getBufferedRange() {
         if (this.tech != null) {
             return this.tech.getBufferedRange();
@@ -413,6 +383,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
+    /**
+     * @return array[2] with buffered unix times [lowerBound, upperBound]
+     */
     public long[] getBufferedTimeRange() {
         if (this.tech != null) {
             return this.tech.getBufferedTimeRange();
@@ -420,6 +393,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return null;
     }
 
+    /**
+     * Calls onError
+     * @param errorCode
+     * @param errorMessage
+     */
     public void fail(final int errorCode, final String errorMessage) {
         this.onError(errorCode, errorMessage);
         context.runOnUiThread(new Runnable() {
@@ -430,6 +408,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         });
     }
 
+    /**
+     * @return Activity the player belongs to
+     */
     public Activity getActivity() {
         return context;
     }
@@ -438,6 +419,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     public void trigger(EventId eventId, Object param) {
     }
 
+    /**
+     * @return boolean stating if stream is paused or not
+     */
     @Override
     public boolean isPaused() {
         if (this.tech != null) {
@@ -446,6 +430,9 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return false;
     }
 
+    /**
+     * @return subtitles view for styling
+     */
     @Override
     public View getSubtitlesView() {
         if (this.tech != null) {
@@ -470,11 +457,13 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         return true;
     }
 
+
     @Override
-    public void seekToLive() {
+    public void seekToLive() {}
 
-    }
-
+    /**
+     * Starts stream from beginning
+     */
     @Override
     public void startOver() {
         if (this.tech == null) {
@@ -483,6 +472,10 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         seekTo(0);
     }
 
+    /**
+     * Run some task on player's UI thread
+     * @param runnable runnable to be executed
+     */
     @Override
     public void runOnUiThread(Runnable runnable) {
         if (this.context != null) {
@@ -503,4 +496,18 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         super.onInit();
         return true;
     }
+
+    protected long getTimehisftDelay() {
+        if (this.tech != null) {
+            return this.tech.getTimeshiftDelay();
+        }
+        return 0;
+    }
+
+    protected void setTimeshiftDelay(long timeshift) {
+        if (this.tech != null) {
+            this.tech.setTimeshiftDelay(timeshift);
+        }
+    }
+
 }
