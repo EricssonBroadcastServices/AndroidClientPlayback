@@ -586,13 +586,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
         tech.init(this, context, entitlement.playToken, this.properties);
         tech.load(mediaId, entitlement.mediaLocator, false);
-        context.runOnUiThread(new Runnable() {
-            public void run() {
-                if (tech != null) {
-                    tech.play(entitlement.mediaLocator);
-                }
-            }
-        });
     }
 
     private void prepareProgramService() {
@@ -687,6 +680,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void playProgram(final EmpProgram program) {
+        program.startDateTime = null;
+        program.endDateTime = null;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {
@@ -727,6 +722,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         EMPMetadataProvider.getInstance().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
                             @Override
                             public void onMetadata(EmpProgram fullProgram) {
+                                if (fullProgram == null) {
+                                    return;
+                                }
                                 if (fullProgram.liveNow() && properties.getPlayFrom() == null) {
                                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                                 }

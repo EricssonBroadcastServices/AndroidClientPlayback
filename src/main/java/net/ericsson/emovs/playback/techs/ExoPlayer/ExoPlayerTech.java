@@ -23,6 +23,7 @@ import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
+import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
@@ -209,7 +210,7 @@ public class ExoPlayerTech implements ITech {
         }
     }
 
-    public boolean load(String mediaId, String manifestUrl, boolean isOffline) {
+    public boolean load(final String mediaId, final String manifestUrl, final boolean isOffline) {
         this.startTimeSeekDone = false;
         this.windowStartTimeMs = 0;
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -237,164 +238,177 @@ public class ExoPlayerTech implements ITech {
             trackSelector.setParameters(currentParameters);
         }
 
-        Pair<String, String> licenseDetails = DashLicenseDetails.getLicenseDetails(manifestUrl, isOffline);
+        final ExoPlayerTech self = this;
+        DashLicenseDetails.getLicenseDetails(manifestUrl, isOffline, new ParameterizedRunnable<Pair<String, String>>() {
+            @Override
+            public void run(Pair<String, String> licenseDetails) {
+                if (licenseDetails == null && properties.getDRMProperties() != null) {
+                    PlaybackProperties.DRMProperties drmProps = properties.getDRMProperties();
+                    licenseDetails = new Pair<>(drmProps.licenseServerUrl, drmProps.initDataBase64);
+                }
 
-        if (licenseDetails == null && properties.getDRMProperties() != null) {
-            PlaybackProperties.DRMProperties drmProps = properties.getDRMProperties();
-            licenseDetails = new Pair<>(drmProps.licenseServerUrl, drmProps.initDataBase64);
-        }
+                if (licenseDetails != null) {
+                    String[] keyRequestPropertiesArray = {};
+                    String licenseWithToken = Uri.parse(licenseDetails.first)
+                            .buildUpon()
+                            .appendQueryParameter("token", "Bearer " + self.playToken)
+                            .build().toString();
+                    licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
 
-        if (licenseDetails != null) {
-            String[] keyRequestPropertiesArray = {};
-            String licenseWithToken = Uri.parse(licenseDetails.first)
-                    .buildUpon()
-                    .appendQueryParameter("token", "Bearer " + this.playToken)
-                    .build().toString();
-            licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
+                    UUID drmSchemeUuid = null;
+                    try {
+                        drmSchemeUuid = getDrmUuid("widevine");
+                    } catch (ParserException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    try {
+                        DrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
 
-            UUID drmSchemeUuid = null;
-            try {
-                drmSchemeUuid = getDrmUuid("widevine");
-            } catch (ParserException e) {
-                e.printStackTrace();
-                return false;
-            }
-            try {
-                DrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
+                        if (isOffline) {
+                            drmSessionManager = buildOfflineDrmSessionManager(mediaId, drmSchemeUuid, licenseDetails.first, licenseDetails.second);
+                        }
+                        else {
+                            drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, licenseDetails.first, keyRequestPropertiesArray);
+                        }
 
-                if (isOffline) {
-                    drmSessionManager = buildOfflineDrmSessionManager(mediaId, drmSchemeUuid, licenseDetails.first, licenseDetails.second);
+                        DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+                        self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
+                        self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
+                        self.player.addListener(new com.google.android.exoplayer2.Player.EventListener(){
+                            @Override
+                            public void onTimelineChanged(Timeline timeline, Object manifest) {
+                                windowStartTimeMs = getWindowStartFromTimeline(timeline);
+                                if (windowStartTimeMs < 0) {
+                                    windowStartTimeMs = 0;
+                                    long tParamStartTime = tParamStartTime();
+                                    if (tParamStartTime >= 0) {
+                                        windowStartTimeMs = tParamStartTime;
+                                    }
+                                }
+                                if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null) {
+                                    if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
+                                        long[] seekTimeRange = parent.getSeekTimeRange();
+                                        if (seekTimeRange != null) {
+                                            seekToTime(seekTimeRange[1] - Player.SAFETY_LIVE_DELAY);
+                                        }
+                                        else {
+                                            long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
+                                            seekToTime(startTime);
+                                        }
+                                        startTimeSeekDone = true;
+                                    }
+                                    else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
+                                        long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
+                                        long[] range = getSeekTimeRange();
+                                        if (range != null && (startTime < range[0] || startTime > range[1])) {
+                                            parent.trigger(IPlaybackEventListener.EventId.WARNING, Warning.INVALID_START_TIME);
+                                        }
+                                        else {
+                                            seekToTime(startTime);
+                                            startTimeSeekDone = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                                int oldBitrate = currentBitrate;
+                                getCurrentBitrate();
+                                if (oldBitrate > 0 && oldBitrate != currentBitrate) {
+                                    parent.onBitrateChange(oldBitrate, currentBitrate);
+                                }
+                            }
+
+                            @Override
+                            public void onLoadingChanged(boolean isLoading) {
+                                if (parent != null && isPlaying) {
+                                    if (isLoading) {
+                                        parent.onWaitingStart();
+                                    }
+                                    else {
+                                        parent.onWaitingEnd();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                                if (playbackState == com.google.android.exoplayer2.Player.STATE_READY) {
+                                    if (isReady == false) {
+                                        parent.onLoad();
+                                        isReady = true;
+                                    }
+                                    if (player != null && playWhenReady && !isPlaying) {
+                                        view.setVisibility(View.VISIBLE);
+                                        isPlaying = true;
+                                        parent.onPlaying();
+                                    }
+                                    if (player != null && seekStart) {
+                                        seekStart = false;
+                                        parent.onSeek(player.getCurrentPosition());
+                                    }
+                                }
+                                else if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED && isPlaying) {
+                                    isPlaying = false;
+                                    isReady = false;
+                                    seekStart = false;
+                                    parent.onPlaybackEnd();
+                                }
+                                else if (playbackState == com.google.android.exoplayer2.Player.STATE_BUFFERING && !isReady && !isPlaying && !loadStarted) {
+                                    loadStarted = true;
+                                    parent.onLoadStart();
+                                }
+                                else if (playbackState == com.google.android.exoplayer2.Player.STATE_IDLE) {
+                                    isPlaying = false;
+                                    isReady = false;
+                                    seekStart = false;
+                                }
+                            }
+
+                            @Override
+                            public void onRepeatModeChanged(int repeatMode) {
+
+                            }
+
+                            @Override
+                            public void onPlayerError(ExoPlaybackException error) {
+                                if (parent != null) {
+                                    parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onPositionDiscontinuity() {
+
+                            }
+
+                            @Override
+                            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+                            }
+                        });
+                    } catch (UnsupportedDrmException e) {
+                        e.printStackTrace();
+                        return;
+                    }
                 }
                 else {
-                    drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, licenseDetails.first, keyRequestPropertiesArray);
+                    self.player = HookedSimpleExoPlayer.newSimpleInstance(self, new DefaultRenderersFactory(ctx), trackSelector);
+                    self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
                 }
 
-                DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
-                this.player = HookedSimpleExoPlayer.newSimpleInstance(this, renderersFactory, trackSelector);
-                this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
-                this.player.addListener(new com.google.android.exoplayer2.Player.EventListener(){
-                    @Override
-                    public void onTimelineChanged(Timeline timeline, Object manifest) {
-                        windowStartTimeMs = getWindowStartFromTimeline(timeline);
-                        if (windowStartTimeMs < 0) {
-                            windowStartTimeMs = 0;
-                            long tParamStartTime = tParamStartTime();
-                            if (tParamStartTime >= 0) {
-                                windowStartTimeMs = tParamStartTime;
-                            }
+                if (ctx != null) {
+                    ctx.runOnUiThread(new Runnable() {
+                        public void run() {
+                            play(manifestUrl);
                         }
-                        if (startTimeSeekDone == false && properties != null && properties.getPlayFrom() != null) {
-                            if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
-                                long[] seekTimeRange = parent.getSeekTimeRange();
-                                if (seekTimeRange != null) {
-                                    seekToTime(seekTimeRange[1] - Player.SAFETY_LIVE_DELAY);
-                                }
-                                else {
-                                    long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
-                                    seekToTime(startTime);
-                                }
-                                startTimeSeekDone = true;
-                            }
-                            else if (properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.StartTime) {
-                                long startTime = ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime;
-                                long[] range = getSeekTimeRange();
-                                if (range != null && (startTime < range[0] || startTime > range[1])) {
-                                    parent.trigger(IPlaybackEventListener.EventId.WARNING, Warning.INVALID_START_TIME);
-                                }
-                                else {
-                                    seekToTime(startTime);
-                                    startTimeSeekDone = true;
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                        int oldBitrate = currentBitrate;
-                        getCurrentBitrate();
-                        if (oldBitrate > 0 && oldBitrate != currentBitrate) {
-                            parent.onBitrateChange(oldBitrate, currentBitrate);
-                        }
-                    }
-
-                    @Override
-                    public void onLoadingChanged(boolean isLoading) {
-                        if (parent != null && isPlaying) {
-                            if (isLoading) {
-                                parent.onWaitingStart();
-                            }
-                            else {
-                                parent.onWaitingEnd();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                        if (playbackState == com.google.android.exoplayer2.Player.STATE_READY) {
-                            if (isReady == false) {
-                                parent.onLoad();
-                                isReady = true;
-                            }
-                            if (player != null && playWhenReady && !isPlaying) {
-                                view.setVisibility(View.VISIBLE);
-                                isPlaying = true;
-                                parent.onPlaying();
-                            }
-                            if (player != null && seekStart) {
-                                seekStart = false;
-                                parent.onSeek(player.getCurrentPosition());
-                            }
-                        }
-                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED && isPlaying) {
-                            isPlaying = false;
-                            isReady = false;
-                            seekStart = false;
-                            parent.onPlaybackEnd();
-                        }
-                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_BUFFERING && !isReady && !isPlaying && !loadStarted) {
-                            loadStarted = true;
-                            parent.onLoadStart();
-                        }
-                        else if (playbackState == com.google.android.exoplayer2.Player.STATE_IDLE) {
-                            isPlaying = false;
-                            isReady = false;
-                            seekStart = false;
-                        }
-                    }
-
-                    @Override
-                    public void onRepeatModeChanged(int repeatMode) {
-
-                    }
-
-                    @Override
-                    public void onPlayerError(ExoPlaybackException error) {
-                        if (parent != null) {
-                            parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onPositionDiscontinuity() {
-
-                    }
-
-                    @Override
-                    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-                    }
-                });
-            } catch (UnsupportedDrmException e) {
-                e.printStackTrace();
-                return false;
+                    });
+                }
+                return;
             }
-        }
-        else {
-            this.player = HookedSimpleExoPlayer.newSimpleInstance(this, new DefaultRenderersFactory(ctx), trackSelector);
-            this.player.setPlayWhenReady(this.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : this.properties.isAutoplay());
-        }
+        });
 
         return true;
     }
@@ -418,7 +432,7 @@ public class ExoPlayerTech implements ITech {
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         MediaSource mediaSource = new DashMediaSource(this.manifestUrl, dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
-        this.player.prepare(mediaSource);
+        player.prepare(mediaSource);
         overrideExoControls();
     }
 
