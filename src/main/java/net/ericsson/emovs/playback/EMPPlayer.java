@@ -683,8 +683,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     private void playProgram(final EmpProgram program) {
-        program.startDateTime = null;
-        program.endDateTime = null;
         final EntitledRunnable onEntitlementRunnable = new EntitledRunnable() {
             @Override
             public void run() {

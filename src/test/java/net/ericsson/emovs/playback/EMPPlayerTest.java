@@ -8,6 +8,7 @@ import junit.framework.Assert;
 
 import net.ericsson.emovs.exposure.clients.exposure.ExposureClient;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeExposureClient;
@@ -360,7 +361,7 @@ public class EMPPlayerTest {
         public int warningCode;
 
         public EMPPlayerTechGetter(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host) {
-            super(analyticsConnector, entitlementProvider, techFactory, context, host);
+            super(analyticsConnector, entitlementProvider, techFactory, context, host, EMPMetadataProvider.getInstance(), MonotonicTimeService.getInstance());
         }
 
         public FakeTech getTech() {

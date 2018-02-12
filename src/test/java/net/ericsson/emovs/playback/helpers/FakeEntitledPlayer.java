@@ -3,10 +3,14 @@ package net.ericsson.emovs.playback.helpers;
 import android.app.Activity;
 import android.view.View;
 
+import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
+import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.playback.ui.activities.SimplePlaybackActivity;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
+import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IMetadataProvider;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpProgram;
@@ -267,5 +271,15 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
     @Override
     public EmpProgram getCurrentProgram() {
         return null;
+    }
+
+    @Override
+    public IMetadataProvider getMetadataProvider() {
+        return EMPMetadataProvider.getInstance();
+    }
+
+    @Override
+    public IEntitlementProvider getEntitlementProvider() {
+        return EMPEntitlementProvider.getInstance();
     }
 }

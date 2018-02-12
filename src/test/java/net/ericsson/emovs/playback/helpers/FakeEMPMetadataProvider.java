@@ -1,10 +1,10 @@
 package net.ericsson.emovs.playback.helpers;
 
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
-import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
-import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
+import net.ericsson.emovs.utilities.interfaces.IMetadataCallback;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 import net.ericsson.emovs.utilities.errors.Error;
+import net.ericsson.emovs.utilities.queries.EpgQueryParameters;
 
 import java.util.ArrayList;
 
