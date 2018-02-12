@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
@@ -293,7 +292,7 @@ public class ExoPlayerTech implements ITech {
                                             seekToTime(seekTimeRange[1] - Player.SAFETY_LIVE_DELAY);
                                         }
                                         else {
-                                            long startTime = MonotonicTimeService.getInstance().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
+                                            long startTime = parent.getMonotonicTimeService().currentTime() - getTimeshiftDelay() * 1000 - Player.SAFETY_LIVE_DELAY;
                                             seekToTime(startTime);
                                         }
                                         startTimeSeekDone = true;
@@ -473,8 +472,8 @@ public class ExoPlayerTech implements ITech {
 
     public void seekToTime(long unixTimeMs) {
         if (player != null) {
-            if (unixTimeMs >= MonotonicTimeService.getInstance().currentTime()) {
-                unixTimeMs = MonotonicTimeService.getInstance().currentTime();
+            if (unixTimeMs >= parent.getMonotonicTimeService().currentTime()) {
+                unixTimeMs = parent.getMonotonicTimeService().currentTime();
             }
             long windowStartTime = getWindowStartTime();
             this.player.seekTo(unixTimeMs - windowStartTime);

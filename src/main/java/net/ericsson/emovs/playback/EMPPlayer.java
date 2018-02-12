@@ -4,18 +4,16 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
-import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
-import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.Warning;
-import net.ericsson.emovs.utilities.errors.WarningCodes;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IMetadataCallback;
+import net.ericsson.emovs.utilities.interfaces.IMetadataProvider;
+import net.ericsson.emovs.utilities.interfaces.IMonotonicTimeService;
 import net.ericsson.emovs.utilities.interfaces.IPlayable;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpAsset;
@@ -26,6 +24,7 @@ import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.ErrorRunnable;
+import net.ericsson.emovs.utilities.queries.EpgQueryParameters;
 import net.ericsson.emovs.utilities.system.FileSerializer;
 import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.system.RunnableThread;
@@ -42,6 +41,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     protected IPlayable playable;
     protected Entitlement entitlement;
     protected IEntitlementProvider entitlementProvider;
+    protected IMetadataProvider metadataProvider;
     protected ProgramService programService;
     protected long lastPlayTimeMs;
     protected long lastSeekToTimeMs;
@@ -71,10 +71,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      * @param techFactory reference to a factory of specific techs that will play the media
      * @param context activity that holds the player
      * @param host reference to the ViewGroup that wraps the player (can have several players per activity)
+     * @param metadataProvider reference to the metadata provider that provides EPG functionality
+     * @param monotonicTimeService reference to a monotonic time provider interface
      */
-    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host) {
-        super(analyticsConnector, techFactory, context, host);
+    public EMPPlayer(AnalyticsPlaybackConnector analyticsConnector, IEntitlementProvider entitlementProvider, TechFactory techFactory, Activity context, ViewGroup host, IMetadataProvider metadataProvider, IMonotonicTimeService monotonicTimeService) {
+        super(analyticsConnector, techFactory, context, host, monotonicTimeService);
         this.entitlementProvider = entitlementProvider;
+        this.metadataProvider = metadataProvider;
     }
 
     /**
@@ -188,7 +191,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         if (this.programService == null) {
             return;
         }
-        long timeshiftUnixTime = MonotonicTimeService.getInstance().currentTime() - timeshift * 1000;
+        long timeshiftUnixTime = getMonotonicTimeService().currentTime() - timeshift * 1000;
         this.programService.isEntitled (timeshiftUnixTime, new Runnable() {
             @Override
             public void run() {
@@ -364,7 +367,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 }
             }
             else if (this.entitlement != null && this.entitlement.channelId != null) {
-                if (_unixTimeMs >= MonotonicTimeService.getInstance().currentTime()) {
+                if (_unixTimeMs >= getMonotonicTimeService().currentTime()) {
                     return;
                 }
                 if (range != null) {
@@ -379,7 +382,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 epgParams.setFutureTimeFrame(0);
                 epgParams.setPastTimeFrame(0);
 
-                EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, unixTimeMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
+                getMetadataProvider().getEpgWithTime(this.entitlement.channelId, unixTimeMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
                     @Override
                     public void onMetadata(ArrayList<EmpProgram> programs) {
                         try {
@@ -504,7 +507,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             epgParams.setFutureTimeFrame(0);
             epgParams.setPastTimeFrame(0);
             epgParams.setPageSize(10);
-            EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, nowMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
+            getMetadataProvider().getEpgWithTime(this.entitlement.channelId, nowMs, new IMetadataCallback<ArrayList<EmpProgram>>() {
                 @Override
                 public void onMetadata(ArrayList<EmpProgram> programs) {
                     try {
@@ -639,7 +642,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         epgParams.setFutureTimeFrame(0);
                         epgParams.setPastTimeFrame(0);
                         epgParams.setPageSize(10);
-                        EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, getServerTime(), new IMetadataCallback<ArrayList<EmpProgram>>() {
+                        getMetadataProvider().getEpgWithTime(this.entitlement.channelId, getServerTime(), new IMetadataCallback<ArrayList<EmpProgram>>() {
                             @Override
                             public void onMetadata(ArrayList<EmpProgram> programs) {
                                 if (programs.size() > 0) {
@@ -719,7 +722,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         prepareProgramService();
                     }
                     else {
-                        EMPMetadataProvider.getInstance().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
+                        getMetadataProvider().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
                             @Override
                             public void onMetadata(EmpProgram fullProgram) {
                                 if (fullProgram == null) {
@@ -796,8 +799,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         return true;
     }
 
-    private IEntitlementProvider getEntitlementProvider() {
+    public IEntitlementProvider getEntitlementProvider() {
         return entitlementProvider;
     }
 
+    public IMetadataProvider getMetadataProvider() {
+        return metadataProvider;
+    }
 }

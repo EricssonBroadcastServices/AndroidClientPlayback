@@ -3,7 +3,6 @@ package net.ericsson.emovs.playback.interfaces;
 import android.app.Activity;
 import android.view.View;
 
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.Player;
 

@@ -6,9 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.interfaces.IMonotonicTimeService;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
 
 import java.util.UUID;
@@ -20,6 +20,7 @@ import java.util.UUID;
 public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     public static long SAFETY_LIVE_DELAY = 10000L;
     protected AnalyticsPlaybackConnector analyticsConnector;
+    protected IMonotonicTimeService monotonicTimeService;
     protected Activity context;
     protected ViewGroup host;
     protected PlaybackProperties properties;
@@ -35,10 +36,11 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @param context activity that holds the player
      * @param host reference to the ViewGroup that wraps the player (can have several players per activity)
      */
-    public Player(AnalyticsPlaybackConnector analyticsConnector, TechFactory techFactory, Activity context, ViewGroup host) {
+    public Player(AnalyticsPlaybackConnector analyticsConnector, TechFactory techFactory, Activity context, ViewGroup host, IMonotonicTimeService monotonicTimeService) {
         this.host = host;
         this.context = context;
         this.analyticsConnector = analyticsConnector;
+        this.monotonicTimeService = monotonicTimeService;
         this.techFactory = techFactory;
 
         if (analyticsConnector != null) {
@@ -143,7 +145,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
      * @return
      */
     public long getServerTime() {
-        return MonotonicTimeService.getInstance().currentTime();
+        return getMonotonicTimeService().currentTime();
     }
 
     /**
@@ -510,4 +512,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
         }
     }
 
+    public IMonotonicTimeService getMonotonicTimeService() {
+        return monotonicTimeService;
+    }
 }

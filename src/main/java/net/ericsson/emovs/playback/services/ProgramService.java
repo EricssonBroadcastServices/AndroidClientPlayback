@@ -2,19 +2,16 @@ package net.ericsson.emovs.playback.services;
 
 import android.util.Log;
 
-import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
-import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
-import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
-import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IMetadataCallback;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+import net.ericsson.emovs.utilities.queries.EpgQueryParameters;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -90,7 +87,7 @@ public class ProgramService extends Thread {
             }
         }
 
-        EMPMetadataProvider.getInstance().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+        player.getMetadataProvider().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
@@ -100,7 +97,7 @@ public class ProgramService extends Thread {
                             continue;
                         }
                         if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
-                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, new Runnable() {
+                            player.getEntitlementProvider().isEntitledAsync(program.assetId, new Runnable() {
                                 @Override
                                 public void run() {
                                     if (onAllowed != null) {

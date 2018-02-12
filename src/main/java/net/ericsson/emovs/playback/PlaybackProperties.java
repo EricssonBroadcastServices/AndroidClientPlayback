@@ -1,7 +1,5 @@
 package net.ericsson.emovs.playback;
 
-import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
-
 import java.io.Serializable;
 
 /**
