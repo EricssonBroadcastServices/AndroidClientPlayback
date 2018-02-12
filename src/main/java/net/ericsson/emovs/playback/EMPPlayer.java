@@ -44,6 +44,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     protected IEntitlementProvider entitlementProvider;
     protected ProgramService programService;
     protected long lastPlayTimeMs;
+    protected long lastSeekToTimeMs;
 
     private EmptyPlaybackEventListener empPlaybackListener = new EmptyPlaybackEventListener(this) {
         @Override
@@ -211,7 +212,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     }
                 });
             }
-        });
+        }, false);
     }
 
     /**
@@ -272,6 +273,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      */
     @Override
     public void seekTo(final long positionMs) {
+        if (getServerTime() - lastSeekToTimeMs < 500L) {
+            return;
+        }
+        lastSeekToTimeMs = getServerTime();
         if (this.tech != null && this.isPlaying()) {
             long playheadPosition = getPlayheadPosition();
             if (positionMs > playheadPosition && this.entitlement.ffEnabled == false) {
@@ -279,7 +284,24 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             } else if (positionMs < playheadPosition && this.entitlement.rwEnabled == false) {
                 return;
             }
-            this.tech.seekTo(positionMs);
+            long[] range = getSeekTimeRange();
+            if (range == null || range.length != 2 || this.programService == null) {
+                this.tech.seekTo(positionMs);
+            }
+            else {
+                long unixTimeToCheck = range[0] + positionMs;
+                programService.isEntitled (unixTimeToCheck, new Runnable() {
+                    @Override
+                    public void run() {
+                        tech.seekTo(positionMs);
+                    }
+                }, new ErrorRunnable() {
+                    @Override
+                    public void run(final int errorCode, final String errorMessage) {
+                        onWarning(Warning.SEEK_NOT_POSSIBLE.getCode(), Warning.SEEK_NOT_POSSIBLE.toString());
+                    }
+                }, true);
+            }
         }
     }
 
@@ -323,7 +345,23 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
             long[] range = getSeekTimeRange();
             if (range != null && _unixTimeMs >= range[0] && _unixTimeMs <= range[1]) {
-                this.tech.seekToTime(_unixTimeMs);
+                final long seekToTime = _unixTimeMs;
+                if (programService == null) {
+                    tech.seekToTime(seekToTime);
+                }
+                else {
+                    programService.isEntitled (_unixTimeMs, new Runnable() {
+                        @Override
+                        public void run() {
+                            tech.seekToTime(seekToTime);
+                        }
+                    }, new ErrorRunnable() {
+                        @Override
+                        public void run(final int errorCode, final String errorMessage) {
+                            onWarning(Warning.SEEK_NOT_POSSIBLE.getCode(), Warning.SEEK_NOT_POSSIBLE.toString());
+                        }
+                    }, true);
+                }
             }
             else if (this.entitlement != null && this.entitlement.channelId != null) {
                 if (_unixTimeMs >= MonotonicTimeService.getInstance().currentTime()) {
@@ -367,7 +405,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                     public void run(final int errorCode, final String errorMessage) {
                                         onWarning(Warning.SEEK_NOT_POSSIBLE.getCode(), Warning.SEEK_NOT_POSSIBLE.toString());
                                     }
-                                });
+                                }, true);
                             }
                             else {
                                 fail (ErrorCodes.PLAYBACK_PROGRAM_NOT_FOUND, Error.PROGRAM_NOT_FOUND.toString());

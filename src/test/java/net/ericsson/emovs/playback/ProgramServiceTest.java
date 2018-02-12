@@ -58,6 +58,8 @@ public class ProgramServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        ProgramService.FUZZY_ENTITLEMENT_MAX_DELAY = 0;
+
         when(live_program1.liveNow()).thenReturn(true);
         live_program1.assetId = "@id/1";
         when(live_program2.liveNow()).thenReturn(true);
@@ -187,7 +189,7 @@ public class ProgramServiceTest {
         Thread.sleep(2000);
 
         currentProgram = service.getCurrentProgram();
-        Assert.assertTrue("@id/2".equals(currentProgram.assetId));
+        Assert.assertTrue(currentProgram == null);
 
         Assert.assertTrue(player.isPlaying() == false);
         Assert.assertTrue(player.lastErrorCode == ErrorCodes.PLAYBACK_NOT_ENTITLED);

@@ -6,6 +6,7 @@ import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
 import net.ericsson.emovs.exposure.metadata.IMetadataCallback;
 import net.ericsson.emovs.exposure.metadata.queries.EpgQueryParameters;
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
@@ -19,6 +20,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * <p>
@@ -28,7 +30,7 @@ import java.util.ArrayList;
  *     <ul>
  *         <li>Regular entitlement checks when live stream is playing</li>
  *         <li>Entitlement check when timeshiftDelay is changed</li>
- *         <li></li>
+ *         <li>FUZZY_ENTITLEMENT_MAX_DELAY can be set to tune a random fuzzy wait period between program change and entitlement check (useful to reduce load on server)</li>
  *     </ul>
  * </p>
  */
@@ -36,10 +38,12 @@ public class ProgramService extends Thread {
     private static final String TAG = ProgramService.class.toString();
     private static final int LONG_WAIT_TIME = 1000;
     private static final int SHORT_WAIT_TIME = 1000;
+    public static int FUZZY_ENTITLEMENT_MAX_DELAY = 0;
 
     Entitlement entitlement;
     IEntitledPlayer player;
     EmpProgram currentProgram;
+    Random randomizer = new Random(System.currentTimeMillis());
 
     public ProgramService(IEntitledPlayer player, Entitlement entitlement) {
         this.player = player;
@@ -50,21 +54,20 @@ public class ProgramService extends Thread {
         return this.currentProgram;
     }
 
-    public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden) {
+    public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, boolean updateCurrentProgram) {
         if (currentProgram == null) {
-            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
+            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
         }
         else {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
             Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
-
-            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+            if (dStart.getMillis() >= 0 && dEnd.getMillis() <= 0) {
                 if (onAllowed != null) {
                     onAllowed.run();
                 }
             }
             else {
-                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, false);
+                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
             }
         }
     }
@@ -73,12 +76,13 @@ public class ProgramService extends Thread {
         EpgQueryParameters epgParams = new EpgQueryParameters();
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
+        epgParams.setPageSize(5);
 
         if (currentProgram != null) {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
             Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
 
-            if (dStart.getMillis() > 0 && dEnd.getMillis() < 0) {
+            if (dStart.getMillis() >= 0 && dEnd.getMillis() <= 0) {
                 if (onAllowed != null) {
                     onAllowed.run();
                 }
@@ -90,20 +94,29 @@ public class ProgramService extends Thread {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
-                    for (EmpProgram program : programs) {
+                    for (final EmpProgram program : programs) {
                         // Ignoring programs that are almost ending
                         if (programs.size() > 1 && timeToCheck - program.endDateTime.getMillis() > -1000L) {
                             continue;
                         }
                         if (updateProgram == false || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
-                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, onAllowed, onForbidden);
+                            EMPEntitlementProvider.getInstance().isEntitledAsync(program.assetId, new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (onAllowed != null) {
+                                        onAllowed.run();
+                                    }
+
+                                    if (updateProgram) {
+                                        if (player != null && currentProgram != null) {
+                                            player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
+                                        }
+                                        currentProgram = program;
+                                    }
+                                }
+                            }, onForbidden);
                         }
-                        if (updateProgram) {
-                            if (player != null && currentProgram != null) {
-                                player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
-                            }
-                            currentProgram = program;
-                        }
+
                         break;
                     }
                 }
@@ -139,9 +152,19 @@ public class ProgramService extends Thread {
                 }
 
                 if (this.player.isPlaying()) {
-                    long currentTime = this.player.getPlayheadTime();
-                    Log.d("PlaybackCurrentTime", Long.toString(currentTime));
-                    checkTimeshiftAllowance(currentTime, null, new ErrorRunnable() {
+                    long playheadTime = this.player.getPlayheadTime();
+                    Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
+                    if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
+                        this.currentProgram != null &&
+                        this.currentProgram.endDateTime != null) {
+                        long timeToEnd = this.currentProgram.endDateTime.getMillis() - playheadTime;
+                        if (timeToEnd >= 0 && timeToEnd < 5 * LONG_WAIT_TIME) {
+                            int fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
+                            Thread.sleep(fuzzySleep);
+                            continue;
+                        }
+                    }
+                    checkTimeshiftAllowance(playheadTime, null, new ErrorRunnable() {
                         @Override
                         public void run(int code, final String message) {
                             player.runOnUiThread(new Runnable() {
