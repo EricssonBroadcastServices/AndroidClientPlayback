@@ -326,6 +326,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 this.tech.seekToTime(_unixTimeMs);
             }
             else if (this.entitlement != null && this.entitlement.channelId != null) {
+                if (_unixTimeMs >= MonotonicTimeService.getInstance().currentTime()) {
+                    return;
+                }
                 if (range != null) {
                     long[] rangeDiffs = { _unixTimeMs - range[0], range[1] - _unixTimeMs };
                     if (rangeDiffs[1] < 0 && UniversalPackagerHelper.isDynamicCatchup(this.entitlement.mediaLocator)) {
