@@ -335,8 +335,12 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      */
     @Override
     public void seekToTime(long _unixTimeMs) {
+        this.seekToTimeInternal(_unixTimeMs, false);
+    }
+
+    protected void seekToTimeInternal(long _unixTimeMs, boolean avoidContract) {
         if (this.tech != null) {
-            if (this.isPlaying()) {
+            if (avoidContract == false && this.isPlaying()) {
                 long playheadTime = getPlayheadTime();
                 if (_unixTimeMs > playheadTime && this.entitlement.ffEnabled == false) {
                     return;
@@ -538,7 +542,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             }, epgParams);
         }
         else {
-            seekToTime(Math.min(nowMs, seekTimeRange[1] - SAFETY_LIVE_DELAY));
+            seekToTimeInternal(Math.min(nowMs, seekTimeRange[1] - SAFETY_LIVE_DELAY), true);
         }
     }
 
