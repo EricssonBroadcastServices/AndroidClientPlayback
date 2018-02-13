@@ -1,8 +1,8 @@
 # Customizing Player UI
 
 
-One way of customizing the activity UI and it is not possible to append UI elements to the content view, then the method **bindContentView** shall be used to create a custom layout.
-If you also want to create video controls (play/pause, seekbar, etc..), then it is possible to disable native controls by setting **nativeControls** property in **PlaybackProperties** class.
+To create a new content view for your activity use **bindContentView**.
+If you want to create controls for the player (play/pause, seekbar, etc..) it is possible by disabling native controls when setting **nativeControls** property in the **PlaybackProperties** class.
 
 ```java
 public class MyVideoPlayer extends SimplePlaybackActivity {
@@ -61,8 +61,8 @@ To play an asset, the reference code is as follows:
 	player.play(asset, PlaybackProperties.DEFAULT);
 ```
 
-If one wants to implement custom controls, then all it has to be done is fetch the **EMPPlayerView** object in the activity and register a listener in the associated **EMPPlayer** instance.
-This listener must implement interface **IPlaybackEventListener** or extend class **EmptyPlaybackEventListener**.
+If one wants to implement custom controls, then all that has to be done is fetch the **EMPPlayerView** object in the activity and register a listener in the associated **EMPPlayer** instance.
+This listener must implement the **IPlaybackEventListener** interface or extend the **EmptyPlaybackEventListener** class.
 
 ```java
 EMPPlayerView view = (EMPPlayerView) findViewById(R.id.myempplayer);
