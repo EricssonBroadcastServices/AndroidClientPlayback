@@ -6,7 +6,7 @@ If you are not familiar with the basic EMPPlayer API, please check the first 2 t
 
 **Playing a Live Channel**
 
-In order to play a Live Channel simply build an EmpChannel object and pass it as an argument to the **play()** method.
+In order to play a Live Channel simply build an EmpChannel object specifying the channel ID and pass it as an argument to the **play()** method. When you play a live channel using an EmpChannel you do not need to know which program is live at the current moment. However, in that case, it might not be possible to store or play from a bookmark.
   
 ```java
 EmpChannel channel = new EmpChannel();
@@ -16,8 +16,7 @@ player.play(channel, PlaybackProperties.DEFAULT);
 
 **Playing a Live Program**
 
-When you play an EmpChannel, you do not have to know which EmpProgram is live at the current moment.
-However, in that case, it might not be possible to store or play from a bookmark. For that purpose, it is advised that you play the live EmpProgram instead.
+In order to play a Live Program simply build an EmpProgram object specifying the channel ID and live program ID and pass it as an argument to the **play()** method. In this case it is possible to store and play from a bookmark.
 
 ```java
 EmpProgram program = new EmpProgram();
@@ -26,11 +25,10 @@ program.programId = "MY_LIVE_PROGRAM_ID";
 player.play(program, PlaybackProperties.DEFAULT);
 ```
 
-
-**Playing a Catchup**
+**Playing a Catchup Program**
 
 Any program that belongs to a Channel and is not live anymore is considered to be a Catchup.
-You can use the EmpProgram object to play a catchup. The code syntax is the same regardless if the program is live or not.
+In order to play a Catchup Program simply build an EmpProgram object specifying the channel ID and catchup program ID and pass it as an argument to the **play()** method. In this case it is possible to store and play from a bookmark. The code syntax is the same regardless if the program is live or not.
 
 ```java
 EmpProgram program = new EmpProgram();
