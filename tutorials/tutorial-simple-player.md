@@ -1,7 +1,7 @@
 # Integrating Simple Activity for Playback
 
-The most basic integration of EMPPlayer is by extending the **SimplePlaybackActivity** class provided by the library.
-In order to specify playback properties like autoplay or startTime, use class PlaybackProperties.
+The most basic integration of the EMPPlayer is by extending the **SimplePlaybackActivity** class provided by the library.
+In order to specify playback properties like autoplay or startTime, use the PlaybackProperties class.
  
 ```java
 import android.os.Bundle;
@@ -21,7 +21,7 @@ public class MyVideoPlayer extends SimplePlaybackActivity {
 }
 ```
 
-Once the derived activity is created and registered in **AndroidManifest.xml**, the player can be started by sending the playable in the Intent:
+Once the derived activity is created and registered in **AndroidManifest.xml**, the player can be started by sending the playable to the Intent:
 
 **Asset**
 
