@@ -23,8 +23,9 @@
 
 ## Tutorials
 
-- [Integrating simple Activity for playback](tutorials/tutorial-simple-player.md)
-- [Customizing player UI](tutorials/tutorial-player-customization.md)
+- [Integrating Simple Activity for playback](tutorials/tutorial-simple-player.md)
+- [Customizing Player UI](tutorials/tutorial-player-customization.md)
+- [Live and Catchup Playback](tutorials/tutorial-live-and-catchup-playback.md)
 - [Custom Analytics and Entitlement Provider](tutorials/tutorial-custom-analytics-entitlement-provider.md)
 - [Custom Playback Tech](tutorials/tutorial-custom-tech.md)
 
