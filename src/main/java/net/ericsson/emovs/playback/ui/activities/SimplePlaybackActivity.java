@@ -54,7 +54,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
  * Created by Joao Coelho on 2017-09-21.
  */
 public class SimplePlaybackActivity extends AppCompatActivity {
-    public boolean LOG_ERRORS_AND_WARNINGS = true;
+    public boolean SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST = true;
 
     protected final String PLAYABLE_ARGUMENT_NAME = "playable";
 
@@ -266,14 +266,14 @@ public class SimplePlaybackActivity extends AppCompatActivity {
             view.getPlayer().addListener(new EmptyPlaybackEventListener(view.getPlayer()) {
                 @Override
                 public void onError(int errorCode, String errorMessage) {
-                    if (LOG_ERRORS_AND_WARNINGS) {
+                    if (SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST) {
                         Toast.makeText(self, errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onWarning(int warningCode, String warningMessage) {
-                    if (LOG_ERRORS_AND_WARNINGS) {
+                    if (SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST) {
                         Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT).show();
                     }
                 }
