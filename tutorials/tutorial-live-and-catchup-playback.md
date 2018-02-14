@@ -127,7 +127,7 @@ Helper methods for subtitles are as follows:
 - **getAudioLanguages()**: returns an array of audio languages that are available in the stream
 - **setAudioLanguage()**: selects an audio language to be displayed
 
-** Logs **
+**Logs**
 All logging is currently handled using Android's native Logging capabilities, so any framework or library compatible with native logging tools should be able to gather logs from our player and send them anywhere you want (for instance crashlytics).
 
 
