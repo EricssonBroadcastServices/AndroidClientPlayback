@@ -906,7 +906,7 @@ public class ExoPlayerTech implements ITech {
 
     private void registerPlayer() {
         View timebar = view.findViewById(R.id.exo_progress);
-        if (timebar instanceof HookedDefaultTimeBar) {
+        if (timebar != null && timebar instanceof HookedDefaultTimeBar) {
             HookedDefaultTimeBar hookedTimebar = (HookedDefaultTimeBar) timebar;
             hookedTimebar.bindPlayer(getParent());
         }
@@ -916,6 +916,12 @@ public class ExoPlayerTech implements ITech {
             for (HookedImageButton btn : hookedBtns) {
                 btn.bindPlayer(getParent());
             }
+        }
+
+        View durationView = view.findViewById(R.id.exo_duration);
+        if (durationView != null && durationView instanceof HookedDurationTextView) {
+            HookedDurationTextView hookedDurationView = (HookedDurationTextView) durationView;
+            hookedDurationView.bindPlayer(getParent());
         }
     }
 

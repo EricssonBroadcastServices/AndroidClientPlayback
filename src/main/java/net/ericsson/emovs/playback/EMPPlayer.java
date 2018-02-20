@@ -224,7 +224,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     @Override
     public EmpProgram getCurrentProgram() {
         if (this.programService != null) {
-            return this.programService.getCurrentProgram();
+            EmpProgram psProgram = this.programService.getCurrentProgram();
+            if (psProgram != null){
+                return psProgram;
+            }
+        }
+        if (this.playable instanceof EmpProgram) {
+            return (EmpProgram) this.playable;
         }
         return null;
     }

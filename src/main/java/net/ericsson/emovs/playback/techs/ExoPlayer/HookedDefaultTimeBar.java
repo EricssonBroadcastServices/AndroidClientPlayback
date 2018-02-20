@@ -18,7 +18,7 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
 
     // TODO: update timeline when program changes
     // TODO: hook timeline duration and current position
-    
+
     public HookedDefaultTimeBar(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -42,8 +42,8 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
         if (player instanceof IEntitledPlayer) {
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
-            if (currentProgram != null && currentProgram.endDateTime != null && currentProgram.startDateTime != null) {
-                long programDuration = currentProgram.endDateTime.getMillis() - currentProgram.startDateTime.getMillis();
+            if (currentProgram != null && currentProgram.getDuration() != null ) {
+                long programDuration = currentProgram.getDuration();
                 super.setDuration(programDuration);
                 return;
             }
