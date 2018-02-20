@@ -923,6 +923,12 @@ public class ExoPlayerTech implements ITech {
             HookedDurationTextView hookedDurationView = (HookedDurationTextView) durationView;
             hookedDurationView.bindPlayer(getParent());
         }
+
+        View positionView = view.findViewById(R.id.exo_position);
+        if (positionView != null && positionView instanceof HookedPositionTextView) {
+            HookedPositionTextView hookedDurationView = (HookedPositionTextView) positionView;
+            hookedDurationView.bindPlayer(getParent());
+        }
     }
 
 }

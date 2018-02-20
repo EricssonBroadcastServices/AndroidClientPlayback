@@ -16,9 +16,6 @@ import net.ericsson.emovs.utilities.models.EmpProgram;
 public class HookedDefaultTimeBar extends DefaultTimeBar {
     IPlayer player;
 
-    // TODO: update timeline when program changes
-    // TODO: hook timeline duration and current position
-
     public HookedDefaultTimeBar(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -29,11 +26,32 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
 
     @Override
     public void setPosition(long position) {
+        if (player instanceof IEntitledPlayer) {
+            IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+            EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+            if (currentProgram != null && currentProgram.getDuration() != null) {
+                long duration = currentProgram.getDuration();
+                long newPosition = Math.min(duration, Math.max(0, player.getPlayheadTime() - currentProgram.startDateTime.getMillis()));
+                super.setPosition(newPosition);
+                return;
+            }
+        }
         super.setPosition(position);
     }
 
     @Override
     public void setBufferedPosition(long bufferedPosition) {
+        if (player instanceof IEntitledPlayer) {
+            IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+            EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+            long[] bufferedTimeRange = player.getBufferedTimeRange();
+            if (currentProgram != null && currentProgram.getDuration() != null && bufferedTimeRange != null) {
+                long duration = currentProgram.getDuration();
+                long newPosition = Math.min(duration, Math.max(0, bufferedTimeRange[1] - currentProgram.startDateTime.getMillis()));
+                super.setBufferedPosition(newPosition);
+                return;
+            }
+        }
         super.setBufferedPosition(bufferedPosition);
     }
 
@@ -42,9 +60,11 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
         if (player instanceof IEntitledPlayer) {
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
-            if (currentProgram != null && currentProgram.getDuration() != null ) {
+            long[] seekableTimeRange = player.getSeekTimeRange();
+            if (currentProgram != null && currentProgram.getDuration() != null && seekableTimeRange != null) {
+                long liveDuration = seekableTimeRange[1] - currentProgram.startDateTime.getMillis();
                 long programDuration = currentProgram.getDuration();
-                super.setDuration(programDuration);
+                super.setDuration(Math.min(liveDuration, programDuration));
                 return;
             }
         }

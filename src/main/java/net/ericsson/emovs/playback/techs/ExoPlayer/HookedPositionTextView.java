@@ -12,10 +12,10 @@ import net.ericsson.emovs.utilities.time.DateTimeParser;
  * Created by Joao Coelho on 2018-01-24.
  */
 
-public class HookedDurationTextView extends android.support.v7.widget.AppCompatTextView {
+public class HookedPositionTextView extends android.support.v7.widget.AppCompatTextView {
     IPlayer player;
 
-    public HookedDurationTextView(Context context, AttributeSet attrs) {
+    public HookedPositionTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -28,12 +28,12 @@ public class HookedDurationTextView extends android.support.v7.widget.AppCompatT
         if (player != null && player instanceof IEntitledPlayer) {
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
-            long[] seekableTimeRange = player.getSeekTimeRange();
-            if (currentProgram != null && currentProgram.getDuration() != null && seekableTimeRange != null) {
-                long liveDuration = seekableTimeRange[1] - currentProgram.startDateTime.getMillis();
-                String newDuration = DateTimeParser.formatDisplayTime(Math.min(currentProgram.getDuration(), liveDuration));
-                if (newDuration.equals(text) == false) {
-                    setText(newDuration);
+            if (currentProgram != null && currentProgram.getDuration() != null ) {
+                long programDuration = currentProgram.getDuration();
+                long positionInTheProgram = Math.max(0, Math.min(programDuration, player.getPlayheadTime() - currentProgram.startDateTime.getMillis()));
+                String newPosition = DateTimeParser.formatDisplayTime(positionInTheProgram);
+                if (newPosition.equals(text) == false) {
+                    setText(newPosition);
                 }
                 else {
                     super.onTextChanged(text, start, lengthBefore, lengthAfter);
