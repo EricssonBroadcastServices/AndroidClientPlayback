@@ -34,6 +34,7 @@ public class HookedDurationTextView extends android.support.v7.widget.AppCompatT
                 String newDuration = DateTimeParser.formatDisplayTime(Math.min(currentProgram.getDuration(), liveDuration));
                 if (newDuration.equals(text) == false) {
                     setText(newDuration);
+                    invalidate();
                 }
                 else {
                     super.onTextChanged(text, start, lengthBefore, lengthAfter);

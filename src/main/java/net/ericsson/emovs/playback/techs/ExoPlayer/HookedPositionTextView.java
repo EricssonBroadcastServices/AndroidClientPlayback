@@ -34,6 +34,7 @@ public class HookedPositionTextView extends android.support.v7.widget.AppCompatT
                 String newPosition = DateTimeParser.formatDisplayTime(positionInTheProgram);
                 if (newPosition.equals(text) == false) {
                     setText(newPosition);
+                    invalidate();
                 }
                 else {
                     super.onTextChanged(text, start, lengthBefore, lengthAfter);
