@@ -229,9 +229,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 return psProgram;
             }
         }
-        if (this.playable instanceof EmpProgram) {
-            return (EmpProgram) this.playable;
-        }
         return null;
     }
 
@@ -601,9 +598,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         tech.load(mediaId, entitlement.mediaLocator, false);
     }
 
-    private void prepareProgramService() {
+    private void prepareProgramService(EmpProgram program) {
         disposeProgrameService();
-        this.programService = new ProgramService(this, getEntitlement());
+        this.programService = new ProgramService(this, getEntitlement(), program);
         this.programService.start();
     }
 
@@ -666,14 +663,14 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 }
 
                                 preparePlayback(entitlement.channelId, entitlement);
-                                prepareProgramService();
+                                prepareProgramService(programs.size() > 0 ? programs.get(0) : null);
                             }
 
                             @Override
                             public void onError(final Error error) {
                                 properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                                 preparePlayback(entitlement.channelId, entitlement);
-                                prepareProgramService();
+                                prepareProgramService(null);
                             }
                         }, epgParams);
                         return;
@@ -685,7 +682,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 }
 
                 preparePlayback(entitlement.channelId, entitlement);
-                prepareProgramService();
+                prepareProgramService(null);
             }
         };
         super.onEntitlementLoadStart();
@@ -727,7 +724,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                             ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
                         }
                         preparePlayback(entitlement.programId, entitlement);
-                        prepareProgramService();
+                        prepareProgramService(program);
                     }
                     else {
                         getMetadataProvider().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
@@ -746,21 +743,21 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                     ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = fullProgram.startDateTime.getMillis();
                                 }
                                 preparePlayback(entitlement.programId, entitlement);
-                                prepareProgramService();
+                                prepareProgramService(fullProgram);
                             }
 
                             @Override
                             public void onError(Error error) {
                                 properties.withPlayFrom(null);
                                 preparePlayback(entitlement.programId, entitlement);
-                                prepareProgramService();
+                                prepareProgramService(program);
                             }
                         });
                     }
                 }
                 else {
                     preparePlayback(entitlement.programId, entitlement);
-                    prepareProgramService();
+                    prepareProgramService(program);
                 }
             }
         };

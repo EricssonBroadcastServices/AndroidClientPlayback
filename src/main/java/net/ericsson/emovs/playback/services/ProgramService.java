@@ -33,8 +33,9 @@ import java.util.Random;
  */
 public class ProgramService extends Thread {
     private static final String TAG = ProgramService.class.toString();
-    private static final int LONG_WAIT_TIME = 1000;
-    private static final int SHORT_WAIT_TIME = 1000;
+    public static final int LONG_WAIT_TIME = 1000;
+    public static final int SHORT_WAIT_TIME = 1000;
+    public static final int EPG_GAP_WAIT_TIME = 30000;
     public static int FUZZY_ENTITLEMENT_MAX_DELAY = 0;
 
     Entitlement entitlement;
@@ -42,9 +43,12 @@ public class ProgramService extends Thread {
     EmpProgram currentProgram;
     Random randomizer = new Random(System.currentTimeMillis());
 
-    public ProgramService(IEntitledPlayer player, Entitlement entitlement) {
+    public ProgramService(IEntitledPlayer player, Entitlement entitlement, EmpProgram initialProgram) {
         this.player = player;
         this.entitlement = entitlement;
+        if (initialProgram != null && initialProgram.startDateTime != null && initialProgram.endDateTime != null) {
+            this.currentProgram = initialProgram;
+        }
     }
 
     public EmpProgram getCurrentProgram() {
@@ -119,6 +123,7 @@ public class ProgramService extends Thread {
                 }
                 if (programs == null || programs.size() == 0) {
                     player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG);
+                    currentProgram = null;
                 }
                 if (onAllowed != null) {
                     onAllowed.run();
@@ -138,6 +143,7 @@ public class ProgramService extends Thread {
     }
 
     public void run () {
+        boolean firstCycle = true;
         for(;;) {
             try {
                 if (this.player == null || this.entitlement == null || this.entitlement.channelId == null) {
@@ -149,6 +155,12 @@ public class ProgramService extends Thread {
                 }
 
                 if (this.player.isPlaying()) {
+                    // If gap in EPG then wait a bit longer
+                    if (firstCycle == false && this.currentProgram == null) {
+                        Thread.sleep(EPG_GAP_WAIT_TIME);
+                    }
+                    firstCycle = false;
+
                     long playheadTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
                     if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&

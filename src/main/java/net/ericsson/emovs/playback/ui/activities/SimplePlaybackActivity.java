@@ -274,7 +274,8 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                 @Override
                 public void onWarning(int warningCode, String warningMessage) {
                     if (SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST) {
-                        Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT).show();
+                        Toast warningToast = Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT);
+                        warningToast.show();
                     }
                 }
 
