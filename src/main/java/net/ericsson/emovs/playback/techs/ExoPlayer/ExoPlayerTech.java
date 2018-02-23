@@ -88,6 +88,7 @@ public class ExoPlayerTech implements ITech {
 
     float lastVolume;
     boolean isPlaying;
+    boolean waitingStarted;
     boolean isReady;
     boolean loadStarted;
     boolean seekStart;
@@ -322,14 +323,6 @@ public class ExoPlayerTech implements ITech {
 
                             @Override
                             public void onLoadingChanged(boolean isLoading) {
-                                if (parent != null && isPlaying) {
-                                    if (isLoading) {
-                                        parent.onWaitingStart();
-                                    }
-                                    else {
-                                        parent.onWaitingEnd();
-                                    }
-                                }
                             }
 
                             @Override
@@ -348,21 +341,37 @@ public class ExoPlayerTech implements ITech {
                                         seekStart = false;
                                         parent.onSeek(player.getCurrentPosition());
                                     }
+                                    if (waitingStarted) {
+                                        waitingStarted = false;
+                                        if (parent != null) {
+                                            parent.onWaitingEnd();
+                                        }
+                                    }
                                 }
                                 else if (playbackState == com.google.android.exoplayer2.Player.STATE_ENDED && isPlaying) {
                                     isPlaying = false;
                                     isReady = false;
                                     seekStart = false;
+                                    waitingStarted = false;
                                     parent.onPlaybackEnd();
                                 }
-                                else if (playbackState == com.google.android.exoplayer2.Player.STATE_BUFFERING && !isReady && !isPlaying && !loadStarted) {
-                                    loadStarted = true;
-                                    parent.onLoadStart();
+                                else if (playbackState == com.google.android.exoplayer2.Player.STATE_BUFFERING) {
+                                    if (!isReady && !isPlaying && !loadStarted) {
+                                        loadStarted = true;
+                                        parent.onLoadStart();
+                                    }
+                                    else if (isPlaying) {
+                                        waitingStarted = true;
+                                        if (parent != null) {
+                                            parent.onWaitingStart();
+                                        }
+                                    }
                                 }
                                 else if (playbackState == com.google.android.exoplayer2.Player.STATE_IDLE) {
                                     isPlaying = false;
                                     isReady = false;
                                     seekStart = false;
+                                    waitingStarted = false;
                                 }
                             }
 
