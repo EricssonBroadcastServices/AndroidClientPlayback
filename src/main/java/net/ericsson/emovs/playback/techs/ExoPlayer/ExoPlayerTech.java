@@ -901,7 +901,6 @@ public class ExoPlayerTech implements ITech {
                 registerPlayer();
             }
         });
-
     }
 
     private void registerPlayer() {

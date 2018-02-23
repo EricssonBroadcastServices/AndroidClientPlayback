@@ -108,7 +108,7 @@ public class ProgramServiceTest {
         player.mockIsPlaying(true);
 
 
-        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup, null);
 
         fakeEntitlementProvider.mockIsEntitled(true);
         fakeEntitlementProvider.forgetEntitlementCheck();
@@ -164,7 +164,7 @@ public class ProgramServiceTest {
         FakeEntitledPlayer player = new FakeEntitledPlayer();
         player.mockIsPlaying(true);
 
-        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup, null);
 
         fakeEntitlementProvider.mockIsEntitled(true);
         fakeEntitlementProvider.forgetEntitlementCheck();
@@ -214,7 +214,7 @@ public class ProgramServiceTest {
         FakeEntitledPlayer player = new FakeEntitledPlayer();
         player.mockIsPlaying(true);
 
-        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup, null);
 
         fakeEntitlementProvider.mockIsEntitled(true);
         fakeEntitlementProvider.forgetEntitlementCheck();
@@ -240,8 +240,7 @@ public class ProgramServiceTest {
         Thread.sleep(2000);
 
         currentProgram = service.getCurrentProgram();
-        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
-
+        Assert.assertTrue(currentProgram == null);
         Assert.assertTrue(player.isPlaying() == true);
         Assert.assertTrue(player.lastErrorCode == 0);
         Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG);
@@ -266,7 +265,7 @@ public class ProgramServiceTest {
         FakeEntitledPlayer player = new FakeEntitledPlayer();
         player.mockIsPlaying(true);
 
-        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup);
+        ProgramService service = new ProgramService(player, entitlement_with_bookmark_emup, null);
 
         fakeEntitlementProvider.mockIsEntitled(true);
         fakeEntitlementProvider.forgetEntitlementCheck();
