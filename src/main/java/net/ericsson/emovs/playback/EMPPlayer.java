@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static net.ericsson.emovs.utilities.errors.Warning.SEEK_TO_UNAVAILABLE_POSITION;
+
 /**
  * Player with EMP business logic
  */
@@ -374,14 +376,16 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 }
             }
             else if (this.entitlement != null && this.entitlement.channelId != null) {
-                if (_unixTimeMs >= getMonotonicTimeService().currentTime()) {
-                    return;
-                }
                 if (range != null) {
                     long[] rangeDiffs = { _unixTimeMs - range[0], range[1] - _unixTimeMs };
                     if (rangeDiffs[1] < 0 && UniversalPackagerHelper.isDynamicCatchup(this.entitlement.mediaLocator)) {
-                        _unixTimeMs = range[1] - SAFETY_LIVE_DELAY;
+                        trigger(EventId.WARNING, SEEK_TO_UNAVAILABLE_POSITION);
+                        return;
                     }
+                }
+                if (_unixTimeMs >= getMonotonicTimeService().currentTime()) {
+                    trigger(EventId.WARNING, SEEK_TO_UNAVAILABLE_POSITION);
+                    return;
                 }
                 final long unixTimeMs = _unixTimeMs;
 

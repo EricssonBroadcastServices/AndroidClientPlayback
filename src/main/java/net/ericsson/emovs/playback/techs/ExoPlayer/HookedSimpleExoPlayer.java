@@ -6,6 +6,9 @@ import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 
+import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.models.EmpProgram;
+
 /**
  * Created by Joao Coelho on 2017-09-28.
  */
@@ -69,9 +72,18 @@ public class HookedSimpleExoPlayer extends SimpleExoPlayer {
 
     @Override
     public void seekTo(int windowIndex, long positionMs) {
+        // This method API should not be called from outside the tech - this method is intended to be used internally ONLY
         //super.seekTo(windowIndex, positionMs);
         if(tech != null && tech.isPlaying()) {
             tech.seekStart(true);
+            if (tech.getParent() instanceof IEntitledPlayer) {
+                IEntitledPlayer entitledPlayer = (IEntitledPlayer) tech.getParent();
+                EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+                if (currentProgram != null && currentProgram.getDuration() != null) {
+                    tech.getParent().seekToTime(currentProgram.startDateTime.getMillis() + positionMs);
+                    return;
+                }
+            }
             tech.getParent().seekTo(positionMs);
         }
     }
