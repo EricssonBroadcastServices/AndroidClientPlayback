@@ -39,12 +39,11 @@ public class ProgramService extends Thread {
     private static int FUZZY_ENTITLEMENT_MIN_MAX_DELAY = 30000;
     public static int FUZZY_ENTITLEMENT_MAX_DELAY = FUZZY_ENTITLEMENT_MIN_MAX_DELAY;
 
-    Entitlement entitlement;
-    IEntitledPlayer player;
-    EmpProgram currentProgram;
-    Random randomizer = new Random(System.currentTimeMillis());
-
-    EntitlementCheckCache eeCache;
+    protected Entitlement entitlement;
+    protected IEntitledPlayer player;
+    protected EmpProgram currentProgram;
+    protected Random randomizer = new Random(System.currentTimeMillis());
+    protected EntitlementCheckCache eeCache;
 
     public ProgramService(IEntitledPlayer player, Entitlement entitlement, EmpProgram initialProgram) {
         this.player = player;
@@ -195,12 +194,13 @@ public class ProgramService extends Thread {
 
     public void run () {
         boolean firstCycle = true;
-        int fuzzySleep = 0;
-        if (FUZZY_ENTITLEMENT_MAX_DELAY > 0) {
-            fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
-        }
         for(;;) {
             try {
+                int fuzzySleep = 0;
+                if (FUZZY_ENTITLEMENT_MAX_DELAY > 0) {
+                    fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
+                }
+
                 if (this.player == null || this.entitlement == null || this.entitlement.channelId == null) {
                     return;
                 }
@@ -218,12 +218,25 @@ public class ProgramService extends Thread {
 
                     final long playheadTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
+                    checkTimeshiftAllowance(playheadTime, null, new ErrorRunnable() {
+                        @Override
+                        public void run(int code, final String message) {
+                            player.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    currentProgram = null;
+                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
+                                    player.stop();
+                                }
+                            });
+                        }
+                    }, true, false);
                     if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
-                        this.currentProgram != null &&
-                        this.currentProgram.endDateTime != null) {
+                            this.currentProgram != null &&
+                            this.currentProgram.endDateTime != null) {
                         final long futureTimeCheck = this.currentProgram.endDateTime.getMillis() + 1;
                         long timeToEnd = futureTimeCheck - playheadTime;
-                        if (timeToEnd >= 0 && timeToEnd < fuzzySleep) {
+                        if (timeToEnd >= 0 && timeToEnd <= fuzzySleep) {
                             checkTimeshiftAllowance(futureTimeCheck, new Runnable() {
                                 @Override
                                 public void run() {
@@ -239,19 +252,6 @@ public class ProgramService extends Thread {
                             fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
                         }
                     }
-                    checkTimeshiftAllowance(playheadTime, null, new ErrorRunnable() {
-                        @Override
-                        public void run(int code, final String message) {
-                            player.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    currentProgram = null;
-                                    player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
-                                    player.stop();
-                                }
-                            });
-                        }
-                    }, true, false);
                     Thread.sleep(LONG_WAIT_TIME);
                 }
                 else {
