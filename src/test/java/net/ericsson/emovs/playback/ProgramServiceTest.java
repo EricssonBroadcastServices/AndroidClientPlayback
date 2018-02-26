@@ -85,7 +85,6 @@ public class ProgramServiceTest {
         entitlement_with_bookmark_emup.liveTime = 67890L;
         entitlement_with_bookmark_emup.isLive = true;
         entitlement_with_bookmark_emup.isUnifiedStream = true;
-
     }
 
     @Test

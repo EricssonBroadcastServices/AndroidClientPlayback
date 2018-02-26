@@ -114,7 +114,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework:2.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.ant:ant-launcher:1.8.0@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="nekohtml:xercesMinimal:1.9.6.2@jar" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:shadows-multidex:3.0@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-profile:2.2.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-core-utils-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-project:2.2.1@jar" level="project" />
@@ -151,6 +150,7 @@
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.ant:ant:1.8.0@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.codehaus.plexus:plexus-utils:1.5.15@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-core-ui-26.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:shadows-playservices:3.6.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-error-diagnostics:2.2.1@jar" level="project" />
     <orderEntry type="library" exported="" name="joda-time:joda-time:2.9.4@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven.wagon:wagon-file:1.0-beta-6@jar" level="project" />
