@@ -132,11 +132,11 @@ public class ProgramServiceCacheTest {
         fakeMetadataProvider.mockEpg(singleProgramEpg2);
         service.clear();
 
-        Thread.sleep(2500);
+        Thread.sleep(3000);
 
         player.mockPlayHeadTime(live_program2.startDateTime.getMillis() + 1L);
 
-        Thread.sleep(2500);
+        Thread.sleep(3000);
 
         currentProgram = service.getCurrentProgram();
         Assert.assertTrue(service.wasTimeAllowedCalled());
