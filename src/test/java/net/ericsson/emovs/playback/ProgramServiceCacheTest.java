@@ -59,7 +59,6 @@ public class ProgramServiceCacheTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        ProgramService.FUZZY_ENTITLEMENT_MAX_DELAY = 30000;
 
         when(live_program1.liveNow()).thenReturn(true);
         live_program1.assetId = "@id/1";
@@ -91,6 +90,7 @@ public class ProgramServiceCacheTest {
     @Test
     public void entitled_live_program_boundary_crossing_test() throws Exception {
         // Test Case 1: Normal playback and program ends and starts a new program (User is ENTITLED to watch next program)
+        ProgramService.FUZZY_ENTITLEMENT_MAX_DELAY = 30000;
 
         FakeEMPMetadataProvider fakeMetadataProvider = new FakeEMPMetadataProvider();
         TestUtils.mockProvider(EMPMetadataProvider.class, fakeMetadataProvider);
@@ -131,18 +131,21 @@ public class ProgramServiceCacheTest {
         fakeEntitlementProvider.forgetEntitlementCheck();
         fakeMetadataProvider.mockEpg(singleProgramEpg2);
         service.clear();
+
+        Thread.sleep(2500);
+
         player.mockPlayHeadTime(live_program2.startDateTime.getMillis() + 1L);
 
-        Thread.sleep(2000);
+        Thread.sleep(2500);
 
         currentProgram = service.getCurrentProgram();
+        Assert.assertTrue(service.wasTimeAllowedCalled());
         Assert.assertTrue("@id/2".equals(currentProgram.assetId));
         Assert.assertTrue(currentProgram.startDateTime.getMillis() == live_program2.startDateTime.getMillis());
         Assert.assertTrue(currentProgram.endDateTime.getMillis() == live_program2.endDateTime.getMillis());
         Assert.assertTrue(player.isPlaying());
         Assert.assertTrue(player.lastErrorCode == 0);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
-        Assert.assertTrue(service.wasTimeAllowedCalled());
         service.interrupt();
     }
 
@@ -186,21 +189,21 @@ public class ProgramServiceCacheTest {
         fakeMetadataProvider.mockEpg(singleProgramEpg2);
         service.clear();
         fakeEntitlementProvider.mockIsEntitled(false);
+        fakeEntitlementProvider.forgetEntitlementCheck();
         ProgramService.FUZZY_ENTITLEMENT_MAX_DELAY = 30000;
 
-        Thread.sleep(2000);
+        Thread.sleep(2500);
 
         player.mockPlayHeadTime(live_program2.startDateTime.getMillis() + 1L);
-        fakeEntitlementProvider.forgetEntitlementCheck();
 
-        Thread.sleep(5000);
+        Thread.sleep(2500);
 
         currentProgram = service.getCurrentProgram();
+        Assert.assertTrue(service.wasTimeAllowedCalled());
         Assert.assertTrue(currentProgram == null);
         Assert.assertTrue(player.isPlaying() == false);
         Assert.assertTrue(player.lastErrorCode == ErrorCodes.PLAYBACK_NOT_ENTITLED);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == true);
-        Assert.assertTrue(service.wasTimeAllowedCalled());
 
         service.interrupt();
     }
@@ -240,20 +243,24 @@ public class ProgramServiceCacheTest {
 
         ArrayList<EmpProgram> empty_epg = new ArrayList<>();
         fakeMetadataProvider.mockEpg(empty_epg);
+
         service.clear();
-        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
         fakeEntitlementProvider.mockIsEntitled(false);
         fakeEntitlementProvider.forgetEntitlementCheck();
+
+        Thread.sleep(2500);
+
+        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
 
         Thread.sleep(2000);
 
         currentProgram = service.getCurrentProgram();
-        Assert.assertTrue(currentProgram == null);
-        Assert.assertTrue(player.isPlaying() == true);
+        Assert.assertTrue(service.wasTimeAllowedCalled());
         Assert.assertTrue(player.lastErrorCode == 0);
         Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG);
+        Assert.assertTrue(currentProgram == null);
+        Assert.assertTrue(player.isPlaying() == true);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
-        Assert.assertTrue(service.wasTimeAllowedCalled());
 
         service.interrupt();
     }
@@ -294,20 +301,22 @@ public class ProgramServiceCacheTest {
         ArrayList<EmpProgram> empty_epg = new ArrayList<>();
         fakeMetadataProvider.mockEpg(empty_epg);
         service.clear();
-        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
         fakeMetadataProvider.mockBackendAvailability(false);
         fakeEntitlementProvider.forgetEntitlementCheck();
 
         Thread.sleep(2000);
 
-        currentProgram = service.getCurrentProgram();
-        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
+        player.mockPlayHeadTime(live_program1.endDateTime.getMillis() + 1L);
 
+        Thread.sleep(2500);
+
+        currentProgram = service.getCurrentProgram();
+        Assert.assertTrue(service.wasTimeAllowedCalled());
         Assert.assertTrue(player.isPlaying() == true);
         Assert.assertTrue(player.lastErrorCode == 0);
         Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
+        Assert.assertTrue("@id/1".equals(currentProgram.assetId));
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
-        Assert.assertTrue(service.wasTimeAllowedCalled());
 
         service.interrupt();
     }

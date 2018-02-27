@@ -157,8 +157,10 @@ public class ProgramService extends Thread {
                                 }
                             }, onForbidden);
                         }
-
-                        break;
+                        else if (onAllowed != null) {
+                            onAllowed.run();
+                        }
+                        return;
                     }
                 }
                 if (programs == null || programs.size() == 0) {
