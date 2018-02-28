@@ -3,6 +3,7 @@
 ## 2.0.78
 
 ### New features and Enhancements
+- Added program-based timeline in EMP built-in controls.
 - Added fuzzy delay on entitlement check when program changes.
 
 ### Bug fixes
