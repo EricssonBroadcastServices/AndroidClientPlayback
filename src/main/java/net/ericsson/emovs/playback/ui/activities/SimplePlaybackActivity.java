@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -265,17 +266,38 @@ public class SimplePlaybackActivity extends AppCompatActivity {
             view.getPlayer().clearListeners();
             view.getPlayer().addListener(new EmptyPlaybackEventListener(view.getPlayer()) {
                 @Override
-                public void onError(int errorCode, String errorMessage) {
+                public void onError(int errorCode, final String errorMessage) {
                     if (SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST) {
-                        Toast.makeText(self, errorMessage, Toast.LENGTH_SHORT).show();
+                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                            Toast.makeText(self, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(self, errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
                     }
                 }
 
                 @Override
-                public void onWarning(int warningCode, String warningMessage) {
+                public void onWarning(int warningCode, final String warningMessage) {
                     if (SHOW_ERRORS_AND_WARNINGS_IN_A_TOAST) {
-                        Toast warningToast = Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT);
-                        warningToast.show();
+                        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+                            Toast warningToast = Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT);
+                            warningToast.show();
+                        }
+                        else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast warningToast = Toast.makeText(self, "Warning: " + warningMessage, Toast.LENGTH_SHORT);
+                                    warningToast.show();
+                                }
+                            });
+                        }
                     }
                 }
 

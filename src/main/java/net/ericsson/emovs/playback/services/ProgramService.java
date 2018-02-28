@@ -251,7 +251,6 @@ public class ProgramService extends Thread {
                                 }
                             }, true, true);
                             Thread.sleep(timeToEnd);
-                            fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
                         }
                     }
                     Thread.sleep(LONG_WAIT_TIME);
