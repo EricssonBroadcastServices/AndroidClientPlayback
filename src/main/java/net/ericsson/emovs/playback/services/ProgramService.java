@@ -96,7 +96,7 @@ public class ProgramService extends Thread {
                     }
                 }
                 if (eeCache.hasGapInEpg()) {
-                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG);
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
                     currentProgram = null;
                 }
                 if (eeCache.isCheckNotPossible()) {
@@ -168,7 +168,7 @@ public class ProgramService extends Thread {
                         eeCache.registerGapInEpg();
                     }
                     else {
-                        player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG);
+                        player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
                         currentProgram = null;
                     }
                 }

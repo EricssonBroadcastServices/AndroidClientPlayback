@@ -241,7 +241,7 @@ public class ProgramServiceTest {
         Assert.assertTrue(currentProgram == null);
         Assert.assertTrue(player.isPlaying() == true);
         Assert.assertTrue(player.lastErrorCode == 0);
-        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG);
+        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EG);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
 
         service.interrupt();

@@ -257,7 +257,7 @@ public class ProgramServiceCacheTest {
         currentProgram = service.getCurrentProgram();
         Assert.assertTrue(service.wasTimeAllowedCalled());
         Assert.assertTrue(player.lastErrorCode == 0);
-        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG);
+        Assert.assertTrue(player.lastWarning != null && player.lastWarning.getCode() == WarningCodes.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EG);
         Assert.assertTrue(currentProgram == null);
         Assert.assertTrue(player.isPlaying() == true);
         Assert.assertTrue(fakeEntitlementProvider.wasEntitlementCheckDone == false);
