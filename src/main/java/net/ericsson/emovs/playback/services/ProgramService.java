@@ -43,7 +43,6 @@ public class ProgramService extends Thread {
     protected IEntitledPlayer player;
     protected EmpProgram currentProgram;
     protected Random randomizer = new Random(System.currentTimeMillis());
-    protected EntitlementCheckCache eeCache;
 
     public ProgramService(IEntitledPlayer player, Entitlement entitlement, EmpProgram initialProgram) {
         this.player = player;
@@ -51,7 +50,6 @@ public class ProgramService extends Thread {
         if (initialProgram != null && initialProgram.startDateTime != null && initialProgram.endDateTime != null) {
             this.currentProgram = initialProgram;
         }
-        eeCache = new EntitlementCheckCache();
     }
 
     public EmpProgram getCurrentProgram() {
@@ -60,7 +58,7 @@ public class ProgramService extends Thread {
 
     public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, boolean updateCurrentProgram) {
         if (currentProgram == null) {
-            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram, false);
+            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
         }
         else {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
@@ -71,44 +69,12 @@ public class ProgramService extends Thread {
                 }
             }
             else {
-                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram, false);
+                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
             }
         }
     }
 
-    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram, final boolean shouldCacheOutcome) {
-        // Check if entitlement check was done already and cached
-        Boolean isAllowed = eeCache.isTimeAllowed(timeToCheck);
-        if (isAllowed != null) {
-            if (isAllowed == true) {
-                if (onAllowed != null) {
-                    onAllowed.run();
-                }
-                if (updateProgram) {
-                    if (shouldCacheOutcome) {
-                        // Should not happen!
-                    }
-                    else {
-                        if (player != null && eeCache.getProgram() != null) {
-                            player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, eeCache.getProgram());
-                        }
-                        currentProgram = eeCache.getProgram();
-                    }
-                }
-                if (eeCache.hasGapInEpg()) {
-                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
-                    currentProgram = null;
-                }
-                if (eeCache.isCheckNotPossible()) {
-                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
-                }
-            }
-            else if (onForbidden != null) {
-                onForbidden.run(ErrorCodes.PLAYBACK_NOT_ENTITLED, "USER_NOT_ENTITLED");
-            }
-            eeCache.clear();
-            return;
-        }
+    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram) {
         EpgQueryParameters epgParams = new EpgQueryParameters();
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
@@ -144,15 +110,10 @@ public class ProgramService extends Thread {
                                     }
 
                                     if (updateProgram) {
-                                        if (shouldCacheOutcome) {
-                                            eeCache.registerProgramChanged(program);
+                                        if (player != null && currentProgram != null) {
+                                            player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
                                         }
-                                        else {
-                                            if (player != null && currentProgram != null) {
-                                                player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
-                                            }
-                                            currentProgram = program;
-                                        }
+                                        currentProgram = program;
                                     }
                                 }
                             }, onForbidden);
@@ -164,13 +125,8 @@ public class ProgramService extends Thread {
                     }
                 }
                 if (programs == null || programs.size() == 0) {
-                    if (shouldCacheOutcome) {
-                        eeCache.registerGapInEpg();
-                    }
-                    else {
-                        player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
-                        currentProgram = null;
-                    }
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
+                    currentProgram = null;
                 }
                 if (onAllowed != null) {
                     onAllowed.run();
@@ -183,12 +139,7 @@ public class ProgramService extends Thread {
                     onAllowed.run();
                 }
                 if (player != null) {
-                    if (shouldCacheOutcome) {
-                        eeCache.registerCheckNotPossible();
-                    }
-                    else {
-                        player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
-                    }
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_ENTITLEMENT_CHECK_NOT_POSSIBLE);
                 }
             }
         }, epgParams);
@@ -198,11 +149,6 @@ public class ProgramService extends Thread {
         boolean firstCycle = true;
         for(;;) {
             try {
-                int fuzzySleep = 0;
-                if (FUZZY_ENTITLEMENT_MAX_DELAY > 0) {
-                    fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
-                }
-
                 if (this.player == null || this.entitlement == null || this.entitlement.channelId == null) {
                     return;
                 }
@@ -218,8 +164,18 @@ public class ProgramService extends Thread {
                     }
                     firstCycle = false;
 
-                    final long playheadTime = this.player.getPlayheadTime();
+                    long playheadTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
+                    if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
+                            this.currentProgram != null &&
+                            this.currentProgram.endDateTime != null) {
+                        long timeToEnd = this.currentProgram.endDateTime.getMillis() - playheadTime;
+                        if (timeToEnd >= 0 && timeToEnd < 5 * LONG_WAIT_TIME) {
+                            int fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
+                            Thread.sleep(fuzzySleep);
+                            continue;
+                        }
+                    }
                     checkTimeshiftAllowance(playheadTime, null, new ErrorRunnable() {
                         @Override
                         public void run(int code, final String message) {
@@ -232,27 +188,7 @@ public class ProgramService extends Thread {
                                 }
                             });
                         }
-                    }, true, false);
-                    if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
-                            this.currentProgram != null &&
-                            this.currentProgram.endDateTime != null) {
-                        final long futureTimeCheck = this.currentProgram.endDateTime.getMillis() + 1;
-                        long timeToEnd = futureTimeCheck - playheadTime;
-                        if (timeToEnd >= 0 && timeToEnd <= fuzzySleep) {
-                            checkTimeshiftAllowance(futureTimeCheck, new Runnable() {
-                                @Override
-                                public void run() {
-                                    eeCache.register(playheadTime, futureTimeCheck, true);
-                                }
-                            }, new ErrorRunnable() {
-                                @Override
-                                public void run(int code, final String message) {
-                                    eeCache.register(playheadTime, futureTimeCheck, false);
-                                }
-                            }, true, true);
-                            Thread.sleep(timeToEnd);
-                        }
-                    }
+                    }, true);
                     Thread.sleep(LONG_WAIT_TIME);
                 }
                 else {
@@ -266,87 +202,4 @@ public class ProgramService extends Thread {
         }
     }
 
-    public static void setEntitlementFuzzyMaxDelay(int delay) {
-        if (delay < FUZZY_ENTITLEMENT_MIN_MAX_DELAY) {
-            FUZZY_ENTITLEMENT_MAX_DELAY = FUZZY_ENTITLEMENT_MIN_MAX_DELAY;
-        }
-        else {
-            FUZZY_ENTITLEMENT_MAX_DELAY = delay;
-        }
-    }
-
-    public class EntitlementCheckCache {
-        protected Long playheadToDeny;
-        protected Long whenWasDenied;
-        protected Long denyTimeValidity;
-        protected Boolean isAllowed;
-        protected EmpProgram program;
-        protected Boolean gapInEpg;
-        protected Boolean checkNotPossible;
-
-        public EntitlementCheckCache() {
-
-        }
-
-        public void clear(){
-            this.playheadToDeny = null;
-            this.whenWasDenied = null;
-            this.denyTimeValidity = null;
-            this.isAllowed = null;
-            this.program = null;
-            this.gapInEpg = null;
-            this.checkNotPossible = null;
-        }
-
-        public void register(long playheadFromDeny, long playheadToDeny, boolean isAllowed) {
-            if (player == null) {
-                clear();
-                return;
-            }
-            this.playheadToDeny = playheadToDeny;
-            this.whenWasDenied = player.getServerTime();
-            this.denyTimeValidity = playheadToDeny - playheadFromDeny;
-            this.isAllowed = isAllowed;
-        }
-
-        public void registerCheckNotPossible() {
-            this.checkNotPossible = true;
-        }
-
-        public boolean isCheckNotPossible() {
-            return this.checkNotPossible != null && this.checkNotPossible == true;
-        }
-
-        public void registerProgramChanged(EmpProgram newProgram) {
-            program = newProgram;
-        }
-
-        public void registerGapInEpg() {
-            gapInEpg = true;
-        }
-
-        public boolean hasGapInEpg() {
-            return gapInEpg != null && gapInEpg == true;
-        }
-
-        public EmpProgram getProgram() {
-            return program;
-        }
-
-        public Boolean isTimeAllowed(long playheadTime) {
-            if (player == null || playheadToDeny == null || whenWasDenied == null || denyTimeValidity == null || isAllowed == null) {
-                clear();
-                return null;
-            }
-            long nowMs = player.getServerTime();
-            if (nowMs - this.whenWasDenied > 2 * this.denyTimeValidity) {
-                clear();
-                return null;
-            }
-            if (playheadTime >= this.playheadToDeny && playheadTime <= this.playheadToDeny + this.denyTimeValidity) {
-                return this.isAllowed;
-            }
-            return null;
-        }
-    }
 }
