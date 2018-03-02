@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.0.79
+
+### Bug fixes
+- **EMP-10982** player no longer sends WaitingEnd event after playback is aborted.
+
 ## 2.0.78
 
 ### New features and Enhancements

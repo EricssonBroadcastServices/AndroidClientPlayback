@@ -347,7 +347,7 @@ public class ExoPlayerTech implements ITech {
                                             }
                                             if (waitingStarted) {
                                                 waitingStarted = false;
-                                                if (parent != null) {
+                                                if (parent != null && isPlaying) {
                                                     parent.onWaitingEnd();
                                                 }
                                             }
