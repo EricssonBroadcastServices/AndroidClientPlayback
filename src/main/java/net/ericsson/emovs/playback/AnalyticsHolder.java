@@ -1,8 +1,10 @@
 package net.ericsson.emovs.playback;
 
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
+import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 
 /**
@@ -12,9 +14,14 @@ import net.ericsson.emovs.utilities.models.EmpProgram;
  */
 public class AnalyticsHolder implements IPlaybackEventListener {
     AnalyticsPlaybackConnector connector;
+    IEntitledPlayer player;
+    String fallbackSessionId;
 
-    public AnalyticsHolder(AnalyticsPlaybackConnector connector) {
+    public AnalyticsHolder(AnalyticsPlaybackConnector connector, IPlayer player) {
         this.connector = connector;
+        if (player instanceof IEntitledPlayer) {
+            this.player = (IEntitledPlayer) player;
+        }
     }
 
     @Override
@@ -24,6 +31,7 @@ public class AnalyticsHolder implements IPlaybackEventListener {
 
     @Override
     public void onEntitlementLoadStart() {
+        fallbackSessionId = "error-" + Double.toString(Math.random()).replace("0.", "");
         this.connector.onEntitlementLoadStart();
     }
 
@@ -99,7 +107,12 @@ public class AnalyticsHolder implements IPlaybackEventListener {
 
     @Override
     public void onError(int errorCode, String errorMessage) {
-        this.connector.onError(errorCode, errorMessage);
+        if (this.player == null || this.player.getSessionId() == null) {
+            this.connector.onError(fallbackSessionId, errorCode, errorMessage);
+        }
+        else {
+            this.connector.onError(errorCode, errorMessage);
+        }
     }
 
     @Override

@@ -45,7 +45,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
 
         if (analyticsConnector != null) {
             this.analyticsConnector.bindPlayer(this);
-            addListener(new AnalyticsHolder(this.analyticsConnector));
+            addListener(new AnalyticsHolder(this.analyticsConnector, this));
         }
     }
 
@@ -69,7 +69,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
     public void clearListeners() {
         super.clearListeners();
         if (this.analyticsConnector != null) {
-            addListener(new AnalyticsHolder(this.analyticsConnector));
+            addListener(new AnalyticsHolder(this.analyticsConnector, this));
         }
     }
 

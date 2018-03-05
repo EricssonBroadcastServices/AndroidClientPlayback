@@ -260,7 +260,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     }
 
     /**
-     * Initializes the playback resources (this method should not be pubicly accessible)
+     * Initializes the playback resources (this method should not be publicly accessible)
      * @param _properties playbacks specific properties
      */
     @Override
