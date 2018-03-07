@@ -106,9 +106,9 @@
     <orderEntry type="library" exported="" scope="TEST" name="org.ow2.asm:asm-tree:5.0.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-fragment-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-repository-metadata:2.2.1@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.android.support:support-annotations:26.0.1@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-vector-drawable-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven.wagon:wagon-http-shared:1.0-beta-6@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-ui-2.7.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:robolectric:3.5.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="com.google.guava:guava:20.0@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework:2.1@jar" level="project" />
@@ -119,19 +119,19 @@
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-project:2.2.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.hamcrest:hamcrest-core:1.3@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.ow2.asm:asm:5.0.1@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-smoothstreaming-2.7.0" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.gms:play-services-tasks-10.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:shadows-framework:3.5.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-ant-tasks:2.1.3@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-2.7.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="nekohtml:nekohtml:1.9.6.2@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-v4-26.0.1" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-dash-r2.5.0" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:animated-vector-drawable-26.0.1" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.gms:play-services-cast-framework-10.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-artifact:2.2.1@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-hls-r2.5.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.codehaus.plexus:plexus-container-default:1.0-alpha-9-stable-1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:junit:3.5.1@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-core-r2.5.0" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-core-2.7.0" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-media-compat-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.bouncycastle:bcprov-jdk15on:1.52@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-model:2.2.1@jar" level="project" />
@@ -139,11 +139,8 @@
     <orderEntry type="library" exported="" name="com.android.support:recyclerview-v7-26.0.1" level="project" />
     <orderEntry type="library" exported="" name="com.google.android.gms:play-services-cast-10.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="net.bytebuddy:byte-buddy:1.7.9@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-smoothstreaming-r2.5.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit:junit:4.12@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-r2.5.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="backport-util-concurrent:backport-util-concurrent:3.1@jar" level="project" />
-    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-ui-r2.5.0" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:appcompat-v7-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.ow2.asm:asm-commons:5.0.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="com.google.protobuf:protobuf-java:2.6.1@jar" level="project" />
@@ -165,10 +162,13 @@
     <orderEntry type="library" exported="" scope="TEST" name="org.apache.maven:maven-artifact-manager:2.2.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="com.ibm.icu:icu4j:53.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.hamcrest:hamcrest-library:1.3@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-dash-2.7.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:utils:3.5.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="org.robolectric:resources:3.5.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="xmlpull:xmlpull:1.1.3.1@jar" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="xpp3:xpp3_min:1.1.4c@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.google.android.exoplayer:exoplayer-hls-2.7.0" level="project" />
+    <orderEntry type="library" exported="" name="com.android.support:support-annotations:27.0.0@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:transition-26.0.1" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:design-26.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="classworlds:classworlds:1.1-alpha-2@jar" level="project" />

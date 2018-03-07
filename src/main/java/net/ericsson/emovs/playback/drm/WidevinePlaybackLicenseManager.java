@@ -51,8 +51,8 @@ public class WidevinePlaybackLicenseManager {
             }
 
             try {
-                GenericDrmCallback customDrmCallback = new GenericDrmCallback(buildHttpDataSourceFactory(true), licenseUrl);
-                OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(customDrmCallback, null);
+                //GenericDrmCallback customDrmCallback = new GenericDrmCallback(buildHttpDataSourceFactory(true), licenseUrl);
+                OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, buildHttpDataSourceFactory(true));
                 Pair<Long, Long> remainingTime = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
 
                 Log.e(TAG, "Widevine license : " + Base64.encodeToString (offlineAssetKeyId, Base64.DEFAULT));
