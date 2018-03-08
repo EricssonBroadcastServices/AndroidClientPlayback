@@ -923,7 +923,6 @@ public class ExoPlayerTech implements ITech {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
-                view.setVisibility(View.INVISIBLE);
                 registerPlayer();
             }
         });
