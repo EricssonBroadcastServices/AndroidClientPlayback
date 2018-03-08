@@ -13,7 +13,6 @@ import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
-import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.utilities.drm.DashDetails;
@@ -439,10 +438,22 @@ public class ExoPlayerTech implements ITech {
     }
 
     public void play(String dashManifestUrl) {
+        if (this.player == null) {
+            return;
+        }
         this.manifestUrl = Uri.parse(dashManifestUrl);
         this.view.setPlayer(this.player);
         this.view.setUseController(this.properties == null ? PlaybackProperties.DEFAULT.hasNativeControls() : this.properties.hasNativeControls());
         this.view.requestFocus();
+
+        if (this.properties != null && this.properties.getNativeControlsShowTimeoutMs() != null) {
+            this.view.setControllerShowTimeoutMs(this.properties.getNativeControlsShowTimeoutMs());
+        }
+
+        if (this.properties != null && this.properties.isNativeControlsHideOnTouch() != null) {
+            this.view.setControllerHideOnTouch(this.properties.isNativeControlsHideOnTouch());
+        }
+
         this.view.setControllerVisibilityListener(new PlaybackControlView.VisibilityListener() {
             @Override
             public void onVisibilityChange(int visibility) {
