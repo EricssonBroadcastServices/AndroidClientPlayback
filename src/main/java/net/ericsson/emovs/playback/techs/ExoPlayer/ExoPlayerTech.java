@@ -252,10 +252,14 @@ public class ExoPlayerTech implements ITech {
 
                         if (licenseDetails != null) {
                             String[] keyRequestPropertiesArray = {};
-                            String licenseWithToken = Uri.parse(licenseDetails.first)
-                                    .buildUpon()
-                                    .appendQueryParameter("token", "Bearer " + self.playToken)
-                                    .build().toString();
+                            String licenseWithToken = licenseDetails.first;
+                            if (self.playToken != null) {
+                                licenseWithToken = Uri.parse(licenseDetails.first)
+                                        .buildUpon()
+                                        .appendQueryParameter("token", "Bearer " + self.playToken)
+                                        .build().toString();
+                            }
+
                             licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
 
                             UUID drmSchemeUuid = null;
