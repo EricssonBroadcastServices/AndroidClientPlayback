@@ -6,6 +6,7 @@
 - Added native controls extra PlaybackProperties (withNativeControlsHideOnTouch, withNativeControlsShowTimeoutMs).
 
 ### Bug fixes
+- Fixed bug in release() method in Player in which the Analytics listener was being wrongly detached.
 - **EMP-10982** player no longer sends WaitingEnd event after playback is aborted.
 - **EMP-11090** removed setVisibility(INVISIBLE) in ExoPlayer Tech as it is no longer needed and causes crash in some devices.
 
