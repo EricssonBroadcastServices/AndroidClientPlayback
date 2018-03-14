@@ -78,7 +78,7 @@ public class ProgramService extends Thread {
         EpgQueryParameters epgParams = new EpgQueryParameters();
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
-        epgParams.setPageSize(5);
+        epgParams.setPageSize(3);
 
         if (currentProgram != null) {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
