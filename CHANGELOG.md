@@ -1,5 +1,12 @@
 # Release Notes
 
+## 2.0.80
+
+### Bug fixes
+- Warnings are no longer treated as errors
+- When device loses connection to the internet while playback is ongoing NETWORK_ERROR is triggered instead of EXO_PLAYER_INTERNAL_ERROR
+
+
 ## 2.0.79
 
 ### New features and Enhancements
