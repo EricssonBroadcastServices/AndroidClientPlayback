@@ -23,6 +23,7 @@ import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
+import net.ericsson.emovs.utilities.system.ServiceUtils;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
@@ -63,6 +64,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
+import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
 
 
 /**
@@ -390,7 +393,12 @@ public class ExoPlayerTech implements ITech {
                                     @Override
                                     public void onPlayerError(ExoPlaybackException error) {
                                         if (parent != null) {
-                                            parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+                                            if (!isOffline && isPlaying && !ServiceUtils.haveNetworkConnection(ctx)) {
+                                                parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
+                                            }
+                                            else {
+                                                parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+                                            }
                                         }
                                     }
 
