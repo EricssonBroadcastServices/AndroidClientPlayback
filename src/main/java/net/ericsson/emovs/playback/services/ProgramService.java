@@ -89,7 +89,7 @@ public class ProgramService extends Thread {
             }
         }
 
-        player.getMetadataProvider().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+        player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
@@ -140,7 +140,7 @@ public class ProgramService extends Thread {
             }
         }
 
-        player.getMetadataProvider().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+        player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
@@ -214,6 +214,10 @@ public class ProgramService extends Thread {
 
                     long playheadTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
+
+                    // Force cache update if necessary
+                    player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, this.player.getPlayheadTime(), null, null);
+
                     if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
                             this.currentProgram != null &&
                             this.currentProgram.endDateTime != null) {
