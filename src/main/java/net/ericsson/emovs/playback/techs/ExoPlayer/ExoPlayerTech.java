@@ -95,6 +95,8 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     float lastVolume;
 
     int currentBitrate;
+    DefaultTrackSelector.ParametersBuilder trackSelectorParamsBuilder;
+
     PlaybackProperties properties;
     Uri manifestUrl;
 
@@ -226,24 +228,24 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
         if (properties != null) {
-            DefaultTrackSelector.ParametersBuilder paramsBuilder = new DefaultTrackSelector.ParametersBuilder();
+            this.trackSelectorParamsBuilder = new DefaultTrackSelector.ParametersBuilder();
 
             // Setting max bitrate
             if (properties.getMaxBitrate() != null) {
-                paramsBuilder = paramsBuilder.setMaxVideoBitrate(properties.getMaxBitrate());
+                this.trackSelectorParamsBuilder = this.trackSelectorParamsBuilder.setMaxVideoBitrate(properties.getMaxBitrate());
             }
 
             // Setting preferred audio langugage
             if (properties.getPreferredAudioLanguage() != null) {
-                paramsBuilder = paramsBuilder.setPreferredAudioLanguage(properties.getPreferredAudioLanguage());
+                this.trackSelectorParamsBuilder = this.trackSelectorParamsBuilder.setPreferredAudioLanguage(properties.getPreferredAudioLanguage());
             }
 
             // Setting preferred text language
             if (properties.getPreferredTextLanguage() != null) {
-                paramsBuilder = paramsBuilder.setPreferredTextLanguage(properties.getPreferredTextLanguage());
+                this.trackSelectorParamsBuilder = this.trackSelectorParamsBuilder.setPreferredTextLanguage(properties.getPreferredTextLanguage());
             }
 
-            trackSelector.setParameters(paramsBuilder.build());
+            trackSelector.setParameters(this.trackSelectorParamsBuilder.build());
         }
 
         eventLogger = new EventLogger(trackSelector);
@@ -537,17 +539,11 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
      */
     @Override
     public void selectAudioLanguage(String language) {
-        Field field = null;
-        try {
-            DefaultTrackSelector.Parameters p = trackSelector.getParameters();
-            field = p.getClass().getDeclaredField("preferredAudioLanguage");
-            field.setAccessible(true);
-            field.set(p, language);
-            trackSelector.setParameters(p);
+        if (this.trackSelector == null || this.trackSelectorParamsBuilder == null) {
+            return;
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.trackSelectorParamsBuilder = this.trackSelectorParamsBuilder.setPreferredAudioLanguage(language);
+        trackSelector.setParameters(this.trackSelectorParamsBuilder.build());
     }
 
     /**
@@ -605,17 +601,11 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
      */
     @Override
     public void selectTextLanguage(String language) {
-        Field field = null;
-        try {
-            DefaultTrackSelector.Parameters p = trackSelector.getParameters();
-            field = p.getClass().getDeclaredField("preferredTextLanguage");
-            field.setAccessible(true);
-            field.set(p, language);
-            trackSelector.setParameters(p);
+        if (this.trackSelector == null || this.trackSelectorParamsBuilder == null) {
+            return;
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.trackSelectorParamsBuilder = this.trackSelectorParamsBuilder.setPreferredTextLanguage(language);
+        trackSelector.setParameters(this.trackSelectorParamsBuilder.build());
     }
 
     /**
