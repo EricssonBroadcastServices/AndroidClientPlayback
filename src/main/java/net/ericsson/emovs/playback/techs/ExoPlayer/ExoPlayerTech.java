@@ -292,7 +292,8 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
                                 self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
                                 self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
-                                self.player.addListener(new ExoPlayerEventListener(self, isOffline));
+                                self.playerEventListener = new ExoPlayerEventListener(self, isOffline);
+                                self.player.addListener(self.playerEventListener);
 
                             } catch (UnsupportedDrmException e) {
                                 e.printStackTrace();
