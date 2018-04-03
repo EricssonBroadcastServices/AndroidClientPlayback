@@ -11,10 +11,13 @@ public class PlaybackProperties implements Serializable {
     String preferredTextLanguage;
     String preferredAudioLanguage;
     Integer maxBitrate;
-    boolean nativeControls;
     boolean autoplay;
     PlayFromItem playFrom;
     DRMProperties drmProperties;
+
+    boolean nativeControls;
+    Integer nativeControlsShowTimeoutMs;
+    Boolean nativeControlsHideOnTouch;
 
     public PlaybackProperties() {
         this.nativeControls = true;
@@ -37,6 +40,41 @@ public class PlaybackProperties implements Serializable {
     public PlaybackProperties withNativeControls(boolean useNativeControls) {
         this.nativeControls = useNativeControls;
         return this;
+    }
+
+    /**
+     * When set, tells player to hide controls when taps the screen
+     * @return
+     */
+    public Boolean isNativeControlsHideOnTouch() {
+        return nativeControlsHideOnTouch;
+    }
+
+    /**
+     * When set, tells player to hide controls when taps the screen
+     * @param hideOnTouch
+     * @return this
+     */
+    public PlaybackProperties withNativeControlsHideOnTouch(boolean hideOnTouch) {
+        this.nativeControlsHideOnTouch = hideOnTouch;
+        return this;
+    }
+
+    /**
+     * When set, native controls will disapear if no user interation is done within the timeout window (milliseconds)
+     * @param timeoutMs
+     * @return this
+     */
+    public PlaybackProperties withNativeControlsShowTimeoutMs(Integer timeoutMs) {
+        this.nativeControlsShowTimeoutMs = timeoutMs;
+        return this;
+    }
+
+    /**
+     * Gets native controls show timeout (in milliseconds)
+     */
+    public Integer getNativeControlsShowTimeoutMs() {
+        return this.nativeControlsShowTimeoutMs;
     }
 
     /**
@@ -147,6 +185,8 @@ public class PlaybackProperties implements Serializable {
         newProps.maxBitrate = this.maxBitrate;
         newProps.preferredAudioLanguage = this.getPreferredAudioLanguage();
         newProps.preferredTextLanguage = this.getPreferredTextLanguage();
+        newProps.nativeControlsHideOnTouch = this.isNativeControlsHideOnTouch();
+        newProps.nativeControlsShowTimeoutMs = this.getNativeControlsShowTimeoutMs();
         return newProps;
     }
 

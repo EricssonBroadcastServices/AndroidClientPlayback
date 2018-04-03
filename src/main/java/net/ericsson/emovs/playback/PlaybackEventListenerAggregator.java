@@ -282,7 +282,7 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
             return;
         }
         for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onError(warningCode, warningMessage);
+            listener.onWarning(warningCode, warningMessage);
         }
     }
 

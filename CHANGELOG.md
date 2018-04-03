@@ -1,9 +1,21 @@
 # Release Notes
 
-## 2.0.79
+## 2.0.80
 
 ### Bug fixes
+- Warnings are no longer treated as errors
+- When device loses connection to the internet while playback is ongoing NETWORK_ERROR is triggered instead of EXO_PLAYER_INTERNAL_ERROR
+
+
+## 2.0.79
+
+### New features and Enhancements
+- Added native controls extra PlaybackProperties (withNativeControlsHideOnTouch, withNativeControlsShowTimeoutMs).
+
+### Bug fixes
+- Fixed bug in release() method in Player in which the Analytics listener was being wrongly detached.
 - **EMP-10982** player no longer sends WaitingEnd event after playback is aborted.
+- **EMP-11090** removed setVisibility(INVISIBLE) in ExoPlayer Tech as it is no longer needed and causes crash in some devices.
 
 ## 2.0.78
 

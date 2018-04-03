@@ -93,7 +93,7 @@ public class Player extends PlaybackEventListenerAggregator implements IPlayer {
             this.tech.release();
             this.tech = null;
         }
-        super.clearListeners();
+        this.clearListeners();
     }
 
     /**

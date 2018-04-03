@@ -58,7 +58,7 @@ public class ProgramService extends Thread {
 
     public void isEntitled(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, boolean updateCurrentProgram) {
         if (currentProgram == null) {
-            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
+            checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram, false);
         }
         else {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
@@ -69,30 +69,78 @@ public class ProgramService extends Thread {
                 }
             }
             else {
-                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram);
+                checkTimeshiftAllowance(timeToCheck, onAllowed, onForbidden, updateCurrentProgram, false);
             }
         }
     }
 
-    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram) {
+    public void checkProgramChange(final long timeToCheck, final boolean updateProgram) {
         EpgQueryParameters epgParams = new EpgQueryParameters();
         epgParams.setFutureTimeFrame(0);
         epgParams.setPastTimeFrame(0);
-        epgParams.setPageSize(5);
+        epgParams.setPageSize(3);
 
         if (currentProgram != null) {
             Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
             Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
 
             if (dStart.getMillis() >= 0 && dEnd.getMillis() <= 0) {
-                if (onAllowed != null) {
-                    onAllowed.run();
-                }
                 return;
             }
         }
 
-        player.getMetadataProvider().getEpgWithTime(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+        player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
+            @Override
+            public void onMetadata(ArrayList<EmpProgram> programs) {
+                if(programs != null) {
+                    for (final EmpProgram program : programs) {
+                        // Ignoring programs that are almost ending
+                        if (programs.size() > 1 && timeToCheck - program.endDateTime.getMillis() > -1000L) {
+                            continue;
+                        }
+                        if (updateProgram || currentProgram == null || program.assetId.equals(currentProgram.assetId) == false) {
+
+                            if (player != null && currentProgram != null) {
+                                player.trigger(IPlaybackEventListener.EventId.PROGRAM_CHANGED, program);
+                            }
+                            currentProgram = program;
+                        }
+                        return;
+                    }
+                }
+                if (programs == null || programs.size() == 0) {
+                    player.trigger(IPlaybackEventListener.EventId.WARNING, Warning.PROGRAM_SERVICE_GAPS_IN_EPG_OR_NO_EPG);
+                    currentProgram = null;
+                }
+            }
+
+            @Override
+            public void onError(final Error error) {
+            }
+        }, epgParams);
+    }
+
+    public void checkTimeshiftAllowance(final long timeToCheck, final Runnable onAllowed, final ErrorRunnable onForbidden, final boolean updateProgram, final boolean forceCheck) {
+        EpgQueryParameters epgParams = new EpgQueryParameters();
+        epgParams.setFutureTimeFrame(0);
+        epgParams.setPastTimeFrame(0);
+        epgParams.setPageSize(5);
+
+        if (currentProgram != null) {
+            if (forceCheck == false) {
+                Duration dStart = new Duration(currentProgram.startDateTime, new DateTime(timeToCheck));
+                Duration dEnd = new Duration(currentProgram.endDateTime, new DateTime(timeToCheck));
+
+                if (dStart.getMillis() >= 0 && dEnd.getMillis() <= 0) {
+                    if (onAllowed != null) {
+                        onAllowed.run();
+                    }
+                    return;
+                }
+            }
+        }
+
+        player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, timeToCheck, new IMetadataCallback<ArrayList<EmpProgram>>() {
             @Override
             public void onMetadata(ArrayList<EmpProgram> programs) {
                 if(programs != null) {
@@ -166,13 +214,32 @@ public class ProgramService extends Thread {
 
                     long playheadTime = this.player.getPlayheadTime();
                     Log.d("PlaybackCurrentTime", Long.toString(playheadTime));
+
+                    // Force cache update if necessary
+                    player.getMetadataProvider().getEpgCacheFirst(this.entitlement.channelId, this.player.getPlayheadTime(), null, null);
+
                     if (FUZZY_ENTITLEMENT_MAX_DELAY > 0 &&
                             this.currentProgram != null &&
                             this.currentProgram.endDateTime != null) {
                         long timeToEnd = this.currentProgram.endDateTime.getMillis() - playheadTime;
                         if (timeToEnd >= 0 && timeToEnd < 5 * LONG_WAIT_TIME) {
+                            Thread.sleep(timeToEnd);
+                            checkProgramChange(this.currentProgram.endDateTime.getMillis() + 1, true);
                             int fuzzySleep = randomizer.nextInt(FUZZY_ENTITLEMENT_MAX_DELAY);
                             Thread.sleep(fuzzySleep);
+                            checkTimeshiftAllowance(playheadTime, null, new ErrorRunnable() {
+                                @Override
+                                public void run(int code, final String message) {
+                                    player.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            currentProgram = null;
+                                            player.fail(ErrorCodes.PLAYBACK_NOT_ENTITLED, message);
+                                            player.stop();
+                                        }
+                                    });
+                                }
+                            }, false, true);
                             continue;
                         }
                     }
@@ -188,7 +255,7 @@ public class ProgramService extends Thread {
                                 }
                             });
                         }
-                    }, true);
+                    }, true, false);
                     Thread.sleep(LONG_WAIT_TIME);
                 }
                 else {

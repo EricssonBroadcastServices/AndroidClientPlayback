@@ -13,8 +13,11 @@ import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
+import net.ericsson.emovs.utilities.system.ServiceUtils;
 
 import java.lang.reflect.Field;
+
+import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
 
 /**
  * Created by Joao Coelho on 2018-03-07.
@@ -28,10 +31,11 @@ public class ExoPlayerEventListener implements Player.EventListener {
     boolean loadStarted;
     boolean seekStart;
     boolean isPlaying;
+    boolean isOffline;
 
     ExoPlayerTech tech;
 
-    public ExoPlayerEventListener(ExoPlayerTech tech) {
+    public ExoPlayerEventListener(ExoPlayerTech tech, boolean isOffline) {
         this.tech = tech;
         this.isPlaying = false;
         this.isReady = false;
@@ -39,6 +43,7 @@ public class ExoPlayerEventListener implements Player.EventListener {
         this.seekStart = false;
         this.startTimeSeekDone = false;
         this.windowStartTimeMs = 0;
+        this.isOffline = isOffline;
     }
 
     @Override
@@ -165,7 +170,13 @@ public class ExoPlayerEventListener implements Player.EventListener {
             return;
         }
         if (tech.parent != null) {
-            tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+            if (!this.isOffline && isPlaying && !ServiceUtils.haveNetworkConnection(tech.ctx)) {
+                this.tech.parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
+            }
+            else {
+                this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+            }
+
         }
     }
 

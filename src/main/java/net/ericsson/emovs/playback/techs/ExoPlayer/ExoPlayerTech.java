@@ -14,7 +14,6 @@ import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
-import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.utilities.drm.DashDetails;
@@ -25,6 +24,7 @@ import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
+import net.ericsson.emovs.utilities.system.ServiceUtils;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
@@ -68,6 +68,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
+
 
 /**
  * Created by Joao Coelho on 2017-08-29.
@@ -84,7 +86,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     private static final long TIMESHIFT_VAL = 30;
 
     ViewGroup host;
-    Activity ctx;
+    protected Activity ctx;
     SimpleExoPlayer player;
     SimpleExoPlayerView view;
     String playToken;
@@ -260,10 +262,14 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
                         if (licenseDetails != null) {
                             String[] keyRequestPropertiesArray = {};
-                            String licenseWithToken = Uri.parse(licenseDetails.first)
-                                    .buildUpon()
-                                    .appendQueryParameter("token", "Bearer " + self.playToken)
-                                    .build().toString();
+                            String licenseWithToken = licenseDetails.first;
+                            if (self.playToken != null) {
+                                licenseWithToken = Uri.parse(licenseDetails.first)
+                                        .buildUpon()
+                                        .appendQueryParameter("token", "Bearer " + self.playToken)
+                                        .build().toString();
+                            }
+
                             licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
 
                             UUID drmSchemeUuid = null;
@@ -286,7 +292,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
                                 self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
                                 self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
-                                self.player.addListener(new ExoPlayerEventListener(self));
+                                self.player.addListener(new ExoPlayerEventListener(self, isOffline));
 
                             } catch (UnsupportedDrmException e) {
                                 e.printStackTrace();
@@ -331,7 +337,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     }
 
     public void play(String dashManifestUrl) {
-        if (this.player == null){
+        if (this.player == null) {
             return;
         }
         this.manifestUrl = Uri.parse(dashManifestUrl);
@@ -339,6 +345,15 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
         this.view.setUseController(this.properties == null ? PlaybackProperties.DEFAULT.hasNativeControls() : this.properties.hasNativeControls());
         this.view.requestFocus();
+
+        if (this.properties != null && this.properties.getNativeControlsShowTimeoutMs() != null) {
+            this.view.setControllerShowTimeoutMs(this.properties.getNativeControlsShowTimeoutMs());
+        }
+
+        if (this.properties != null && this.properties.isNativeControlsHideOnTouch() != null) {
+            this.view.setControllerHideOnTouch(this.properties.isNativeControlsHideOnTouch());
+        }
+
         this.view.setControllerVisibilityListener(new PlaybackControlView.VisibilityListener() {
             @Override
             public void onVisibilityChange(int visibility) {
@@ -826,7 +841,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 }
 
                 view = (SimpleExoPlayerView) exoView;
-                view.setVisibility(View.INVISIBLE);
                 registerPlayer();
             }
         });

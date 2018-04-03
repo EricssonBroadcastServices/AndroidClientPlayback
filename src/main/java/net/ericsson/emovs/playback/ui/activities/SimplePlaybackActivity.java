@@ -23,6 +23,7 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 
 import net.ericsson.emovs.analytics.EMPAnalyticsProvider;
 import net.ericsson.emovs.cast.EMPCastProvider;
+import net.ericsson.emovs.cast.models.EmpCustomData;
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.playback.ui.adapters.LanguageAdapter;
 import net.ericsson.emovs.utilities.emp.EMPRegistry;
@@ -454,8 +455,16 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                     if (view == null || view.getPlayer() == null) {
                         continue;
                     }
+                    EmpCustomData castProps = new EmpCustomData();
+                    if (view.getPlayer().isPlaying()) {
+                        String sessionId = view.getPlayer().getSessionId();
+                        long currentTime = view.getPlayer().getPlayheadTime();
+                        castProps.playFrom = "startTime";
+                        castProps.startTime = currentTime / 1000;
+                        EMPAnalyticsProvider.getInstance().startCasting(sessionId, currentTime, new HashMap<String, String>());
+                    }
                     IPlayable playable = view.getPlayer().getPlayable();
-                    EMPCastProvider.getInstance().startCasting(playable, null, new OneTimeRunnable(new Runnable() {
+                    EMPCastProvider.getInstance().startCasting(playable, castProps, new OneTimeRunnable(new Runnable() {
                         @Override
                         public synchronized void run() {
                             EMPCastProvider.getInstance().showExpandedControls();
@@ -467,11 +476,6 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "CAST FAILED", Toast.LENGTH_SHORT).show();
                         }
                     }));
-                    if (view.getPlayer().isPlaying()) {
-                        String sessionId = view.getPlayer().getSessionId();
-                        long currentTime = view.getPlayer().getPlayheadTime();
-                        EMPAnalyticsProvider.getInstance().startCasting(sessionId, currentTime, new HashMap<String, String>());
-                    }
                     return;
                 }
             }
