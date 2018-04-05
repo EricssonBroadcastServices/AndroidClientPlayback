@@ -22,7 +22,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.EricssonBroadcastServices'
 
 ext {
-    exoPlayerVersion = 'r2.5.0'
+    exoPlayerVersion = '2.7.0'
     releasePlayerName = 'EMPPlayer'
     releaseArtifact = 'fluxplayer-playback'
     releaseVersion = 'v2.0.80'
