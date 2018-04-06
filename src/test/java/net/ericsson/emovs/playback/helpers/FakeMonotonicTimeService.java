@@ -3,7 +3,7 @@ package net.ericsson.emovs.playback.helpers;
 import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 
 /**
- * Created by Benjamin on 2018-04-06.
+ * Created by Joao Coelho on 2018-04-06.
  */
 
 public class FakeMonotonicTimeService extends MonotonicTimeService {
