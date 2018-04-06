@@ -4,9 +4,11 @@ import junit.framework.Assert;
 
 import net.ericsson.emovs.exposure.entitlements.EMPEntitlementProvider;
 import net.ericsson.emovs.exposure.metadata.EMPMetadataProvider;
+import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.helpers.FakeEMPEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitledPlayer;
+import net.ericsson.emovs.playback.helpers.FakeMonotonicTimeService;
 import net.ericsson.emovs.playback.services.ProgramService;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
@@ -96,6 +98,9 @@ public class ProgramServiceTest {
 
         FakeEMPEntitlementProvider fakeEntitlementProvider = new FakeEMPEntitlementProvider();
         TestUtils.mockProvider(EMPEntitlementProvider.class, fakeEntitlementProvider);
+
+        FakeMonotonicTimeService fakeMonotonicTimeService = new FakeMonotonicTimeService();
+        TestUtils.mockProvider(MonotonicTimeService.class, fakeMonotonicTimeService);
 
         ArrayList<EmpProgram> singleProgramEpg1 = new ArrayList<>();
         singleProgramEpg1.add(live_program1);

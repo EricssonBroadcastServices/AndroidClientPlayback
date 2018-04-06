@@ -40,7 +40,34 @@ public  class FakeEMPMetadataProvider extends EMPMetadataProvider {
             callback.onError(Error.NETWORK_ERROR);
         }
         else {
-            callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+            if (callback != null) {
+                callback.onMetadata(this.epg == null ? new ArrayList<EmpProgram>() : this.epg);
+            }
         }
+    }
+
+    @Override
+    public void getEpgCacheFirst(final String channelId, final long epgTimeNowMs, final IMetadataCallback<ArrayList<EmpProgram>> callback, EpgQueryParameters params) {
+        IMetadataCallback cacheListener = new IMetadataCallback<ArrayList<EmpProgram>>() {
+            @Override
+            public void onMetadata(ArrayList<EmpProgram> metadata) {
+                try {
+                    epgCache.update(channelId, metadata);
+                }
+                catch (Exception e) {}
+                if (callback != null) {
+                    ArrayList<EmpProgram> newMetadata = epgCache.getByTime(epgTimeNowMs);
+                    callback.onMetadata(newMetadata);
+                }
+            }
+
+            @Override
+            public void onError(Error error) {
+                if (callback != null) {
+                    callback.onError(error);
+                }
+            }
+        };
+        getEpgWithTime(channelId, epgTimeNowMs, cacheListener, params);
     }
 }
