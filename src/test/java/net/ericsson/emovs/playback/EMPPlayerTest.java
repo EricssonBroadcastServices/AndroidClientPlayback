@@ -165,7 +165,7 @@ public class EMPPlayerTest {
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
-        Thread.sleep(50);
+        Thread.sleep(100);
 
         FakeTech tech = player.getTech();
         Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == 1000000);
