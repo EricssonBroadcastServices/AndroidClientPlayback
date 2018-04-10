@@ -183,8 +183,8 @@ public class SimplePlaybackActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         releaseAllEmpClients();
+        super.onDestroy();
     }
 
     /**
