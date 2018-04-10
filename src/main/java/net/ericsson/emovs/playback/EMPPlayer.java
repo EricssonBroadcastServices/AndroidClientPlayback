@@ -40,6 +40,7 @@ import static net.ericsson.emovs.utilities.errors.Warning.SEEK_TO_UNAVAILABLE_PO
  * Player with EMP business logic
  */
 public class EMPPlayer extends Player implements IEntitledPlayer {
+    protected int START_OVER_SAFETIME_OFFSET_MS = 150;
     protected IPlayable playable;
     protected Entitlement entitlement;
     protected IEntitlementProvider entitlementProvider;
@@ -492,7 +493,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         if (currentPlayable instanceof EmpProgram) {
             EmpProgram program = (EmpProgram) currentPlayable;
             if (program.startDateTime != null) {
-                seekToTime(program.startDateTime.getMillis());
+                seekToTime(program.startDateTime.getMillis() + START_OVER_SAFETIME_OFFSET_MS);
             }
             else {
                 seekTo(0);
