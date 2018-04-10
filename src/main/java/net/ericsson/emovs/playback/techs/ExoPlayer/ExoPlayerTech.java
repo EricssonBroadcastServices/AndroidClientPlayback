@@ -386,6 +386,9 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         if (player == null) {
             return;
         }
+        if (playerEventListener != null) {
+            player.removeListener(playerEventListener);
+        }
         this.player.release();
         this.player = null;
     }

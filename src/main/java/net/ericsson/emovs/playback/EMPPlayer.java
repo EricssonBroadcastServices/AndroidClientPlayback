@@ -411,6 +411,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                         }
                                         play(program, newProps);
                                         for(IPlaybackEventListener listener : listeners.keySet()) {
+                                            if (listener instanceof AnalyticsHolder) {
+                                                continue;
+                                            }
                                             addListener(listener);
                                         }
                                     }
@@ -530,6 +533,9 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                             HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
                             play(program, newProps);
                             for(IPlaybackEventListener listener : listeners.keySet()) {
+                                if (listener instanceof AnalyticsHolder) {
+                                    continue;
+                                }
                                 addListener(listener);
                             }
                         }
