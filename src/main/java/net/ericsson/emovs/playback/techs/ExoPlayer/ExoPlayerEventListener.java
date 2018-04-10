@@ -13,7 +13,6 @@ import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
-import net.ericsson.emovs.utilities.system.RunnableThread;
 import net.ericsson.emovs.utilities.system.ServiceUtils;
 
 import java.lang.reflect.Field;
@@ -148,20 +147,13 @@ public class ExoPlayerEventListener implements Player.EventListener {
             }
         }
         else if (playbackState == com.google.android.exoplayer2.Player.STATE_IDLE) {
-            new RunnableThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    isPlaying = false;
-                    isReady = false;
-                    seekStart = false;
-                    waitingStarted = false;
-                }
-            }).start();
+            if (isPlaying) {
+                tech.parent.onStop();
+            }
+            isPlaying = false;
+            isReady = false;
+            seekStart = false;
+            waitingStarted = false;
         }
     }
 
