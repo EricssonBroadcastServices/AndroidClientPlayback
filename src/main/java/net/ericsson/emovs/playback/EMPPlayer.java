@@ -579,7 +579,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
-    private void preparePlayback(String mediaId, final Entitlement entitlement) {
+    private boolean preparePlayback(String mediaId, final Entitlement entitlement) {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
         }
@@ -605,8 +605,14 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
 
         Log.d("EMP MEDIA LOCATOR", entitlement.mediaLocator);
-        tech.init(this, context, entitlement.playToken, this.properties);
-        tech.load(mediaId, entitlement.mediaLocator, false);
+
+        if (this.tech != null) {
+            tech.init(this, context, entitlement.playToken, this.properties);
+            tech.load(mediaId, entitlement.mediaLocator, false);
+            return true;
+        }
+
+        return false;
     }
 
     private void prepareProgramService(EmpProgram program) {
@@ -673,15 +679,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                                 }
 
-                                preparePlayback(entitlement.channelId, entitlement);
-                                prepareProgramService(programs.size() > 0 ? programs.get(0) : null);
+                                boolean ret = preparePlayback(entitlement.channelId, entitlement);
+                                if (ret) prepareProgramService(programs.size() > 0 ? programs.get(0) : null);
                             }
 
                             @Override
                             public void onError(final Error error) {
                                 properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
-                                preparePlayback(entitlement.channelId, entitlement);
-                                prepareProgramService(null);
+                                boolean ret = preparePlayback(entitlement.channelId, entitlement);
+                                if (ret) prepareProgramService(null);
                             }
                         }, epgParams);
                         return;
@@ -692,8 +698,8 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                 }
 
-                preparePlayback(entitlement.channelId, entitlement);
-                prepareProgramService(null);
+                boolean ret = preparePlayback(entitlement.channelId, entitlement);
+                if (ret) prepareProgramService(null);
             }
         };
         super.onEntitlementLoadStart();
@@ -734,8 +740,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                             ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
                         }
-                        preparePlayback(entitlement.programId, entitlement);
-                        prepareProgramService(program);
+                        boolean ret = preparePlayback(entitlement.programId, entitlement);
+                        if (ret) {
+                            prepareProgramService(program);
+                        }
                     }
                     else {
                         getMetadataProvider().getProgramDetails(program.channelId, program.programId, new IMetadataCallback<EmpProgram>() {
@@ -753,22 +761,22 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                                     ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = fullProgram.startDateTime.getMillis();
                                 }
-                                preparePlayback(entitlement.programId, entitlement);
-                                prepareProgramService(fullProgram);
+                                boolean ret = preparePlayback(entitlement.programId, entitlement);
+                                if (ret) prepareProgramService(fullProgram);
                             }
 
                             @Override
                             public void onError(Error error) {
                                 properties.withPlayFrom(null);
-                                preparePlayback(entitlement.programId, entitlement);
-                                prepareProgramService(program);
+                                boolean ret = preparePlayback(entitlement.programId, entitlement);
+                                if (ret) prepareProgramService(program);
                             }
                         });
                     }
                 }
                 else {
-                    preparePlayback(entitlement.programId, entitlement);
-                    prepareProgramService(program);
+                    boolean ret = preparePlayback(entitlement.programId, entitlement);
+                    if (ret) prepareProgramService(program);
                 }
             }
         };
@@ -803,13 +811,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 self.playbackUUID = UUID.randomUUID();
                 self.onEntitlementChange();
                 Log.d("EMP MEDIA LOCATOR", manifestPath);
-                tech.init(self, context, self.entitlement.playToken, self.properties);
-                tech.load(self.entitlement.assetId, manifestPath, true);
-                context.runOnUiThread(new Runnable() {
-                    public void run() {
-                        tech.play(manifestPath);
-                    }
-                });
+                if (tech != null) {
+                    tech.init(self, context, self.entitlement.playToken, self.properties);
+                    tech.load(self.entitlement.assetId, manifestPath, true);
+                    context.runOnUiThread(new Runnable() {
+                        public void run() {
+                            tech.play(manifestPath);
+                        }
+                    });
+                }
             }
         }).start();
         return true;

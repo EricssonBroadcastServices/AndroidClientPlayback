@@ -4,6 +4,7 @@
 
 ### New features and Enhancements
 ExoPlayer Update - v2.7.0
+Adding null-check for tech on preparePlayback@EMPPlayer function
 
 ### Bug fixes
 **EMP-10988** Fixed text relocations in libaricentomxplugin.so
