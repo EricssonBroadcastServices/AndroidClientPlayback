@@ -27,7 +27,7 @@ ext {
     releaseArtifact = 'fluxplayer-playback'
     releaseVersion = 'v2.0.81'
     releaseDescription = 'The EMP Player library playback module.'
-    libraryTag = 'r2.0.81'
+    libraryTag = 'master-SNAPSHOT'
     lightweight = { -> return false }
 }
 
