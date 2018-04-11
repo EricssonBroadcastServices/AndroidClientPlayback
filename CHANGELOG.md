@@ -3,14 +3,14 @@
 ## 2.0.81
 
 ### New features and Enhancements
-ExoPlayer Update - v2.7.0
-Adding null-check for tech on preparePlayback@EMPPlayer function
+- ExoPlayer Update - v2.7.0 (https://github.com/google/ExoPlayer/tree/r2.7.0)
+- Adding null-check for tech on preparePlayback@EMPPlayer function
 
 ### Bug fixes
-**EMP-10988** Fixed text relocations in libaricentomxplugin.so
-**EMP-11216** Sending onStop from tech so that analytics Aborted event is always sent
-**EMP-11217** Preventing double analytics when user seeks to previous program
-**EMP-11220** Added a configurable safety offset for start over so that there is no risk the exo player inadvertently plays a few milliseconds before the program starts
+- **EMP-10988** Fixed text relocations in libaricentomxplugin.so
+- **EMP-11216** Sending onStop from tech so that analytics Aborted event is always sent
+- **EMP-11217** Preventing double analytics when user seeks to previous program
+- **EMP-11220** Added a configurable safety offset for start over so that there is no risk the exo player inadvertently plays a few milliseconds before the program starts
 
 
 ## 2.0.80
