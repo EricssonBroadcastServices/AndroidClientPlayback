@@ -28,7 +28,7 @@ ext {
     releaseVersion = 'v2.0.81'
     releaseDescription = 'The EMP Player library playback module.'
     libraryTag = 'r2.0.81'
-    lightweight = { -> return false }
+    lightweight = { -> return true }
 }
 
 android {
