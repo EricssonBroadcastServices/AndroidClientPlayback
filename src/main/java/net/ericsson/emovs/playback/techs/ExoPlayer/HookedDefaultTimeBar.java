@@ -2,6 +2,9 @@ package net.ericsson.emovs.playback.techs.ExoPlayer;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 
@@ -15,6 +18,7 @@ import net.ericsson.emovs.utilities.models.EmpProgram;
 
 public class HookedDefaultTimeBar extends DefaultTimeBar {
     IPlayer player;
+    View liveLine;
 
     public HookedDefaultTimeBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,6 +61,7 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
 
     @Override
     public void setDuration(long duration) {
+        double MAX_WEIGHT = 10000.0;
         if (player instanceof IEntitledPlayer) {
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
@@ -65,6 +70,22 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
                 long liveDuration = seekableTimeRange[1] - currentProgram.startDateTime.getMillis();
                 long programDuration = currentProgram.getDuration();
                 super.setDuration(Math.min(liveDuration, programDuration));
+
+                if (currentProgram.liveNow()) {
+                    long w = Math.round(liveDuration * MAX_WEIGHT / programDuration);
+                    if (w < MAX_WEIGHT * 0.07) {
+                        w = (long) (MAX_WEIGHT * 0.07);
+                    }
+                    if (w >= MAX_WEIGHT) {
+                        this.liveLine.setVisibility(View.GONE);
+                    }
+                    else {
+                        setWeight(w, (long) MAX_WEIGHT);
+                    }
+                }
+                else {
+                    this.liveLine.setVisibility(View.GONE);
+                }
                 return;
             }
         }
@@ -74,5 +95,29 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
+    }
+
+    public void setWeight(long w, long max) {
+        // Set weight for seekbar
+        ViewGroup.LayoutParams p = getLayoutParams();
+        if (p instanceof LinearLayout.LayoutParams) {
+            LinearLayout.LayoutParams linearParams = (LinearLayout.LayoutParams) p;
+            linearParams.weight = w;
+        }
+        this.setLayoutParams(p);
+
+        if (this.liveLine != null) {
+            // Set weight for live line
+            p = this.liveLine.getLayoutParams();
+            if (p instanceof LinearLayout.LayoutParams) {
+                LinearLayout.LayoutParams linearParams = (LinearLayout.LayoutParams) p;
+                linearParams.weight = max - w;
+            }
+            this.liveLine.setLayoutParams(p);
+            this.liveLine.setVisibility(View.VISIBLE);
+        }
+    }
+    public void bindLiveLine(View liveLine) {
+        this.liveLine = liveLine;
     }
 }

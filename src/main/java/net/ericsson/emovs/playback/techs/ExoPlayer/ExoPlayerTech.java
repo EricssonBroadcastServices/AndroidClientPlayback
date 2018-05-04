@@ -848,6 +848,11 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         if (timebar != null && timebar instanceof HookedDefaultTimeBar) {
             HookedDefaultTimeBar hookedTimebar = (HookedDefaultTimeBar) timebar;
             hookedTimebar.bindPlayer(getParent());
+
+            View liveLine = view.findViewById(R.id.live_divisory_line);
+            if (liveLine != null && liveLine instanceof View) {
+                hookedTimebar.bindLiveLine(liveLine);
+            }
         }
 
         ArrayList<HookedImageButton> hookedBtns = ViewHelper.getViewsFromViewGroup(view, HookedImageButton.class);
