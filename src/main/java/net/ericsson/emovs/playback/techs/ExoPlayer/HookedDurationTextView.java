@@ -13,6 +13,7 @@ import net.ericsson.emovs.utilities.time.DateTimeParser;
  */
 
 public class HookedDurationTextView extends android.support.v7.widget.AppCompatTextView {
+    public enum Mode { DURATION, TIME_LEFT };
     IPlayer player;
 
     public HookedDurationTextView(Context context, AttributeSet attrs) {
@@ -26,22 +27,56 @@ public class HookedDurationTextView extends android.support.v7.widget.AppCompatT
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         if (player != null && player instanceof IEntitledPlayer) {
-            IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
-            EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
-            long[] seekableTimeRange = player.getSeekTimeRange();
-            if (currentProgram != null && currentProgram.getDuration() != null && seekableTimeRange != null) {
-                long liveDuration = seekableTimeRange[1] - currentProgram.startDateTime.getMillis();
-                String newDuration = DateTimeParser.formatDisplayTime(Math.min(currentProgram.getDuration(), liveDuration));
-                if (newDuration.equals(text) == false) {
-                    setText(newDuration);
-                    invalidate();
-                }
-                else {
-                    super.onTextChanged(text, start, lengthBefore, lengthAfter);
-                }
-                return;
+            if (getMode() == Mode.DURATION) {
+                setValueDuration(text);
             }
+            else {
+                setValueTimeLeft(text);
+            }
+            return;
         }
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
+    }
+
+    protected void setValueDuration(CharSequence text){
+        IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+        long[] seekableTimeRange = player.getSeekTimeRange();
+        EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+        if (currentProgram != null && currentProgram.getDuration() != null && seekableTimeRange != null) {
+            long liveDuration = seekableTimeRange[1] - currentProgram.startDateTime.getMillis();
+            String newDuration = DateTimeParser.formatDisplayTime(Math.min(currentProgram.getDuration(), liveDuration));
+            if (newDuration.equals(text) == false) {
+                setText(newDuration);
+                invalidate();
+            }
+        }
+    }
+
+    protected void setValueTimeLeft(CharSequence text) {
+        IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+        long playheadTime = player.getPlayheadTime();
+        EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+        if (currentProgram != null && currentProgram.getDuration() != null) {
+            long timeLeft = currentProgram.endDateTime.getMillis() - playheadTime;
+            if (timeLeft < 0) {
+                timeLeft = 0;
+            }
+            String newDuration = "-" + DateTimeParser.formatDisplayTime(timeLeft);
+            if (newDuration.equals(text) == false) {
+                setText(newDuration);
+                invalidate();
+            }
+        }
+    }
+
+    protected Mode getMode() {
+        if (player != null && player instanceof IEntitledPlayer) {
+            IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+            EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+            if (currentProgram != null && currentProgram.liveNow()) {
+                return Mode.TIME_LEFT;
+            }
+        }
+        return Mode.DURATION;
     }
 }

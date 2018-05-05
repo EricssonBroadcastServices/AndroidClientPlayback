@@ -80,7 +80,7 @@
             android:layout_height="4dip"
             android:layout_weight="1"
             android:layout_marginRight="7dp"
-            android:background="#FFAA0000" />
+            android:background="#FF330000" />
 
         <net.ericsson.emovs.playback.techs.ExoPlayer.HookedDurationTextView
             android:id="@id/exo_duration"
