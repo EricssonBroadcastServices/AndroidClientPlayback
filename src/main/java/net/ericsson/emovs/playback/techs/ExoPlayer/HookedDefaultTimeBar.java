@@ -1,6 +1,8 @@
 package net.ericsson.emovs.playback.techs.ExoPlayer;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,20 +10,28 @@ import android.widget.LinearLayout;
 
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 
+import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IPlayer;
 import net.ericsson.emovs.utilities.models.EmpProgram;
+import net.ericsson.emovs.utilities.system.Utils;
 
 /**
  * Created by Joao Coelho on 2018-01-24.
  */
 
 public class HookedDefaultTimeBar extends DefaultTimeBar {
+    public static int LIVE_COLOR_THRESHOLD = 3000;
+    protected final Paint liveScrubberPaint = new Paint();
+    protected final Paint defaultScrubberPaint = new Paint();
+
     IPlayer player;
     View liveLine;
 
     public HookedDefaultTimeBar(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.defaultScrubberPaint.setColor(getDefaultScrubberColor(-1));
+        this.liveScrubberPaint.setARGB(0xFF, 0xAA, 0x22, 0x22);
     }
 
     public void bindPlayer(IPlayer player) {
@@ -33,6 +43,7 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
         if (player instanceof IEntitledPlayer) {
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
+            updateScrubberColor();
             if (currentProgram != null && currentProgram.getDuration() != null) {
                 long duration = currentProgram.getDuration();
                 long newPosition = Math.min(duration, Math.max(0, player.getPlayheadTime() - currentProgram.startDateTime.getMillis()));
@@ -63,6 +74,7 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
     public void setDuration(long duration) {
         double MAX_WEIGHT = 10000.0;
         if (player instanceof IEntitledPlayer) {
+            updateScrubberColor();
             IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
             EmpProgram currentProgram = entitledPlayer.getCurrentProgram();
             long[] seekableTimeRange = player.getSeekTimeRange();
@@ -117,6 +129,27 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
             this.liveLine.setVisibility(View.VISIBLE);
         }
     }
+
+    public void updateScrubberColor() {
+        if (isNearLiveEdge()) {
+            Utils.setPrivate(this, this.getClass().getSuperclass(), "scrubberPaint", liveScrubberPaint);
+        }
+        else {
+            Utils.setPrivate(this, this.getClass().getSuperclass(), "scrubberPaint", defaultScrubberPaint);
+        }
+        // Utils.setPrivate(this, this.getClass().getSuperclass(), "scrubberPadding", 20);
+    }
+
+    public boolean isNearLiveEdge() {
+        IEntitledPlayer entitledPlayer = (IEntitledPlayer) player;
+        long[] seekableTimeRange = player.getSeekTimeRange();
+        if (seekableTimeRange != null) {
+            long playheadTime = entitledPlayer.getPlayheadTime();
+            return seekableTimeRange[1] - playheadTime < LIVE_COLOR_THRESHOLD + Player.SAFETY_LIVE_DELAY;
+        }
+        return false;
+    }
+
     public void bindLiveLine(View liveLine) {
         this.liveLine = liveLine;
     }
