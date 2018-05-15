@@ -157,7 +157,12 @@ public class SimplePlaybackActivity extends AppCompatActivity {
         textTrackSpinner.setAdapter(subsAdapter);
 
         if (EMPRegistry.chromecastAppId() != null) {
-            CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
+            try {
+                CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return true;
