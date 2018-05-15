@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.0.84
+
+### New features and Enhancements
+- **EMP-11067** updated timeline ui controls for live programs
+
 ## 2.0.81
 
 ### New features and Enhancements
