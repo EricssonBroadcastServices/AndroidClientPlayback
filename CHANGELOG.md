@@ -5,6 +5,10 @@
 ### New features and Enhancements
 - **EMP-11067** updated timeline ui controls for live programs
 
+### Bug Fixes
+- **EMP-11328** fix start time issue in SimplePlaybackActivity
+
+
 ## 2.0.81
 
 ### New features and Enhancements

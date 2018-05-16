@@ -465,7 +465,7 @@ public class SimplePlaybackActivity extends AppCompatActivity {
                         String sessionId = view.getPlayer().getSessionId();
                         long currentTime = view.getPlayer().getPlayheadTime();
                         castProps.playFrom = "startTime";
-                        castProps.startTime = currentTime / 1000;
+                        castProps.startTime = currentTime;
                         EMPAnalyticsProvider.getInstance().startCasting(sessionId, currentTime, new HashMap<String, String>());
                     }
                     IPlayable playable = view.getPlayer().getPlayable();
