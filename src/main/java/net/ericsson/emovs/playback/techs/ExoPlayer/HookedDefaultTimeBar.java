@@ -89,13 +89,15 @@ public class HookedDefaultTimeBar extends DefaultTimeBar {
                         w = (long) (MAX_WEIGHT * 0.07);
                     }
                     if (w >= MAX_WEIGHT) {
-                        this.liveLine.setVisibility(View.GONE);
+                        if (this.liveLine != null) {
+                            this.liveLine.setVisibility(View.GONE);
+                        }
                     }
                     else {
                         setWeight(w, (long) MAX_WEIGHT);
                     }
                 }
-                else {
+                else if (this.liveLine != null) {
                     this.liveLine.setVisibility(View.GONE);
                 }
                 return;
