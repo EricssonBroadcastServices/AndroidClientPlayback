@@ -249,79 +249,19 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         }
 
         eventLogger = new EventLogger(trackSelector);
-
-        final ExoPlayerTech self = this;
-        DashDetails.isValidManifest(manifestUrl, isOffline, new Runnable() {
+        final Runnable onValid = new Runnable() {
             @Override
             public void run() {
-                DashDetails.getLicenseDetails(manifestUrl, isOffline, new ParameterizedRunnable<Pair<String, String>>() {
-                    @Override
-                    public void run(Pair<String, String> licenseDetails) {
-                        if (licenseDetails == null && properties.getDRMProperties() != null) {
-                            PlaybackProperties.DRMProperties drmProps = properties.getDRMProperties();
-                            licenseDetails = new Pair<>(drmProps.licenseServerUrl, drmProps.initDataBase64);
-                        }
-
-                        if (licenseDetails != null) {
-                            String[] keyRequestPropertiesArray = {};
-                            String licenseWithToken = licenseDetails.first;
-                            if (self.playToken != null) {
-                                licenseWithToken = Uri.parse(licenseDetails.first)
-                                        .buildUpon()
-                                        .appendQueryParameter("token", "Bearer " + self.playToken)
-                                        .build().toString();
-                            }
-
-                            licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
-
-                            UUID drmSchemeUuid = null;
-                            try {
-                                drmSchemeUuid = getDrmUuid("widevine");
-                            } catch (ParserException e) {
-                                e.printStackTrace();
-                                return;
-                            }
-                            try {
-                                DrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
-
-                                if (isOffline) {
-                                    drmSessionManager = buildOfflineDrmSessionManager(mediaId, drmSchemeUuid, licenseDetails.first, licenseDetails.second);
-                                }
-                                else {
-                                    drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, licenseDetails.first, keyRequestPropertiesArray);
-                                }
-
-                                DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
-                                self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
-                                self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
-                            } catch (UnsupportedDrmException e) {
-                                e.printStackTrace();
-                                return;
-                            }
-                        }
-                        else {
-                            self.player = HookedSimpleExoPlayer.newSimpleInstance(self, new DefaultRenderersFactory(ctx), trackSelector);
-                            self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
-                        }
-
-                        if (ctx != null) {
-                            if (self.playerEventListener != null) {
-                                self.player.removeListener(self.playerEventListener);
-                            }
-                            self.playerEventListener = new ExoPlayerEventListener(self, isOffline);
-                            self.player.addListener(self.playerEventListener);
-
-                            ctx.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    play(manifestUrl);
-                                }
-                            });
-                        }
-                        return;
-                    }
-                });
+                proceedWithPlayback(manifestUrl, isOffline, mediaId);
             }
-        }, new Runnable() {
+        };
+        final Runnable httpRequired = new Runnable() {
+            @Override
+            public void run() {
+                onValid.run();
+            }
+        };
+        DashDetails.isValidManifest(manifestUrl, isOffline, onValid, new Runnable() {
             @Override
             public void run() {
                 parent.runOnUiThread(new Runnable() {
@@ -332,9 +272,84 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                     }
                 });
             }
-        });
+        }, new Runnable() {
+            @Override
+            public void run() {
+                proceedWithPlayback(manifestUrl.replace("https://", "http://"), isOffline, mediaId);
+            }
+        }, true);
 
         return true;
+    }
+
+    protected void proceedWithPlayback(final String manifestUrl, final boolean isOffline, final String mediaId) {
+        final ExoPlayerTech self = this;
+        DashDetails.getLicenseDetails(manifestUrl, isOffline, new ParameterizedRunnable<Pair<String, String>>() {
+            @Override
+            public void run(Pair<String, String> licenseDetails) {
+                if (licenseDetails == null && properties.getDRMProperties() != null) {
+                    PlaybackProperties.DRMProperties drmProps = properties.getDRMProperties();
+                    licenseDetails = new Pair<>(drmProps.licenseServerUrl, drmProps.initDataBase64);
+                }
+
+                if (licenseDetails != null) {
+                    String[] keyRequestPropertiesArray = {};
+                    String licenseWithToken = licenseDetails.first;
+                    if (self.playToken != null) {
+                        licenseWithToken = Uri.parse(licenseDetails.first)
+                                .buildUpon()
+                                .appendQueryParameter("token", "Bearer " + self.playToken)
+                                .build().toString();
+                    }
+
+                    licenseDetails = new Pair<>(licenseWithToken, licenseDetails.second);
+
+                    UUID drmSchemeUuid = null;
+                    try {
+                        drmSchemeUuid = getDrmUuid("widevine");
+                    } catch (ParserException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    try {
+                        DrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
+
+                        if (isOffline) {
+                            drmSessionManager = buildOfflineDrmSessionManager(mediaId, drmSchemeUuid, licenseDetails.first, licenseDetails.second);
+                        }
+                        else {
+                            drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, licenseDetails.first, keyRequestPropertiesArray);
+                        }
+
+                        DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
+                        self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
+                        self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
+                    } catch (UnsupportedDrmException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+                else {
+                    self.player = HookedSimpleExoPlayer.newSimpleInstance(self, new DefaultRenderersFactory(ctx), trackSelector);
+                    self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
+                }
+
+                if (ctx != null) {
+                    if (self.playerEventListener != null) {
+                        self.player.removeListener(self.playerEventListener);
+                    }
+                    self.playerEventListener = new ExoPlayerEventListener(self, isOffline);
+                    self.player.addListener(self.playerEventListener);
+
+                    ctx.runOnUiThread(new Runnable() {
+                        public void run() {
+                            play(manifestUrl);
+                        }
+                    });
+                }
+                return;
+            }
+        });
     }
 
     @Override
