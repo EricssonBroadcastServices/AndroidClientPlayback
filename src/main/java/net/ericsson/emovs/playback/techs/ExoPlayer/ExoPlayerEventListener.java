@@ -93,7 +93,7 @@ public class ExoPlayerEventListener implements Player.EventListener {
         }
         int oldBitrate = tech.currentBitrate;
         int newBitrate = tech.getCurrentBitrate();
-        if (oldBitrate > 0 && oldBitrate != newBitrate) {
+        if (oldBitrate >= 0 && oldBitrate != newBitrate) {
             tech.parent.onBitrateChange(oldBitrate, newBitrate);
         }
     }

@@ -265,12 +265,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 proceedWithPlayback(manifestUrl, isOffline, mediaId);
             }
         };
-        final Runnable httpRequired = new Runnable() {
-            @Override
-            public void run() {
-                onValid.run();
-            }
-        };
         DashDetails.isValidManifest(manifestUrl, isOffline, onValid, new Runnable() {
             @Override
             public void run() {
