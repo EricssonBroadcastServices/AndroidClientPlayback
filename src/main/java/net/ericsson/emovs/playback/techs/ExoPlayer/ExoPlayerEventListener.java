@@ -1,5 +1,6 @@
 package net.ericsson.emovs.playback.techs.ExoPlayer;
 
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -177,7 +178,14 @@ public class ExoPlayerEventListener implements Player.EventListener {
                 this.tech.parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
             }
             else {
-                this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, error.getMessage());
+                Log.d("ExoPlayerEventListener", error.toString());
+                StringBuilder builder = new StringBuilder();
+                builder.append("Message: " + error.toString() + "\n");
+                for (StackTraceElement element : error.getSourceException().getStackTrace()) {
+                    builder.append(element.toString() + "\n");
+                }
+                Log.d("ExoPlayerEventListener", builder.toString());
+                this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, builder.toString());
             }
 
         }
