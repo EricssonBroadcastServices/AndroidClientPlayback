@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.0.90
+
+### Bug Fixes
+- Enabling DASH bitrate adaptation
+
 ## 2.0.89
 
 ### New features and Enhancements
@@ -7,7 +12,6 @@
 
 ### Bug Fixes
 - **EMP-11328** fix start time issue in SimplePlaybackActivity
-
 
 ## 2.0.81
 
