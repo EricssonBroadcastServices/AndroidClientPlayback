@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
+import net.ericsson.emovs.utilities.system.RunnableThread;
 import net.ericsson.emovs.utilities.system.ServiceUtils;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
@@ -54,11 +56,13 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.EventLogger;
 import com.google.android.exoplayer2.util.Util;
 
@@ -103,9 +107,16 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     protected ExoPlayerEventListener playerEventListener;
     private Handler mainHandler;
     private EventLogger eventLogger;
+    protected DefaultBandwidthMeter bandwidthMeter;
 
     public ExoPlayerTech() {
         mainHandler = new Handler();
+        bandwidthMeter = new DefaultBandwidthMeter(mainHandler, new BandwidthMeter.EventListener() {
+            @Override
+            public void onBandwidthSample(int i, long l, long l1) {
+                Log.d("BandwidthEstimate", Integer.toString(i) + "," + Long.toString(l) + "," + Long.toString(l1));
+            }
+        });
     }
 
     Player getParent() {
@@ -223,7 +234,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     }
 
     public boolean load(final String mediaId, final String manifestUrl, final boolean isOffline) {
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         this.trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
@@ -386,7 +396,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 }
             }
         });
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         //MediaSource mediaSource = new DashMediaSource(this.manifestUrl, dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
 
@@ -783,7 +792,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
 
     private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(false));
+        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(true));
         if (keyRequestPropertiesArray != null) {
             for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
                 drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
@@ -794,7 +803,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         return new DefaultHttpDataSourceFactory(Util.getUserAgent(this.ctx, "EMP-Player"), useBandwidthMeter ? bandwidthMeter : null);
     }
 
