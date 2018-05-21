@@ -84,16 +84,26 @@ public class ExoPlayerEventListener implements Player.EventListener {
                 }
             }
         }
+        checkBitrate();
     }
 
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+        try {
+            checkBitrate();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkBitrate() {
         if (!isInitiated()) {
             return;
         }
         int oldBitrate = tech.currentBitrate;
         int newBitrate = tech.getCurrentBitrate();
-        if (oldBitrate >= 0 && oldBitrate != newBitrate) {
+        if (oldBitrate != newBitrate && newBitrate > 0) {
             tech.parent.onBitrateChange(oldBitrate, newBitrate);
         }
     }
