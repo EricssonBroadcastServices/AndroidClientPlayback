@@ -188,19 +188,20 @@ public class ExoPlayerEventListener implements Player.EventListener {
                 this.tech.parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
             }
             else {
-                Log.d("ExoPlayerEventListener", error.toString());
                 StringBuilder builder = new StringBuilder();
-                builder.append("Message: " + error.toString() + "\n");
-                try {
-                    if (error.getSourceException() != null) {
-                        for (StackTraceElement element : error.getSourceException().getStackTrace()) {
-                            builder.append(element.toString() + "\n");
+                if (error != null) {
+                    try {
+                        builder.append("Message: " + error.toString() + "\n");
+                        if (error.getSourceException() != null && error.getSourceException().getStackTrace() != null) {
+                            for (StackTraceElement element : error.getSourceException().getStackTrace()) {
+                                builder.append(element.toString() + "\n");
+                            }
                         }
+                        Log.d("ExoPlayerEventListener", builder.toString());
                     }
-                    Log.d("ExoPlayerEventListener", builder.toString());
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, builder.toString());
             }
