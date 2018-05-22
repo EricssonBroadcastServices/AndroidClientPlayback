@@ -12,31 +12,45 @@ import java.util.HashMap;
  * Created by Joao Coelho on 2017-09-27.
  */
 class PlaybackEventListenerAggregator implements IPlaybackEventListener {
-    protected HashMap<IPlaybackEventListener, IPlaybackEventListener> eventListeners;
+    private HashMap<IPlaybackEventListener, IPlaybackEventListener> eventListeners;
 
     public PlaybackEventListenerAggregator() {
         this.eventListeners = new HashMap<>();
     }
 
     public void addListener(IPlaybackEventListener listener) {
-        this.eventListeners.put(listener, listener);
+        synchronized (eventListeners) {
+            this.eventListeners.put(listener, listener);
+        }
+    }
+
+    public HashMap<IPlaybackEventListener, IPlaybackEventListener> cloneEventListeners() {
+        synchronized (eventListeners) {
+            return (HashMap<IPlaybackEventListener, IPlaybackEventListener>) this.eventListeners.clone();
+        }
     }
 
     public void removeListener(IPlaybackEventListener listener) {
-        this.eventListeners.remove(listener);
+        synchronized (eventListeners) {
+            this.eventListeners.remove(listener);
+        }
     }
 
     public void clearListeners() {
-        this.eventListeners.clear();
+        synchronized (eventListeners) {
+            this.eventListeners.clear();
+        }
     }
 
     @Override
     public void onInit() {
-        if (eventListeners == null) {
-           return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onInit();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+               return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onInit();
+            }
         }
     }
 
@@ -54,61 +68,73 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
 
     @Override
     public void onEntitlementLoadStart() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onEntitlementLoadStart();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onEntitlementLoadStart();
+            }
         }
     }
 
     @Override
     public void onEntitlementChange() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onEntitlementChange();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onEntitlementChange();
+            }
         }
     }
 
     @Override
     public void onLoadStart() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onLoadStart();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onLoadStart();
+            }
         }
     }
 
     @Override
     public void onLoad() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onLoad();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onLoad();
+            }
         }
     }
 
     @Override
     public void onPlay() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onPlay();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onPlay();
+            }
         }
     }
 
     @Override
     public void onPlaying() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onPlaying();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onPlaying();
+            }
         }
     }
 
@@ -136,61 +162,73 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
 
     @Override
     public void onPause() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onPause();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onPause();
+            }
         }
     }
 
     @Override
     public void onSeek(long position) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onSeek(position);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onSeek(position);
+            }
         }
     }
 
     @Override
     public void onResume() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onResume();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onResume();
+            }
         }
     }
 
     @Override
     public void onWaitingStart() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onWaitingStart();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onWaitingStart();
+            }
         }
     }
 
     @Override
     public void onWaitingEnd() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onWaitingEnd();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onWaitingEnd();
+            }
         }
     }
 
     @Override
     public void onBitrateChange(int oldBitrate, int newBitrate) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onBitrateChange(oldBitrate, newBitrate);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onBitrateChange(oldBitrate, newBitrate);
+            }
         }
     }
 
@@ -238,71 +276,85 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
 
     @Override
     public void onPlaybackEnd() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onPlaybackEnd();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onPlaybackEnd();
+            }
         }
     }
 
     @Override
     public void onDispose() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onDispose();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onDispose();
+            }
         }
     }
 
     @Override
     public void onStop() {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onStop();
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onStop();
+            }
         }
     }
 
     @Override
     public void onError(int errorCode, String errorMessage) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onError(errorCode, errorMessage);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onError(errorCode, errorMessage);
+            }
         }
     }
 
     @Override
     public void onWarning(int warningCode, String warningMessage) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onWarning(warningCode, warningMessage);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onWarning(warningCode, warningMessage);
+            }
         }
     }
 
     @Override
     public void onControllerVisibility(ControllerVisibility visibility) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onControllerVisibility(visibility);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onControllerVisibility(visibility);
+            }
         }
     }
 
     @Override
     public void onProgramChange(EmpProgram newProgram) {
-        if (eventListeners == null) {
-            return;
-        }
-        for (IPlaybackEventListener listener : eventListeners.keySet()) {
-            listener.onProgramChange(newProgram);
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onProgramChange(newProgram);
+            }
         }
     }
 }

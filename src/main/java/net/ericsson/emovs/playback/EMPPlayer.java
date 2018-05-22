@@ -403,7 +403,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 final PlaybackProperties newProps = properties.clone();
                                 newProps.playFrom = new PlaybackProperties.PlayFrom.StartTime(unixTimeMs);
                                 newProps.withAutoplay(isPaused() == false);
-                                final HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
+                                final HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = cloneEventListeners();
                                 programService.isEntitled (unixTimeMs, new Runnable() {
                                     @Override
                                     public void run() {
@@ -531,7 +531,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                             PlaybackProperties newProps = properties.clone();
                             newProps.playFrom = PlaybackProperties.PlayFrom.LIVE_EDGE;
                             newProps.withAutoplay(isPaused() == false);
-                            HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = (HashMap<IPlaybackEventListener, IPlaybackEventListener>) eventListeners.clone();
+                            HashMap<IPlaybackEventListener, IPlaybackEventListener> listeners = cloneEventListeners();
                             play(program, newProps);
                             for(IPlaybackEventListener listener : listeners.keySet()) {
                                 if (listener instanceof AnalyticsHolder) {
