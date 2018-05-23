@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 - Enabling DASH bitrate adaptation
-- If HTTPS .mpd is not available, then the player tries to load it from HTTP.
+- **EMP-11334** If HTTPS .mpd is not available, then the player tries to load it from HTTP.
 - **EMP-11349** fixed ConcurrentModificationException on PlaybackEventListenerAggregator
 
 ## 2.0.89
