@@ -1,6 +1,6 @@
 # Release Notes
 
-## 2.0.90
+## 2.0.90-4
 
 ### Bug Fixes
 - Enabling DASH bitrate adaptation
