@@ -265,23 +265,30 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 proceedWithPlayback(manifestUrl, isOffline, mediaId);
             }
         };
-        DashDetails.isValidManifest(manifestUrl, isOffline, onValid, new Runnable() {
-            @Override
-            public void run() {
-                parent.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        parent.fail(ErrorCodes.INVALID_MANIFEST, "INVALID_MANIFEST");
-                        stop();
-                    }
-                });
-            }
-        }, new Runnable() {
+        final Runnable onHttpRequired = new Runnable() {
             @Override
             public void run() {
                 proceedWithPlayback(manifestUrl.replace("https://", "http://"), isOffline, mediaId);
             }
-        }, true);
+        };
+        final ParameterizedRunnable<String> onError = new ParameterizedRunnable<String>() {
+            @Override
+            public void run(final String s) {
+                parent.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        StringBuilder b = new StringBuilder("INVALID_MANIFEST");
+                        if (s != null) {
+                            b.append("\n" + s);
+                        }
+                        parent.fail(ErrorCodes.INVALID_MANIFEST, b.toString());
+                        stop();
+                    }
+                });
+            }
+        };
+
+        DashDetails.isValidManifest(manifestUrl, isOffline, onValid, onError, onHttpRequired);
 
         return true;
     }
