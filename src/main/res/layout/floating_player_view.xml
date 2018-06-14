@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <net.ericsson.emovs.playback.ui.views.FloatingPlayerView
+        android:id="@+id/dragLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!--<TextView-->
+            <!--android:id="@+id/v_header"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="128dp"-->
+            <!--android:background="#FFFF0000"-->
+            <!--android:fontFamily="sans-serif-thin"-->
+            <!--android:gravity="center"-->
+            <!--android:tag="text"-->
+            <!--android:text="Drag me to the bottom"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--android:textSize="25sp"/>-->
+
+        <net.ericsson.emovs.playback.ui.views.EMPPlayerView
+            android:id="@+id/v_header"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+
+        <TextView
+            android:id="@+id/v_description"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FF0000FF"
+            android:gravity="center"
+            android:tag="desc"
+            android:text="Loreum Loreum Loreum Loreum Loreum Loreum LoreumLoreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum Loreum"
+            android:textColor="@android:color/white"
+            android:textSize="35sp"/>
+    </net.ericsson.emovs.playback.ui.views.FloatingPlayerView>
+</FrameLayout>
