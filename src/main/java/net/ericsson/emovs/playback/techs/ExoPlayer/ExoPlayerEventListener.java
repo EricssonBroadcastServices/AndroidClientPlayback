@@ -16,6 +16,8 @@ import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ServiceUtils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 
 import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
@@ -25,6 +27,9 @@ import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
  */
 
 public class ExoPlayerEventListener implements Player.EventListener {
+
+    private final String TAG = this.getClass().getSimpleName();
+
     long windowStartTimeMs;
     boolean startTimeSeekDone;
     boolean waitingStarted;
@@ -183,26 +188,32 @@ public class ExoPlayerEventListener implements Player.EventListener {
         if (!isInitiated()) {
             return;
         }
+
         if (tech.parent != null) {
             if (!this.isOffline && isPlaying && !ServiceUtils.haveNetworkConnection(tech.ctx)) {
                 this.tech.parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
-            }
-            else {
+            } else {
                 StringBuilder builder = new StringBuilder();
+
                 if (error != null) {
                     try {
-                        builder.append("Message: " + error.toString() + "\n");
-                        if (error.getSourceException() != null && error.getSourceException().getStackTrace() != null) {
-                            for (StackTraceElement element : error.getSourceException().getStackTrace()) {
-                                builder.append(element.toString() + "\n");
-                            }
-                        }
+                        builder.append("Message: ");
+                        builder.append(error.toString());
+                        builder.append("\n");
+
+                        StringWriter stringWriter = new StringWriter();
+                        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+                        error.printStackTrace(printWriter);
+
+                        builder.append(stringWriter.toString());
+
                         Log.d("ExoPlayerEventListener", builder.toString());
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error printing stack trace exposure response", e);
                     }
                 }
+
                 this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, builder.toString());
             }
         }
