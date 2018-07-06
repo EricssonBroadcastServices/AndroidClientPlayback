@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.0.90-6
+
+### Enhancements
+- **EMP-11159** Changed Code 1 (ExoPlaybackException) error handling on player listener
+
 ## 2.0.90-4
 
 ### Bug Fixes
