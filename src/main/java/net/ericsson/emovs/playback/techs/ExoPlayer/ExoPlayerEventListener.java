@@ -57,14 +57,22 @@ public class ExoPlayerEventListener implements Player.EventListener {
         if (!isInitiated()) {
             return;
         }
+        Log.d(TAG, "onTimelineChanged(): timeline: " + timeline.toString());
         windowStartTimeMs = getWindowStartFromTimeline(timeline);
+
+        Log.d(TAG, "onTimelineChanged(): windowStartTimeMs 11111: " + windowStartTimeMs);
         if (windowStartTimeMs < 0) {
+            Log.d(TAG, "onTimelineChanged(): Lower than ZERO: " + windowStartTimeMs);
             windowStartTimeMs = 0;
             long tParamStartTime = tech.tParamStartTime();
             if (tParamStartTime >= 0) {
                 windowStartTimeMs = tParamStartTime;
+                Log.d(TAG, "onTimelineChanged(): set to tParamStartTime: " + windowStartTimeMs);
             }
         }
+
+        Log.d(TAG, "onTimelineChanged(): windowStartTimeMs 22222: " + windowStartTimeMs);
+
         if (startTimeSeekDone == false && tech.properties != null && tech.properties.getPlayFrom() != null) {
             if (tech.properties.getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge) {
                 long[] seekTimeRange = tech.parent.getSeekTimeRange();
@@ -239,17 +247,41 @@ public class ExoPlayerEventListener implements Player.EventListener {
             return 0;
         }
 
+        printTimeline(timeline);
+
         Field field = null;
         try {
+            Log.d(TAG, "getWindowStartFromTimeline(): 11111");
             field = timeline.getClass().getDeclaredField("windowStartTimeMs");
+            Log.d(TAG, "getWindowStartFromTimeline(): 22222");
             field.setAccessible(true);
+            Log.d(TAG, "getWindowStartFromTimeline(): 33333");
             long lwindowStartTimeMs = (Long) field.get(timeline);
+            Log.d(TAG, "getWindowStartFromTimeline(): 44444");
             return lwindowStartTimeMs;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
+            Log.d(TAG, "getWindowStartFromTimeline(): 55555");
             e.printStackTrace();
         }
+
+        Log.d(TAG, "getWindowStartFromTimeline(): 66666");
+
         return  0;
+    }
+
+    private void printTimeline(Timeline timeline) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("\n------------------------------\n");
+        builder.append("timeline.getWindowCount(): " + timeline.getWindowCount());
+        builder.append("\n");
+        builder.append("timeline.getPeriodCount(): " + timeline.getPeriodCount());
+        builder.append("\n");
+        builder.append("timeline.getFirstWindowIndex(false): " + timeline.getFirstWindowIndex(false));
+        builder.append("\n");
+        builder.append("timeline.getLastWindowIndex(false): " + timeline.getLastWindowIndex(false));
+
+        Log.d(TAG, builder.toString());
     }
 
     private boolean isInitiated() {
