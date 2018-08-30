@@ -333,7 +333,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                         }
 
                         DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
-                        self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector);
+                        self.player = HookedSimpleExoPlayer.newSimpleInstance(self, renderersFactory, trackSelector, drmSessionManager);
                         self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
                     } catch (UnsupportedDrmException e) {
                         e.printStackTrace();
@@ -341,7 +341,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                     }
                 }
                 else {
-                    self.player = HookedSimpleExoPlayer.newSimpleInstance(self, new DefaultRenderersFactory(ctx), trackSelector);
+                    self.player = HookedSimpleExoPlayer.newSimpleInstance(self, new DefaultRenderersFactory(ctx), trackSelector, null);
                     self.player.setPlayWhenReady(self.properties == null ? PlaybackProperties.DEFAULT.isAutoplay() : self.properties.isAutoplay());
                 }
 
@@ -400,8 +400,14 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this.ctx, Util.getUserAgent(this.ctx, "EMP-Player"), bandwidthMeter);
         //MediaSource mediaSource = new DashMediaSource(this.manifestUrl, dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory), null, null);
 
-        MediaSource mediaSource = new DashMediaSource.Factory(new DefaultDashChunkSource.Factory(dataSourceFactory), dataSourceFactory)
-                .createMediaSource(this.manifestUrl, mainHandler, eventLogger);
+        MediaSource mediaSource =
+                new DashMediaSource.Factory(new DefaultDashChunkSource.Factory(dataSourceFactory),
+                                            dataSourceFactory).createMediaSource(this.manifestUrl);
+
+        mediaSource.addEventListener(mainHandler, null);
+
+        player.addAnalyticsListener(eventLogger);
+        // eventLogger
 
         player.prepare(mediaSource);
         overrideExoControls();
@@ -800,7 +806,15 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                         keyRequestPropertiesArray[i + 1]);
             }
         }
-        return new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), drmCallback, null, mainHandler, eventLogger, false);
+//        return new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), drmCallback, null, mainHandler, eventLogger, false);
+        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager =
+                new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid),
+                                               drmCallback, null,false);
+
+        drmSessionManager.addListener(mainHandler, null);
+        // eventLogger
+
+        return drmSessionManager;
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {

@@ -1,6 +1,7 @@
 package net.ericsson.emovs.playback.drm;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.exoplayer2.C;
@@ -36,8 +37,36 @@ public class GenericDrmCallback implements MediaDrmCallback {
         return executePost(url, null, null);
     }
 
-    @Override
+//    @Override
     public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest keyRequest) throws Exception {
+
+        //Holder for additional req parameters, as per custom implementation
+        Map<String, String> requestProperties = new HashMap<>();
+        Uri.Builder builder = Uri.parse(licUrl).buildUpon();
+
+        // Set content type for Widevine
+        requestProperties.put("Content-Type", "text/xml");
+
+        Uri uri = builder.build();
+        try {
+            return executePost(uri.toString(), keyRequest.getData(), requestProperties);
+        } catch (FileNotFoundException e) {
+            throw new IOException("License not found");
+        } catch (IOException e) {
+            throw new IOException("Error during license acquisition", e);
+        }
+        /*try {
+            JSONObject jsonObject = new JSONObject(new String(bytes));
+            return Base64.decode(jsonObject.getString("license"), Base64.DEFAULT);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error while parsing response: " + new String(bytes), e);
+            throw new RuntimeException("Error while parsing response", e);
+        }*/
+    }
+
+    @Override
+    public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest keyRequest,
+                                    @Nullable String mediaProvidedLicenseServerUrl) throws Exception {
 
         //Holder for additional req parameters, as per custom implementation
         Map<String, String> requestProperties = new HashMap<>();

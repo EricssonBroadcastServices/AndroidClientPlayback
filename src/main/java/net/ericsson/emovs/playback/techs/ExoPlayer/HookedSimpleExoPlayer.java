@@ -1,9 +1,13 @@
 package net.ericsson.emovs.playback.techs.ExoPlayer;
 
+import android.support.annotation.Nullable;
+
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
@@ -16,13 +20,18 @@ import net.ericsson.emovs.utilities.models.EmpProgram;
 public class HookedSimpleExoPlayer extends SimpleExoPlayer {
     ExoPlayerTech tech;
 
-    public HookedSimpleExoPlayer(ExoPlayerTech tech, RenderersFactory renderersFactory, TrackSelector trackSelector, LoadControl loadControl) {
-        super(renderersFactory, trackSelector, loadControl);
+    public HookedSimpleExoPlayer(ExoPlayerTech tech, RenderersFactory renderersFactory,
+                                 TrackSelector trackSelector, LoadControl loadControl,
+                                 @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager) {
+        super(renderersFactory, trackSelector, loadControl, drmSessionManager);
         this.tech = tech;
     }
 
-    public static HookedSimpleExoPlayer newSimpleInstance(ExoPlayerTech tech, RenderersFactory renderersFactory, TrackSelector trackSelector) {
-        return new HookedSimpleExoPlayer(tech, renderersFactory, trackSelector, new DefaultLoadControl());
+    public static HookedSimpleExoPlayer newSimpleInstance(ExoPlayerTech tech,
+                                                          RenderersFactory renderersFactory,
+                                                          TrackSelector trackSelector,
+                                                          @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager) {
+        return new HookedSimpleExoPlayer(tech, renderersFactory, trackSelector, new DefaultLoadControl(), drmSessionManager);
     }
 
     @Override
