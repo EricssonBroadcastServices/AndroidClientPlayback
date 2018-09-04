@@ -15,7 +15,6 @@ import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
-import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
 import net.ericsson.emovs.utilities.drm.DashDetails;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
@@ -23,20 +22,14 @@ import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
-import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
-import net.ericsson.emovs.utilities.system.RunnableThread;
-import net.ericsson.emovs.utilities.system.ServiceUtils;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
 import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ParserException;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.PlaybackPreparer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
@@ -53,7 +46,6 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -62,23 +54,18 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
-import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.EventLogger;
 import com.google.android.exoplayer2.util.Util;
 
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static net.ericsson.emovs.utilities.errors.Error.NETWORK_ERROR;
-
 
 /**
  * Created by Joao Coelho on 2017-08-29.
  */
-
 public class ExoPlayerTech implements ITech, PlaybackPreparer {
     private final String FLUX_EXOPLAYER_WIDEVINE_KEYSTORE = "FLUX_EXOPLAYER_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID = "key_offline_asset_id_";
@@ -108,6 +95,8 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     private Handler mainHandler;
     private EventLogger eventLogger;
     protected DefaultBandwidthMeter bandwidthMeter;
+
+    DefaultTrackSelector trackSelector = null;
 
     public ExoPlayerTech() {
         mainHandler = new Handler();
@@ -158,8 +147,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         this.playToken = playToken;
         this.properties = properties;
     }
-
-    DefaultTrackSelector trackSelector = null;
 
     public void overrideExoControls() {
         // FastForward: exo_ffwd
@@ -259,18 +246,21 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         }
 
         eventLogger = new EventLogger(trackSelector);
+
         final Runnable onValid = new Runnable() {
             @Override
             public void run() {
                 proceedWithPlayback(manifestUrl, isOffline, mediaId);
             }
         };
+
         final Runnable onHttpRequired = new Runnable() {
             @Override
             public void run() {
                 proceedWithPlayback(manifestUrl.replace("https://", "http://"), isOffline, mediaId);
             }
         };
+
         final ParameterizedRunnable<String> onError = new ParameterizedRunnable<String>() {
             @Override
             public void run(final String s) {
@@ -365,7 +355,6 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
     @Override
     public void preparePlayback() {
-
     }
 
     public void play(String dashManifestUrl) {
