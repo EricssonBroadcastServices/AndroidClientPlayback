@@ -22,6 +22,7 @@ import net.ericsson.emovs.utilities.errors.ErrorCodes;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.R;
 import net.ericsson.emovs.playback.interfaces.ITech;
+import net.ericsson.emovs.utilities.system.DeviceInfo;
 import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
@@ -762,8 +763,14 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 return null;
             }
 
-            GenericDrmCallback customDrmCallback = new GenericDrmCallback(buildHttpDataSourceFactory(true), licenseUrl);
-            DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), customDrmCallback, null, null, null);
+            GenericDrmCallback customDrmCallback =
+                    new GenericDrmCallback(buildHttpDataSourceFactory(true), licenseUrl);
+
+            FrameworkMediaDrm mediaDrm = createFrameworkMediaDrm(uuid);
+
+            DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager =
+                    new DefaultDrmSessionManager<>(uuid, mediaDrm, customDrmCallback, null, null, null);
+
             OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, buildHttpDataSourceFactory(true));
             Pair<Long, Long> remainingTime = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
 
@@ -782,14 +789,31 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
 
     private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(true));
+        HttpMediaDrmCallback drmCallback =
+                new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(true));
+
         if (keyRequestPropertiesArray != null) {
             for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
                 drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
                         keyRequestPropertiesArray[i + 1]);
             }
         }
-        return new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), drmCallback, null, mainHandler, eventLogger, false);
+
+        FrameworkMediaDrm mediaDrm = createFrameworkMediaDrm(uuid);
+
+        return new DefaultDrmSessionManager<>(uuid, mediaDrm, drmCallback, null,
+                                              mainHandler, eventLogger, false);
+    }
+
+    private FrameworkMediaDrm createFrameworkMediaDrm(UUID uuid) throws UnsupportedDrmException {
+        FrameworkMediaDrm framworkMediaDrm = FrameworkMediaDrm.newInstance(uuid);
+
+        // FIX: [EMP-11577] Change the security level to L3 only on Pixel Phones
+        if (isDeviceFromModel(PIXEL_MODEL_FAMILY)) {
+            framworkMediaDrm.setPropertyString(SECURITY_LEVEL_KEY, SECURITY_LEVEL_L3);
+        }
+
+        return framworkMediaDrm;
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
@@ -886,5 +910,35 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
             HookedPositionTextView hookedDurationView = (HookedPositionTextView) positionView;
             hookedDurationView.bindPlayer(getParent());
         }
+    }
+
+    private final String SECURITY_LEVEL_KEY = "securityLevel";
+    private final String SECURITY_LEVEL_L3 = "L3";
+
+    private final String PIXEL_MODEL_FAMILY = "Pixel";
+    private final String PIXEL_MODEL = "Pixel";
+    private final String PIXEL_XL_MODEL = "Pixel XL";
+    private final String PIXEL_2_MODEL = "Pixel 2";
+    private final String PIXEL_2_XL_MODEL = "Pixel 2 XL";
+
+    // Check if the device model is from a specific family of devices
+    private boolean isDeviceFromModel(String modelFamily) {
+        boolean result = false;
+
+        if (modelFamily != null) {
+            if (!modelFamily.isEmpty()) {
+                String deviceModel = DeviceInfo.getDeviceModel().toLowerCase();
+
+                // Check for Google Pixel devices
+                if (modelFamily.equals(PIXEL_MODEL_FAMILY)) {
+                    result = deviceModel.equals(PIXEL_MODEL.toLowerCase())
+                             || deviceModel.equals(PIXEL_XL_MODEL.toLowerCase())
+                             || deviceModel.equals(PIXEL_2_MODEL.toLowerCase())
+                             || deviceModel.equals(PIXEL_2_XL_MODEL.toLowerCase());
+                }
+            }
+        }
+
+        return result;
     }
 }
