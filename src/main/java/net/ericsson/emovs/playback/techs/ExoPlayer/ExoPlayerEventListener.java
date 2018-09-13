@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.InternalPlayerErrorCode;
 import net.ericsson.emovs.utilities.errors.Warning;
 import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.system.ServiceUtils;
@@ -193,30 +194,103 @@ public class ExoPlayerEventListener implements Player.EventListener {
             if (!this.isOffline && isPlaying && !ServiceUtils.haveNetworkConnection(tech.ctx)) {
                 this.tech.parent.onError(ErrorCodes.NETWORK_ERROR, NETWORK_ERROR.toString());
             } else {
-                StringBuilder builder = new StringBuilder();
-
-                if (error != null) {
-                    try {
-                        builder.append("Message: ");
-                        builder.append(error.toString());
-                        builder.append("\n");
-
-                        StringWriter stringWriter = new StringWriter();
-                        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-                        error.printStackTrace(printWriter);
-
-                        builder.append(stringWriter.toString());
-
-                        Log.d("ExoPlayerEventListener", builder.toString());
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error printing stack trace exposure response", e);
-                    }
-                }
-
-                this.tech.parent.onError(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, builder.toString());
+                sendInternalError(error);
             }
         }
+    }
+
+    private void sendInternalError(ExoPlaybackException error) {
+        if (error != null) {
+            Exception innerError = null;
+            String typeName;
+
+            // Get the type of the ExoPlayer exception
+            switch (error.type) {
+                case ExoPlaybackException.TYPE_SOURCE:
+                    innerError = error.getSourceException();
+                    typeName = "TYPE_SOURCE";
+                    break;
+                case ExoPlaybackException.TYPE_RENDERER:
+                    innerError = error.getRendererException();
+                    typeName = "TYPE_RENDERER";
+                    break;
+                case ExoPlaybackException.TYPE_UNEXPECTED:
+                    innerError = error.getUnexpectedException();
+                    typeName = "TYPE_UNEXPECTED";
+                    break;
+                default:
+                    typeName = "TYPE_UNKNOWN";
+                    break;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            String exceptionClassName;
+            String internalExceptionMessage;
+            String stacktrace;
+
+            // Log to console the internal exception or the ExoPlayer exception
+            if (innerError != null) {
+                exceptionClassName = innerError.getClass().getSimpleName();
+                internalExceptionMessage = innerError.getMessage();
+            } else {
+                exceptionClassName = error.getClass().getSimpleName();
+                internalExceptionMessage = error.getMessage();
+            }
+
+            // Get the full stacktrace from the exception error
+            stacktrace = getFullStackTrace(error);
+
+            // Create internal error code with the detailed parameters (message, info and details)
+            InternalPlayerErrorCode internalPlayerErrorCode =
+                    new InternalPlayerErrorCode(exceptionClassName.toLowerCase());
+
+            builder.append("\nExoPlayer Internal Error: ");
+            builder.append("Code ");
+            builder.append(internalPlayerErrorCode.getErrorCode());
+            builder.append(" : ");
+            builder.append(exceptionClassName);
+            builder.append(" : ");
+            builder.append(typeName);
+            builder.append(" : ");
+            builder.append(internalExceptionMessage);
+            builder.append("\n");
+            builder.append(stacktrace);
+
+            Log.d(TAG, builder.toString());
+
+            // Send the error to analytics
+            this.tech.parent.onErrorDetailed(internalPlayerErrorCode.getErrorCode(),
+                                             exceptionClassName,
+                                             internalExceptionMessage,
+                                             stacktrace);
+        } else {
+            Log.d(TAG, "Error: NULL ExoPlaybackException");
+
+            this.tech.parent.onErrorDetailed(ErrorCodes.EXO_PLAYER_INTERNAL_ERROR, "","", "");
+        }
+    }
+
+    private String getFullStackTrace(ExoPlaybackException error) {
+        String stacktrace = "";
+
+        try {
+            StringBuilder builder = new StringBuilder();
+
+            builder.append("\nExoPlayer Internal Error Stacktrace: \n");
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+
+            error.printStackTrace(printWriter);
+
+            builder.append(stringWriter.toString());
+
+            stacktrace = builder.toString();
+        } catch (Exception e) {
+            Log.e(TAG, "Error printing ExoPlayer internal error stacktrace", e);
+        }
+
+        return stacktrace;
     }
 
     @Override
