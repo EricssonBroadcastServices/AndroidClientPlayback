@@ -23,11 +23,21 @@ public class GenericDrmCallback implements MediaDrmCallback {
 
     private final HttpDataSource.Factory dataSourceFactory;
     private final String licUrl;
+    private final Map<String, String> keyRequestProperties;
 
     public GenericDrmCallback(HttpDataSource.Factory dataSourceFactory, String licUrl, Object ... obj){
         Log.d(TAG," license URL  : " + licUrl);
         this.licUrl = licUrl;
         this.dataSourceFactory = dataSourceFactory;
+        this.keyRequestProperties = new HashMap<>();
+    }
+
+    public GenericDrmCallback(HttpDataSource.Factory dataSourceFactory, String licenseUrl,
+                              Map<String, String> keyRequestProperties) {
+        Log.d(TAG,"License URL: " + licenseUrl);
+        this.licUrl = licenseUrl;
+        this.dataSourceFactory = dataSourceFactory;
+        this.keyRequestProperties = keyRequestProperties;
     }
 
     @Override
@@ -45,6 +55,9 @@ public class GenericDrmCallback implements MediaDrmCallback {
 
         // Set content type for Widevine
         requestProperties.put("Content-Type", "text/xml");
+
+        // Adding all other key request properties
+        requestProperties.putAll(keyRequestProperties);
 
         Uri uri = builder.build();
         try {

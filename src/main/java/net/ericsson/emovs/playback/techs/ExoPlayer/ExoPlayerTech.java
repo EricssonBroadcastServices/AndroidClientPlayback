@@ -60,6 +60,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -294,7 +295,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 }
 
                 if (licenseDetails != null) {
-                    String[] keyRequestPropertiesArray = {};
+                    String[] keyRequestPropertiesArray = createDrmKeyRequestPropertiesArray();
                     String licenseWithToken = licenseDetails.first;
                     if (self.playToken != null) {
                         licenseWithToken = Uri.parse(licenseDetails.first)
@@ -316,10 +317,16 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                         DrmSessionManager<FrameworkMediaCrypto> drmSessionManager;
 
                         if (isOffline) {
-                            drmSessionManager = buildOfflineDrmSessionManager(mediaId, drmSchemeUuid, licenseDetails.first, licenseDetails.second);
+                            drmSessionManager =
+                                    buildOfflineDrmSessionManager(mediaId, drmSchemeUuid,
+                                                                  licenseDetails.first,
+                                                                  licenseDetails.second,
+                                                                  keyRequestPropertiesArray);
                         }
                         else {
-                            drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid, licenseDetails.first, keyRequestPropertiesArray);
+                            drmSessionManager = buildDrmSessionManagerV18(drmSchemeUuid,
+                                                                          licenseDetails.first,
+                                                                          keyRequestPropertiesArray);
                         }
 
                         DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(ctx, drmSessionManager, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER);
@@ -351,6 +358,17 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 return;
             }
         });
+    }
+
+    // Create an array of drm key request properties with the PlayToken for the auth header
+    private String[] createDrmKeyRequestPropertiesArray() {
+        if (playToken != null) {
+            if (!playToken.isEmpty()) {
+                return new String[] { "Authorization", "Bearer " + playToken };
+            }
+        }
+
+        return new String[] {};
     }
 
     @Override
@@ -753,7 +771,11 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     }
 
 
-    private DrmSessionManager<FrameworkMediaCrypto> buildOfflineDrmSessionManager(String mediaId, UUID uuid, String licenseUrl, String initDataB64/*, Map<String, String> keyRequestProperties*/) {
+    private DrmSessionManager<FrameworkMediaCrypto> buildOfflineDrmSessionManager(String mediaId,
+                                                                                  UUID uuid,
+                                                                                  String licenseUrl,
+                                                                                  String initDataB64,
+                                                                                  String[] keyRequestProperties) {
         try {
             WidevinePlaybackLicenseManager licenseDownloadManager = new WidevinePlaybackLicenseManager(ctx);
             byte[] offlineAssetKeyId = licenseDownloadManager.get(licenseUrl, mediaId);
@@ -762,7 +784,19 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                 return null;
             }
 
-            GenericDrmCallback customDrmCallback = new GenericDrmCallback(buildHttpDataSourceFactory(true), licenseUrl);
+            Map<String, String> keyRequestPropertiesMap = new HashMap<>();
+
+            if (keyRequestProperties != null) {
+                for (int i = 0; i < (keyRequestProperties.length - 1); i += 2) {
+                    keyRequestPropertiesMap.put(keyRequestProperties[i], keyRequestProperties[i + 1]);
+                }
+            }
+
+            GenericDrmCallback customDrmCallback =
+                    new GenericDrmCallback(buildHttpDataSourceFactory(true),
+                                           licenseUrl,
+                                           keyRequestPropertiesMap);
+
             DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), customDrmCallback, null, null, null);
             OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, buildHttpDataSourceFactory(true));
             Pair<Long, Long> remainingTime = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
