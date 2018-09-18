@@ -323,6 +323,19 @@ class PlaybackEventListenerAggregator implements IPlaybackEventListener {
     }
 
     @Override
+    public void onErrorDetailed(int code, String message, String info, String details) {
+        synchronized (eventListeners) {
+            if (eventListeners == null) {
+                return;
+            }
+
+            for (IPlaybackEventListener listener : eventListeners.keySet()) {
+                listener.onErrorDetailed(code, message, info, details);
+            }
+        }
+    }
+
+    @Override
     public void onWarning(int warningCode, String warningMessage) {
         synchronized (eventListeners) {
             if (eventListeners == null) {

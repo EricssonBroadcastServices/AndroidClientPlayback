@@ -137,6 +137,10 @@ public class EmptyPlaybackEventListener implements IPlaybackEventListener {
     }
 
     @Override
+    public void onErrorDetailed(int code, String message, String info, String details) {
+    }
+
+    @Override
     public void onWarning(int warningCode, String warningMessage) {
 
     }

@@ -116,6 +116,15 @@ public class AnalyticsHolder implements IPlaybackEventListener {
     }
 
     @Override
+    public void onErrorDetailed(int code, String message, String info, String details) {
+        if ((this.player == null) || (this.player.getSessionId() == null)) {
+            this.connector.onErrorDetailed(fallbackSessionId, code, message, info, details);
+        } else {
+            this.connector.onErrorDetailed(code, message, info, details);
+        }
+    }
+
+    @Override
     public void onWarning(int warningCode, String warningMessage) {
 
     }
