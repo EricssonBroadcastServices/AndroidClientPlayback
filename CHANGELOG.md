@@ -1,5 +1,12 @@
 # Release Notes
 
+## 2.0.92
+
+### Enhancements
+- **EMP-11757** Send detailed info about ExoPlaybackException error instead of just Code 1. Errors are detailed according to the list on InternalPlayerErrorCode class.
+Send internal exception info from the Code 1 along with the full stacktrace to analytics.
+- **EMP-11712** Added the playToken to the player's license request authorization header (Authorization: Bearer {playToken}).
+
 ## 2.0.90-6
 
 ### Enhancements
