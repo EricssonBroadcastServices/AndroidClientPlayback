@@ -2,6 +2,7 @@ package net.ericsson.emovs.playback.techs.ExoPlayer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
@@ -70,6 +71,11 @@ import java.util.UUID;
 public class ExoPlayerTech implements ITech, PlaybackPreparer {
     private final String FLUX_EXOPLAYER_WIDEVINE_KEYSTORE = "FLUX_EXOPLAYER_WIDEVINE_KEYSTORE";
     private final String KEY_OFFLINE_MEDIA_ID = "key_offline_asset_id_";
+
+    private final String PLAYBACK_SHARED_PREFERENCES = "PLAYBACK_SHARED_PREFERENCES";
+    private final String SECURITY_LEVEL_KEY = "securityLevel";
+    private final String SECURITY_LEVEL_L3 = "L3";
+    private SharedPreferences mPlaybackPreferences;
 
     private static final int TRACK_GROUP_VIDEO = 0;
     private static final int TRACK_GROUP_AUDIO = 1;
@@ -142,6 +148,10 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     public void init(Player parent, Activity ctx, String playToken, PlaybackProperties properties) {
         this.parent = parent;
         this.ctx = ctx;
+
+        mPlaybackPreferences =
+                ctx.getApplicationContext().getSharedPreferences(PLAYBACK_SHARED_PREFERENCES,
+                        Context.MODE_PRIVATE);
 
         createExoView(parent.getViewGroup());
 
@@ -797,7 +807,10 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
                                            licenseUrl,
                                            keyRequestPropertiesMap);
 
-            DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), customDrmCallback, null, null, null);
+            DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager =
+                    new DefaultDrmSessionManager<>(uuid, createFrameworkMediaDrm(uuid),
+                                                   customDrmCallback, null, null, null);
+
             OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, buildHttpDataSourceFactory(true));
             Pair<Long, Long> remainingTime = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
 
@@ -816,14 +829,33 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
 
     private DrmSessionManager<FrameworkMediaCrypto> buildDrmSessionManagerV18(UUID uuid, String licenseUrl, String[] keyRequestPropertiesArray) throws UnsupportedDrmException {
-        HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(true));
+        HttpMediaDrmCallback drmCallback =
+                new HttpMediaDrmCallback(licenseUrl, buildHttpDataSourceFactory(true));
+
         if (keyRequestPropertiesArray != null) {
             for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
                 drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i],
                         keyRequestPropertiesArray[i + 1]);
             }
         }
-        return new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), drmCallback, null, mainHandler, eventLogger, false);
+
+        return new DefaultDrmSessionManager<>(uuid, createFrameworkMediaDrm(uuid), drmCallback,
+                                              null, mainHandler, eventLogger, false);
+    }
+
+    private FrameworkMediaDrm createFrameworkMediaDrm(UUID uuid) throws UnsupportedDrmException {
+        FrameworkMediaDrm frameworkMediaDrm = FrameworkMediaDrm.newInstance(uuid);
+
+        // Set the security level if its stored on the preferences
+        if (mPlaybackPreferences.contains(SECURITY_LEVEL_KEY)) {
+            String securityLevel = mPlaybackPreferences.getString(SECURITY_LEVEL_KEY, "");
+
+            if (!securityLevel.equals("")) {
+                frameworkMediaDrm.setPropertyString(SECURITY_LEVEL_KEY, securityLevel);
+            }
+        }
+
+        return frameworkMediaDrm;
     }
 
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter) {
