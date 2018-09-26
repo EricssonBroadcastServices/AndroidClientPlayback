@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.0.92-2
+
+### Enhancements
+- **EMP-11789** Set the security level on the license request to L3
+according to the stored preferences value for it.
+
 ## 2.0.92
 
 ### Enhancements
