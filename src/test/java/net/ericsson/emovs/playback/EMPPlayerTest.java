@@ -1,7 +1,6 @@
 package net.ericsson.emovs.playback;
 
 import android.app.Activity;
-import android.view.View;
 import android.view.ViewGroup;
 
 import junit.framework.Assert;
@@ -13,35 +12,26 @@ import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeExposureClient;
 import net.ericsson.emovs.playback.helpers.FakeTech;
-import net.ericsson.emovs.playback.interfaces.ITech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
-import net.ericsson.emovs.utilities.entitlements.IEntitlementCallback;
 import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
-import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.errors.Warning;
-import net.ericsson.emovs.utilities.interfaces.IPlayable;
-import net.ericsson.emovs.utilities.interfaces.IPlaybackEventListener;
 import net.ericsson.emovs.utilities.models.EmpChannel;
 import net.ericsson.emovs.utilities.models.EmpProgram;
 import net.ericsson.emovs.utilities.test.TestUtils;
+import net.ericsson.emovs.utilities.test.Waiter;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.internal.matchers.InstanceOf;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
 
 import static net.ericsson.emovs.utilities.errors.WarningCodes.INVALID_START_TIME;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -135,9 +125,16 @@ public class EMPPlayerTest {
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
-        Thread.sleep(50);
 
-        FakeTech tech = player.getTech();
+        final FakeTech tech = player.getTech();
+
+        new Waiter() {
+            @Override
+            protected boolean isReady() {
+                return tech.propsFedToTech != null;
+            }
+        }.waitUntilReady(1000);
+
         Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getMaxBitrate());
         Assert.assertTrue(tech.propsFedToTech.getPreferredTextLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredTextLanguage());
         Assert.assertTrue(tech.propsFedToTech.getPreferredAudioLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredAudioLanguage());
