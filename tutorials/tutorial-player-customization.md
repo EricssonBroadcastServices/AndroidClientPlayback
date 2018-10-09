@@ -78,3 +78,29 @@ view.getPlayer().addListener(new EmptyPlaybackEventListener(view.getPlayer()) {
 
 The **EMPPlayer** class also exposes more methods to fully enable control of the playback: pause, resume, stop, play, seekTo, etc..
 For more information, check the documentation.
+
+### Playback Throttling note
+
+The EMPPlayer.play() method has a throttling mechanism that prevents spamming play() calls.
+This feature is disabled by default. It can be enabled byt calling the following method on the EMPRegistry:
+
+```java
+// Enable the playback throttling on the app
+EMPRegistry.enablePlaybackThrottling();
+```
+
+If the EMPPlayer.play() method is called again (one or multiple times) in less than 3 seconds,
+the player does not start playback again and nothing happens.
+This is put in place to prevent several internal resources allocation,
+which can degrade performance of the player and libraries.
+
+Affected method is shown below:
+```java
+public class EMPPlayer extends Player implements IEntitledPlayer {
+...
+    public void play(IPlayable playable, PlaybackProperties properties) {
+        ...
+    }
+...
+}
+```

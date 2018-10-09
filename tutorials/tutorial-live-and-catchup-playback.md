@@ -37,6 +37,12 @@ program.programId = "MY_CATCHUP_ID";
 player.play(program, PlaybackProperties.DEFAULT);
 ```
 
+**IMPORTANT: Regarding Playback Throttling**
+
+For details, read the link below:
+
+[Playback Throttling note](tutorials/tutorial-player-customization.md#Playback Throttling note)
+
 
 **Custom Playback Properties**
 
