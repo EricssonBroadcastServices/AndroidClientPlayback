@@ -12,21 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
-import net.ericsson.emovs.playback.drm.GenericDrmCallback;
-import net.ericsson.emovs.playback.Player;
-import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
-import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
-import net.ericsson.emovs.utilities.drm.DashDetails;
-import net.ericsson.emovs.utilities.errors.ErrorCodes;
-
-import net.ericsson.emovs.playback.PlaybackProperties;
-import net.ericsson.emovs.playback.R;
-import net.ericsson.emovs.playback.interfaces.ITech;
-import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
-import net.ericsson.emovs.utilities.time.DateTimeParser;
-import net.ericsson.emovs.utilities.ui.ViewHelper;
-
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.PlaybackPreparer;
@@ -42,7 +28,6 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
@@ -57,6 +42,26 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.EventLogger;
 import com.google.android.exoplayer2.util.Util;
+
+import net.ericsson.emovs.playback.PlaybackProperties;
+import net.ericsson.emovs.playback.Player;
+import net.ericsson.emovs.playback.R;
+import net.ericsson.emovs.playback.drm.AnalyticsDrmCallbackListener;
+import net.ericsson.emovs.playback.drm.EmptyDrmCallbackListener;
+import net.ericsson.emovs.playback.drm.GenericDrmCallback;
+import net.ericsson.emovs.playback.drm.IDrmCallbackListener;
+import net.ericsson.emovs.playback.drm.WatchableMediaDrmCallBack;
+import net.ericsson.emovs.playback.drm.WidevinePlaybackLicenseManager;
+import net.ericsson.emovs.playback.interfaces.ITech;
+import net.ericsson.emovs.utilities.drm.DashDetails;
+import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.interfaces.ControllerVisibility;
+import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
+import net.ericsson.emovs.utilities.interfaces.IPlayer;
+import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
+import net.ericsson.emovs.utilities.time.DateTimeParser;
+import net.ericsson.emovs.utilities.ui.ViewHelper;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -104,6 +109,8 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
     protected DefaultBandwidthMeter bandwidthMeter;
 
     DefaultTrackSelector trackSelector = null;
+
+    private IDrmCallbackListener drmCallbackListener;
 
     public ExoPlayerTech() {
         mainHandler = new Handler();
@@ -157,6 +164,8 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
         this.playToken = playToken;
         this.properties = properties;
+
+        this.drmCallbackListener = createMediaDrmCallbackListener(this.parent);
     }
 
     public void overrideExoControls() {
@@ -809,7 +818,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
             DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager =
                     new DefaultDrmSessionManager<>(uuid, createFrameworkMediaDrm(uuid),
-                                                   customDrmCallback, null, null, null);
+                                                   new WatchableMediaDrmCallBack(customDrmCallback, licenseUrl,drmCallbackListener), null, null, null);
 
             OfflineLicenseHelper offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, buildHttpDataSourceFactory(true));
             Pair<Long, Long> remainingTime = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
@@ -839,7 +848,7 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
             }
         }
 
-        return new DefaultDrmSessionManager<>(uuid, createFrameworkMediaDrm(uuid), drmCallback,
+        return new DefaultDrmSessionManager<>(uuid, createFrameworkMediaDrm(uuid), new WatchableMediaDrmCallBack(drmCallback, licenseUrl,drmCallbackListener),
                                               null, mainHandler, eventLogger, false);
     }
 
@@ -951,6 +960,14 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
         if (positionView != null && positionView instanceof HookedPositionTextView) {
             HookedPositionTextView hookedDurationView = (HookedPositionTextView) positionView;
             hookedDurationView.bindPlayer(getParent());
+        }
+    }
+
+    private static IDrmCallbackListener createMediaDrmCallbackListener(IPlayer parentPlayer) {
+        if(parentPlayer instanceof IEntitledPlayer) {
+            return new AnalyticsDrmCallbackListener((IEntitledPlayer) parentPlayer);
+        } else {
+            return new EmptyDrmCallbackListener();
         }
     }
 }
