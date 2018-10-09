@@ -1,5 +1,15 @@
 # Release Notes
 
+## 2.0.93-1
+
+### Enhancements
+- **EMP-11796** Added a throttling mechanism at the start of the EMPPlayer.play() method call.
+If several attempts to EMPPlayer.play() are made within 3 secs, they will be blocked
+and a warning is sent to Analytics.
+This is put in place to prevent several internal resources allocation if the user is spamming requests,
+which can degrade performance of the player and libraries.
+ 
+
 ## 2.0.92-2
 
 ### Enhancements
