@@ -1,5 +1,11 @@
 # Release Notes
 
+
+## 2.0.93-1
+
+### Enhancements
+- **EMP-11450** Added Drm-request tracking to analytics.
+
 ## 2.0.92-2
 
 ### Enhancements
