@@ -121,7 +121,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      */
     public void play(IPlayable playable, PlaybackProperties properties) {
         try {
-            long elapsedTime = getServerTime() - lastPlayTimeMs;
+            long currentServerTimeMs = getServerTime();
+            long elapsedTime = currentServerTimeMs - lastPlayTimeMs;
+
+            lastPlayTimeMs = currentServerTimeMs;
 
             if (elapsedTime < 1000L) {
                 return;
@@ -131,8 +134,6 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
                 return;
             }
-
-            lastPlayTimeMs = getServerTime();
 
             init(properties);
 
