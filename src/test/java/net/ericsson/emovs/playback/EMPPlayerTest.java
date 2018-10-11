@@ -24,6 +24,7 @@ import net.ericsson.emovs.utilities.test.Waiter;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.internal.runners.statements.Fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
@@ -126,7 +127,7 @@ public class EMPPlayerTest {
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
 
 
-        new Waiter() {
+        if(!new Waiter() {
             @Override
             protected boolean isReady() {
                 FakeTech tech = player.getTech();
@@ -135,13 +136,15 @@ public class EMPPlayerTest {
                 }
                 return tech.propsFedToTech != null;
             }
-        }.waitUntilReady(2000);
+        }.waitUntilReady(2000)) {
+            Assert.fail("Did not receive tech and tech propoperties within reasonable time");
+        }
 
         FakeTech tech = player.getTech();
 
-        Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getMaxBitrate());
-        Assert.assertTrue(tech.propsFedToTech.getPreferredTextLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredTextLanguage());
-        Assert.assertTrue(tech.propsFedToTech.getPreferredAudioLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredAudioLanguage());
+        Assert.assertEquals(SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getMaxBitrate(), tech.propsFedToTech.getMaxBitrate());
+        Assert.assertEquals(SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredTextLanguage(), tech.propsFedToTech.getPreferredTextLanguage());
+        Assert.assertEquals(SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredAudioLanguage(), tech.propsFedToTech.getPreferredAudioLanguage());
     }
 
     @Test
