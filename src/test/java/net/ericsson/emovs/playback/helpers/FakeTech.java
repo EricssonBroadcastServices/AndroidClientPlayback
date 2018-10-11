@@ -13,7 +13,7 @@ import net.ericsson.emovs.utilities.entitlements.Entitlement;
  */
 
 public class FakeTech implements ITech {
-    public PlaybackProperties propsFedToTech;
+    public volatile PlaybackProperties propsFedToTech;
 
     @Override
     public boolean isPlaying() {

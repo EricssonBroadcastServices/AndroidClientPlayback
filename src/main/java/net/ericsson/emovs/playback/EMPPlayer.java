@@ -5,11 +5,13 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.playback.services.ProgramService;
+import net.ericsson.emovs.utilities.emp.EMPRegistry;
 import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
 import net.ericsson.emovs.utilities.errors.Error;
 import net.ericsson.emovs.utilities.errors.Warning;
+import net.ericsson.emovs.utilities.errors.WarningCodes;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IMetadataCallback;
 import net.ericsson.emovs.utilities.interfaces.IMetadataProvider;
@@ -46,8 +48,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     protected IEntitlementProvider entitlementProvider;
     protected IMetadataProvider metadataProvider;
     protected ProgramService programService;
-    protected long lastPlayTimeMs;
     protected long lastSeekToTimeMs;
+
+    protected static long lastPlayTimeMs = 0L;
+
+    private final String TAG = this.getClass().getSimpleName();
+
+    private final long BLOCKING_TIMER_DURATION = 3000L;
 
     private EmptyPlaybackEventListener empPlaybackListener = new EmptyPlaybackEventListener(this) {
         @Override
@@ -85,7 +92,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
 
     /**
      * <p>
-     *     Plays some media available in EMP backend
+     *     Plays some media available in EMP backend (if throttling is enabled, the start can be blocked)
      * </p>
      *  <p>
      *      IPlayables supported:
@@ -114,9 +121,17 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
      */
     public void play(IPlayable playable, PlaybackProperties properties) {
         try {
-            if (getServerTime() - lastPlayTimeMs < 1000L) {
+            long elapsedTime = getServerTime() - lastPlayTimeMs;
+
+            if (elapsedTime < 1000L) {
+                return;
+            } else if (EMPRegistry.playbackThrottlingEnabled()
+                       && (elapsedTime < BLOCKING_TIMER_DURATION)) {
+                onWarning(Warning.PLAYBACK_START_BLOCKED);
+
                 return;
             }
+
             lastPlayTimeMs = getServerTime();
 
             init(properties);
@@ -220,6 +235,11 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                 });
             }
         }, false);
+    }
+
+
+    private void onWarning(Warning warning) {
+        onWarning(warning.getCode(), warning.toString());
     }
 
     /**
