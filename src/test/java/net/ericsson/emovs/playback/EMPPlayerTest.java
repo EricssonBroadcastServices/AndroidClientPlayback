@@ -11,6 +11,7 @@ import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 import net.ericsson.emovs.playback.helpers.FakeEMPMetadataProvider;
 import net.ericsson.emovs.playback.helpers.FakeEntitlementProvider;
 import net.ericsson.emovs.playback.helpers.FakeExposureClient;
+import net.ericsson.emovs.playback.helpers.FakeMonotonicTimeService;
 import net.ericsson.emovs.playback.helpers.FakeTech;
 import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.entitlements.Entitlement;
@@ -123,7 +124,7 @@ public class EMPPlayerTest {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
         final EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
-
+        player.reset();
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
 
 
@@ -136,8 +137,8 @@ public class EMPPlayerTest {
                 }
                 return tech.propsFedToTech != null;
             }
-        }.waitUntilReady(2000)) {
-            Assert.fail("Did not receive tech and tech propoperties within reasonable time");
+        }.waitUntilReady(1000)) {
+            Assert.fail("Did not receive tech and tech properties within reasonable time");
         }
 
         FakeTech tech = player.getTech();
@@ -153,6 +154,7 @@ public class EMPPlayerTest {
         fakeEE.setEntitlement(entitlement_no_bookmark);
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
+        player.reset();
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
         Thread.sleep(50);
 
@@ -167,7 +169,7 @@ public class EMPPlayerTest {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_no_maxbitrate_contract);
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
-
+        player.reset();
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
         Thread.sleep(100);
 
@@ -181,6 +183,7 @@ public class EMPPlayerTest {
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         // Test Case 1: Live Program plays from Live Edge by DEFAULT
+        player.reset();
         player.play(live_program, DEFAULT_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);
@@ -241,6 +244,7 @@ public class EMPPlayerTest {
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         // Test Case 1: Catchup plays from Beginning by DEFAULT
+        player.reset();
         player.play(catchup_program, DEFAULT_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.Beginning);
@@ -296,6 +300,7 @@ public class EMPPlayerTest {
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         // Test Case 1: Channel plays from LIVE_EDGE by DEFAULT
+        player.reset();
         player.play(live_channel, DEFAULT_PLAYBACK_PROPS);
         Thread.sleep(50);
         Assert.assertTrue(player.getPlaybackProperties().getPlayFrom() instanceof PlaybackProperties.PlayFrom.LiveEdge);

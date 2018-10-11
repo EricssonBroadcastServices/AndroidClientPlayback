@@ -9,7 +9,7 @@ import net.ericsson.emovs.exposure.utils.MonotonicTimeService;
 public class FakeMonotonicTimeService extends MonotonicTimeService {
     @Override
     public Long currentTime() {
-        return 0L;
+        return System.currentTimeMillis();
     }
 
     @Override
