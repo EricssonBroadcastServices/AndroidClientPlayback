@@ -190,6 +190,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     /**
      * @return current playback session ID
      */
+    @Override
     public String getSessionId() {
         if (entitlement == null) {
             return null;
