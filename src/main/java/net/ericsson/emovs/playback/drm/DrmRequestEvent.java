@@ -2,12 +2,12 @@ package net.ericsson.emovs.playback.drm;
 
 public class DrmRequestEvent {
     private DrmEventType type;
-    private String licenceUrl;
+    private String licenseUrl;
     private int requestLength;
 
-    public DrmRequestEvent(DrmEventType type, String licenceUrl, int requestLength) {
+    public DrmRequestEvent(DrmEventType type, String licenseUrl, int requestLength) {
         this.type = type;
-        this.licenceUrl = licenceUrl;
+        this.licenseUrl = licenseUrl;
         this.requestLength = requestLength;
     }
 
@@ -15,8 +15,8 @@ public class DrmRequestEvent {
         return type;
     }
 
-    public String getLicenceUrl() {
-        return licenceUrl;
+    public String getLicenseUrl() {
+        return licenseUrl;
     }
 
     public int getRequestDataLength() {

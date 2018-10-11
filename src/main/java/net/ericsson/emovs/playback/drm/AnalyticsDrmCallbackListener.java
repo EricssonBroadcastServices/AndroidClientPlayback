@@ -31,7 +31,7 @@ public class AnalyticsDrmCallbackListener implements IDrmCallbackListener {
     public void onDrmRequest(DrmRequestEvent event) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(EventParameters.Drm.MESSAGE, Request.WIDEVINE_LICENSE_REQUEST);
-        parameters.put(EventParameters.Drm.INFO, event.getLicenceUrl());
+        parameters.put(EventParameters.Drm.INFO, event.getLicenseUrl());
         parameters.put(EventParameters.Drm.DRM_REQUEST_TYPE, event.getType().name());
         parameters.put(EventParameters.Drm.DRM_DATA_LENGTH, String.valueOf(event.getRequestDataLength()));
         sendPlaybackDrm(parameters);

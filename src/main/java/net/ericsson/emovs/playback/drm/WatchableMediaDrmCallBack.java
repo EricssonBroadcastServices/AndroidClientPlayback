@@ -11,19 +11,19 @@ import java.util.UUID;
  */
 public class WatchableMediaDrmCallBack implements MediaDrmCallback {
     private MediaDrmCallback wrapped;
-    private String licenceUrl;
+    private String licenseUrl;
     private IDrmCallbackListener mediaDrmCallbackListener;
 
-    public WatchableMediaDrmCallBack(MediaDrmCallback wrapped, String licenceUrl, IDrmCallbackListener mediaDrmCallbackListener) {
+    public WatchableMediaDrmCallBack(MediaDrmCallback wrapped, String licenseUrl, IDrmCallbackListener mediaDrmCallbackListener) {
         this.wrapped = wrapped;
-        this.licenceUrl = licenceUrl;
+        this.licenseUrl = licenseUrl;
         this.mediaDrmCallbackListener = mediaDrmCallbackListener;
     }
 
     @Override
     public byte[] executeProvisionRequest(UUID uuid, ExoMediaDrm.ProvisionRequest provisionRequest) throws Exception {
         DrmEventType type = DrmEventType.PROVISION;
-        mediaDrmCallbackListener.onDrmRequest(new DrmRequestEvent(type, licenceUrl, provisionRequest.getData().length));
+        mediaDrmCallbackListener.onDrmRequest(new DrmRequestEvent(type, licenseUrl, provisionRequest.getData().length));
         try {
             byte[] response = wrapped.executeProvisionRequest(uuid, provisionRequest);
             mediaDrmCallbackListener.onDrmRequestResponse(new DrmResponseEvent(type, response));
@@ -37,7 +37,7 @@ public class WatchableMediaDrmCallBack implements MediaDrmCallback {
     @Override
     public byte[] executeKeyRequest(UUID uuid, ExoMediaDrm.KeyRequest keyRequest) throws Exception {
         DrmEventType type = DrmEventType.KEY;
-        mediaDrmCallbackListener.onDrmRequest(new DrmRequestEvent(type, licenceUrl, keyRequest.getData().length));
+        mediaDrmCallbackListener.onDrmRequest(new DrmRequestEvent(type, licenseUrl, keyRequest.getData().length));
         try {
             byte[] response = wrapped.executeKeyRequest(uuid, keyRequest);
             mediaDrmCallbackListener.onDrmRequestResponse(new DrmResponseEvent(type, response));
