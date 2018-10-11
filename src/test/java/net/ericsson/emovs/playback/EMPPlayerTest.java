@@ -31,7 +31,6 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.ArrayList;
 
 import static net.ericsson.emovs.utilities.errors.WarningCodes.INVALID_START_TIME;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -122,18 +121,23 @@ public class EMPPlayerTest {
     public void playback_with_subs_and_max_bitrare_props_test() throws Exception {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
-        EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
+        final EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
 
-        final FakeTech tech = player.getTech();
 
         new Waiter() {
             @Override
             protected boolean isReady() {
+                FakeTech tech = player.getTech();
+                if(tech == null) {
+                    return false;
+                }
                 return tech.propsFedToTech != null;
             }
-        }.waitUntilReady(1000);
+        }.waitUntilReady(2000);
+
+        FakeTech tech = player.getTech();
 
         Assert.assertTrue(tech.propsFedToTech.getMaxBitrate() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getMaxBitrate());
         Assert.assertTrue(tech.propsFedToTech.getPreferredTextLanguage() == SUBS_AND_MAXBITRATE_PLAYBACK_PROPS.getPreferredTextLanguage());
