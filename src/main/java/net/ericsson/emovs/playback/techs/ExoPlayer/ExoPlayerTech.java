@@ -46,7 +46,6 @@ import com.google.android.exoplayer2.util.Util;
 import net.ericsson.emovs.playback.PlaybackProperties;
 import net.ericsson.emovs.playback.Player;
 import net.ericsson.emovs.playback.R;
-import net.ericsson.emovs.playback.drm.AnalyticsDrmCallbackListener;
 import net.ericsson.emovs.playback.drm.EmptyDrmCallbackListener;
 import net.ericsson.emovs.playback.drm.GenericDrmCallback;
 import net.ericsson.emovs.playback.drm.IDrmCallbackListener;
@@ -63,6 +62,7 @@ import net.ericsson.emovs.utilities.system.ParameterizedRunnable;
 import net.ericsson.emovs.utilities.time.DateTimeParser;
 import net.ericsson.emovs.utilities.ui.ViewHelper;
 
+import java.lang.reflect.Constructor;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -965,9 +965,19 @@ public class ExoPlayerTech implements ITech, PlaybackPreparer {
 
     private static IDrmCallbackListener createMediaDrmCallbackListener(IPlayer parentPlayer) {
         if(parentPlayer instanceof IEntitledPlayer) {
-            return new AnalyticsDrmCallbackListener((IEntitledPlayer) parentPlayer);
-        } else {
-            return new EmptyDrmCallbackListener();
+            try {
+                Class<?> analyticsDrmCallbackListenerClass = Class.forName("net.ericsson.emovs.playback.drm.AnalyticsDrmCallbackListener");
+                try {
+                    Class<? extends  IDrmCallbackListener> drmCallbackListenerClass = analyticsDrmCallbackListenerClass.asSubclass(IDrmCallbackListener.class);
+                    Constructor<? extends IDrmCallbackListener> drmCallbackListenerConstructor = drmCallbackListenerClass.getConstructor(IEntitledPlayer.class);
+                    return drmCallbackListenerConstructor.newInstance((IEntitledPlayer) parentPlayer);
+                 } catch (Exception e) {
+                    throw new RuntimeException("Failed to instantiate "+analyticsDrmCallbackListenerClass.getName(),e);
+                }
+            } catch (ClassNotFoundException e) {
+                // Ignore exception. We are using the light version.
+            }
         }
+        return new EmptyDrmCallbackListener();
     }
 }
