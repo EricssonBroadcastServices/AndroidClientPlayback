@@ -5,13 +5,17 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import net.ericsson.emovs.playback.services.ProgramService;
+import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
 import net.ericsson.emovs.utilities.emp.EMPRegistry;
 import net.ericsson.emovs.utilities.emp.UniversalPackagerHelper;
 import net.ericsson.emovs.utilities.entitlements.EntitledRunnable;
+import net.ericsson.emovs.utilities.entitlements.Entitlement;
 import net.ericsson.emovs.utilities.entitlements.EntitlementCallback;
+import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.errors.Error;
+import net.ericsson.emovs.utilities.errors.ErrorCodes;
+import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.errors.Warning;
-import net.ericsson.emovs.utilities.errors.WarningCodes;
 import net.ericsson.emovs.utilities.interfaces.IEntitledPlayer;
 import net.ericsson.emovs.utilities.interfaces.IMetadataCallback;
 import net.ericsson.emovs.utilities.interfaces.IMetadataProvider;
@@ -22,13 +26,8 @@ import net.ericsson.emovs.utilities.models.EmpAsset;
 import net.ericsson.emovs.utilities.models.EmpChannel;
 import net.ericsson.emovs.utilities.models.EmpOfflineAsset;
 import net.ericsson.emovs.utilities.models.EmpProgram;
-import net.ericsson.emovs.utilities.analytics.AnalyticsPlaybackConnector;
-import net.ericsson.emovs.utilities.entitlements.Entitlement;
-import net.ericsson.emovs.utilities.errors.ErrorCodes;
-import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 import net.ericsson.emovs.utilities.queries.EpgQueryParameters;
 import net.ericsson.emovs.utilities.system.FileSerializer;
-import net.ericsson.emovs.utilities.entitlements.IEntitlementProvider;
 import net.ericsson.emovs.utilities.system.RunnableThread;
 
 import java.io.File;
@@ -45,6 +44,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
     protected int START_OVER_SAFETIME_OFFSET_MS = 150;
     protected IPlayable playable;
     protected Entitlement entitlement;
+    protected String requestId;
     protected IEntitlementProvider entitlementProvider;
     protected IMetadataProvider metadataProvider;
     protected ProgramService programService;
@@ -172,6 +172,10 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             e.printStackTrace();
             this.onError(ErrorCodes.GENERIC_PLAYBACK_FAILED, e.getMessage());
         }
+    }
+
+    public String getRequestId() {
+        return requestId;
     }
 
     /**
@@ -601,12 +605,13 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
         }
     }
 
-    private boolean preparePlayback(String mediaId, final Entitlement entitlement) {
+    private boolean preparePlayback(String mediaId, final Entitlement entitlement, final String requestId) {
         if (empPlaybackListener != null) {
             addListener(empPlaybackListener);
         }
 
         this.entitlement = entitlement;
+        this.requestId = requestId;
         this.onEntitlementChange();
 
         if (this.properties != null && entitlement != null) {
@@ -701,14 +706,15 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                                 }
 
-                                boolean ret = preparePlayback(entitlement.channelId, entitlement);
-                                if (ret) prepareProgramService(programs.size() > 0 ? programs.get(0) : null);
+                                boolean ret = preparePlayback(entitlement.channelId, entitlement, requestId);
+                                if (ret)
+                                    prepareProgramService(programs.size() > 0 ? programs.get(0) : null);
                             }
 
                             @Override
                             public void onError(final Error error) {
                                 properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
-                                boolean ret = preparePlayback(entitlement.channelId, entitlement);
+                                boolean ret = preparePlayback(entitlement.channelId, entitlement, requestId);
                                 if (ret) prepareProgramService(null);
                             }
                         }, epgParams);
@@ -720,7 +726,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                     properties.withPlayFrom(PlaybackProperties.PlayFrom.LIVE_EDGE);
                 }
 
-                boolean ret = preparePlayback(entitlement.channelId, entitlement);
+                boolean ret = preparePlayback(entitlement.channelId, entitlement, requestId);
                 if (ret) prepareProgramService(null);
             }
         };
@@ -762,7 +768,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                         if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                             ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = program.startDateTime.getMillis();
                         }
-                        boolean ret = preparePlayback(entitlement.programId, entitlement);
+                        boolean ret = preparePlayback(entitlement.programId, entitlement, requestId);
                         if (ret) {
                             prepareProgramService(program);
                         }
@@ -783,21 +789,20 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
                                 if (PlaybackProperties.PlayFrom.isBeginning(properties.getPlayFrom())) {
                                     ((PlaybackProperties.PlayFrom.StartTime) properties.getPlayFrom()).startTime = fullProgram.startDateTime.getMillis();
                                 }
-                                boolean ret = preparePlayback(entitlement.programId, entitlement);
+                                boolean ret = preparePlayback(entitlement.programId, entitlement, requestId);
                                 if (ret) prepareProgramService(fullProgram);
                             }
 
                             @Override
                             public void onError(Error error) {
                                 properties.withPlayFrom(null);
-                                boolean ret = preparePlayback(entitlement.programId, entitlement);
+                                boolean ret = preparePlayback(entitlement.programId, entitlement, requestId);
                                 if (ret) prepareProgramService(program);
                             }
                         });
                     }
-                }
-                else {
-                    boolean ret = preparePlayback(entitlement.programId, entitlement);
+                } else {
+                    boolean ret = preparePlayback(entitlement.programId, entitlement, requestId);
                     if (ret) prepareProgramService(program);
                 }
             }
@@ -811,7 +816,7 @@ public class EMPPlayer extends Player implements IEntitledPlayer {
             @Override
             public void run() {
                 prepareBookmark(asset, entitlement);
-                preparePlayback(entitlement.assetId, entitlement);
+                preparePlayback(entitlement.assetId, entitlement, requestId);
             }
         };
         super.onEntitlementLoadStart();
