@@ -11,9 +11,14 @@ import net.ericsson.emovs.utilities.errors.ErrorRunnable;
 
 public class FakeEntitlementProvider implements IEntitlementProvider {
     Entitlement e;
+    String requestId;
 
     public void setEntitlement(Entitlement e) {
         this.e = e;
+    }
+
+    public void setRequestId(String requestId){
+        this.requestId = requestId;
     }
 
     @Override
@@ -29,21 +34,21 @@ public class FakeEntitlementProvider implements IEntitlementProvider {
     @Override
     public void playVod(String assetId, IEntitlementCallback listener) {
         if (listener != null) {
-            listener.onEntitlement(this.e == null ? new Entitlement() : e);
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "":requestId);
         }
     }
 
     @Override
     public void playCatchup(String channelId, String programId, IEntitlementCallback listener) {
         if (listener != null) {
-            listener.onEntitlement(this.e == null ? new Entitlement() : e);
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "":requestId);
         }
     }
 
     @Override
     public void playLive(String channelId, IEntitlementCallback listener) {
         if (listener != null) {
-            listener.onEntitlement(this.e == null ? new Entitlement() : e);
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "":requestId);
         }
     }
 }
