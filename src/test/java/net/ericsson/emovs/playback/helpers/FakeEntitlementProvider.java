@@ -34,33 +34,21 @@ public class FakeEntitlementProvider implements IEntitlementProvider {
     @Override
     public void playVod(String assetId, IEntitlementCallback listener) {
         if (listener != null) {
-            if(this.requestId == null) {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e);
-            } else {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId);
-            }
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "" : requestId);
         }
     }
 
     @Override
     public void playCatchup(String channelId, String programId, IEntitlementCallback listener) {
         if (listener != null) {
-            if(this.requestId == null) {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e);
-            } else {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId);
-            }
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "" : requestId);
         }
     }
 
     @Override
     public void playLive(String channelId, IEntitlementCallback listener) {
         if (listener != null) {
-            if(this.requestId == null) {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e);
-            } else {
-                listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId);
-            }
+            listener.onEntitlement(this.e == null ? new Entitlement() : e, this.requestId==null ? "" : requestId);
         }
     }
 }
