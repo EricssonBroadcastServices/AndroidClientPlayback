@@ -259,6 +259,9 @@ public class FakeEntitledPlayer implements IEntitledPlayer {
     }
 
     @Override
+    public String getRequestId() { return null; }
+
+    @Override
     public IPlayable getPlayable() {
         return null;
     }

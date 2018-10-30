@@ -77,6 +77,7 @@ public class EMPPlayerTest {
     Entitlement entitlement_no_maxbitrate_contract;
     Entitlement entitlement_no_bookmark;
     Entitlement entitlement_with_bookmark_emup;
+    String request_id;
 
     @Before
     public void setUp() throws Exception {
@@ -107,6 +108,7 @@ public class EMPPlayerTest {
         entitlement_with_bookmark_emup.lastViewedTime = 54321L;
         entitlement_with_bookmark_emup.liveTime = 67890L;
         entitlement_with_bookmark_emup.maxBitrate = 10000000;
+        request_id = "S6NMszgaTA";
 
         TestUtils.mockProvider(ExposureClient.class, new FakeExposureClient());
     }
@@ -123,6 +125,7 @@ public class EMPPlayerTest {
     public void playback_with_subs_and_max_bitrare_props_test() throws Exception {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        fakeEE.setRequestId(request_id);
         final EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
         player.reset();
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
@@ -152,6 +155,7 @@ public class EMPPlayerTest {
     public void playback_max_bitrare_props_test() throws Exception {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_no_bookmark);
+        fakeEE.setRequestId(request_id);
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
 
         player.reset();
@@ -168,6 +172,7 @@ public class EMPPlayerTest {
     public void playback_max_bitrare_props_2_test() throws Exception {
         FakeEntitlementProvider fakeEE = new FakeEntitlementProvider();
         fakeEE.setEntitlement(entitlement_no_maxbitrate_contract);
+        fakeEE.setRequestId(request_id);
         EMPPlayerTechGetter player = new EMPPlayerTechGetter(null, fakeEE, techFactory, dummyActivity, null);
         player.reset();
         player.play(live_program, SUBS_AND_MAXBITRATE_PLAYBACK_PROPS);
@@ -197,6 +202,7 @@ public class EMPPlayerTest {
 
         // Test Case 3: Live Program plays from Bookmark if props are set to start from BOOKMARK
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(live_program, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
@@ -205,6 +211,7 @@ public class EMPPlayerTest {
 
         // Test Case 4: Live Program plays from Live Edge if props are set to start from BOOKMARK but no bookmark is sent from Exposure
         fakeEE.setEntitlement(entitlement_no_bookmark);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(live_program, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
@@ -259,6 +266,7 @@ public class EMPPlayerTest {
 
         // Test Case 3: Catchup plays from Bookmark if props are set to start from BOOKMARK
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(catchup_program, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
@@ -267,6 +275,7 @@ public class EMPPlayerTest {
 
         // Test Case 4: Catchup plays from Beginning if props are set to start from BOOKMARK but no bookmark is sent from Exposure
         fakeEE.setEntitlement(entitlement_no_bookmark);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(catchup_program, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
@@ -307,6 +316,7 @@ public class EMPPlayerTest {
 
         // Test Case 2: Channel plays from Bookmark if props are set to start from BOOKMARK
         fakeEE.setEntitlement(entitlement_with_bookmark_emup);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(live_channel, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
@@ -315,6 +325,7 @@ public class EMPPlayerTest {
 
         // Test Case 3: Channel plays from Live Edge if props are set to start from BOOKMARK but no bookmark is sent from Exposure
         fakeEE.setEntitlement(entitlement_no_bookmark);
+        fakeEE.setRequestId(request_id);
         player.reset();
         player.play(live_channel, BOOKMARK_PLAYBACK_PROPS);
         Thread.sleep(50);
