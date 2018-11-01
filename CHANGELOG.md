@@ -1,5 +1,11 @@
 # Release Notes
 
+
+## 2.0.94-1
+
+### Enhancements
+- **gradle-properties** Added/reordered google() in repositories 
+
 ## 2.0.94
 
 ### Enhancements
