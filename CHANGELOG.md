@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.0.95
+
+### Enhancements
+- **update-gradle** updated gradle
 
 ## 2.0.94-1
 
