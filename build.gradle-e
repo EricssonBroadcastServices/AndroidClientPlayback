@@ -27,7 +27,7 @@ ext {
     exoPlayerVersion = '2.7.0'
     releasePlayerName = 'EMPPlayer'
     releaseArtifact = 'fluxplayer-playback'
-    releaseVersion = 'DEV-LATEST-VERSION'
+    releaseVersion = 'r2.0.94-1'
     releaseDescription = 'The EMP Player library playback module.'
     libraryTag = 'r2.0.94-1'
     lightweight = { -> return false }
